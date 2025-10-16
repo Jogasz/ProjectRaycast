@@ -43,6 +43,9 @@ public class Engine
         var keyboard = Keyboard.GetState();
         var PlayerPosition = playerPosition;
 
+        PlayerDeltaOffsetX = (float)Math.Cos(PlayerAngle);
+        PlayerDeltaOffsetY = (float)Math.Sin(PlayerAngle);
+
         //Strife left
         if (keyboard.IsKeyDown(Key.A))
         {
