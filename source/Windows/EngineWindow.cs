@@ -119,29 +119,37 @@ public class EngineWindow
                     //Player is looking left
                     else if (((MathX.Quadrant4 - PlayerAngle) > MathX.Quadrant1) && ((MathX.Quadrant4 - PlayerAngle) < MathX.Quadrant3))
                     {
-                        Console.WriteLine("Player balra néz! (" + (MathX.Quadrant4 - PlayerAngle) + ")");
+                        RayX = PlayerPosition.X - (PlayerPosition.X % TileSize);
+                        RayY = PlayerPosition.Y - ((PlayerPosition.X % TileSize) * (float)Math.Tan(PlayerAngle));
+                        OffsetX = -TileSize;
+                        OffsetY = -(OffsetX * (float)Math.Tan(PlayerAngle));
                     }
-
-                    Console.WriteLine("Ray is checking if [" + Math.Floor(RayY / TileSize) + ", " + (RayX / TileSize) + "] is == 1");
 
                     CheckingMapCol = Convert.ToInt32((RayX / TileSize));
                     CheckingMapRow = Convert.ToInt32(Math.Floor(RayY / TileSize));
 
-                    while (DepthOfField < 8 && CheckingMapCol < grid.GetLength(1) && CheckingMapCol > 0 && CheckingMapRow < grid.GetLength(0) && CheckingMapRow > 0)
+                    while (DepthOfField < 8 && CheckingMapRow < grid.GetLength(0) && CheckingMapRow >= 0)
                     {
                         if (grid[CheckingMapRow, CheckingMapCol] == 1)
                         {
+                            Console.WriteLine("Ray is checking: (" + CheckingMapRow + ", " + CheckingMapCol + ")");
+                            Console.WriteLine("RayX: " + RayX);
+                            Console.WriteLine("RayY: " + RayY);
+                            Console.WriteLine("OffsetX: " + OffsetX);
+                            Console.WriteLine("OffsetY: " + RayX);
+
                             GL.Color3(0f, 1f, 0f);
                             GL.LineWidth(4f);
                             GL.Begin(PrimitiveType.Lines);
                             GL.Vertex2(PlayerPosition.X, PlayerPosition.Y);
                             GL.Vertex2(RayX, RayY);
                             GL.End();
-                            VerticalPythagoras = Math.Sqrt(Math.Pow(RayX - PlayerPosition.X, 2) + Math.Pow());
+                            //VerticalPythagoras = Math.Sqrt(Math.Pow(RayX - PlayerPosition.X, 2) + Math.Pow());
                             DepthOfField = 8;
                         }
 
-                        else {
+                        else
+                        {
                             RayX += OffsetX;
                             RayY -= OffsetY;
                             DepthOfField++;
@@ -150,10 +158,6 @@ public class EngineWindow
                         }
                     }
                 }
-                Console.WriteLine("RayX: " + RayX);
-                Console.WriteLine("RayY: " + RayY);
-                Console.WriteLine("OffsetX: " + OffsetX);
-                Console.WriteLine("OffsetY: " + OffsetY);
 
                 Screen.SwapBuffers();
             };
