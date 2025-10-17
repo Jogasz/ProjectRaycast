@@ -77,13 +77,12 @@ public class EngineWindow
                 GL.Vertex2(PlayerPosition.X - PlayerWidth / 2f, PlayerPosition.Y + PlayerHeight / 2f);
                 GL.End();
 
-                GL.Color3(1f, 0f, 0f);
+                GL.Color3(255f, 255f, 0f);
                 GL.LineWidth(1f);
                 GL.Begin(PrimitiveType.Lines);
                 GL.Vertex2(PlayerPosition.X, PlayerPosition.Y);
                 GL.Vertex2(PlayerPosition.X + PlayerDeltaOffsetX * 500, PlayerPosition.Y + PlayerDeltaOffsetY * 500);
                 GL.End();
-
 
                 for (int i = 0; i < 1; i++) {
                     ////Vertical wall check
@@ -133,20 +132,25 @@ public class EngineWindow
                     if (PlayerAngle > MathX.Quadrant2 && PlayerAngle < MathX.Quadrant4)
                     {
                         //Player is looking up
-                        RayX = (float)Math.Floor(PlayerPosition.X / TileSize) * TileSize + TileSize;
-                        RayY = PlayerPosition.Y - ((TileSize - (PlayerPosition.X % TileSize)) * (float)Math.Tan(MathX.Quadrant4 - PlayerAngle));
+                        RayX = (float)(PlayerPosition.X + Math.Tan((90 * (MathX.PI / 180) - (MathX.Quadrant4 - PlayerAngle)) * (PlayerPosition.Y % TileSize)));
+                        RayY = (float)Math.Floor(PlayerPosition.Y / TileSize) * TileSize;
                         OffsetX = TileSize;
-                        OffsetY = -(OffsetX * (float)Math.Tan(MathX.Quadrant4 - PlayerAngle));
-                    }
-                    else if (PlayerAngle < MathX.Quadrant2 && PlayerAngle > 0)
-                    {
-                        //Player is looking down
-                        RayX = (float)Math.Floor(PlayerPosition.X / TileSize) * TileSize - 0.0001f;
-                        RayY = PlayerPosition.Y - ((PlayerPosition.X % TileSize) * (float)Math.Tan(PlayerAngle));
-                        OffsetX = -TileSize;
-                        OffsetY = OffsetX * (float)Math.Tan(PlayerAngle);
+                        OffsetY = 0;
                     }
 
+                    Console.WriteLine(90 * (MathX.PI / 180) - (MathX.Quadrant4 - PlayerAngle));
+                    Console.WriteLine("b: " + PlayerPosition.Y % TileSize);
+                    Console.WriteLine("a: " + (90 * (MathX.PI / 180) - (MathX.Quadrant4 - PlayerAngle)) * (PlayerPosition.Y % TileSize));
+
+                    GL.Color3(0f, 0f, 1f);
+                    GL.LineWidth(10f);
+                    GL.Begin(PrimitiveType.Triangles);
+                    GL.Vertex2(PlayerPosition.X, PlayerPosition.Y);
+                    GL.Vertex2(PlayerPosition.X, RayY);
+                    GL.Vertex2(RayX, RayY);
+                    GL.End();
+
+                    /*
                     CheckingMapCol = (int)Math.Floor(RayX / TileSize);
                     CheckingMapRow = (int)Math.Floor(RayY / TileSize);
 
@@ -170,7 +174,7 @@ public class EngineWindow
                             CheckingMapCol = (int)(RayX / TileSize);
                             CheckingMapRow = (int)(RayY / TileSize);
                         }
-                    }
+                    }*/
                 }
                 //map[row, col] = [y, x] = row -> y irány (fentről lefelé), col -> x irány (balről jobbra)
                 
