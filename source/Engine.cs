@@ -21,7 +21,7 @@ public class Engine
     public float PlayerAngle { get; private set; } = 0f;
     public float PlayerDeltaOffsetX { get; private set; } = 0f;
     public float PlayerDeltaOffsetY { get; private set; } = 0f;
-    public float RayAngle { get; private set; } = 0f;
+    public float FOVStart { get; private set; } = 0f;
     public float RadBetweenRays { get; private set; } = 0f;
 
     private static Stopwatch stopWatch = new Stopwatch();
@@ -35,6 +35,7 @@ public class Engine
         //DeltaTime calculation
         float CurrentTime = (float)stopWatch.Elapsed.TotalSeconds;
         DeltaTime = CurrentTime - lastTime;
+        Console.WriteLine(Math.Floor(1 / DeltaTime) + "FPS");
         lastTime = CurrentTime;
         //================================================================
 
@@ -87,7 +88,7 @@ public class Engine
         //================================================================
 
         //FOV Calculation
-        RayAngle = -((float)(FOV * (MathX.PI / 180f)) / 2);
+        FOVStart = -((float)(FOV * (MathX.PI / 180f)) / 2);
         RadBetweenRays = ((float)(FOV * (MathX.PI / 180f)) / (RayCount - 1));
         //================================================================
     }
