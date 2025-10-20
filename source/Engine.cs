@@ -35,7 +35,7 @@ public class Engine
         //DeltaTime calculation
         float CurrentTime = (float)stopWatch.Elapsed.TotalSeconds;
         DeltaTime = CurrentTime - lastTime;
-        Console.WriteLine(Math.Floor(1 / DeltaTime) + "FPS");
+        //Console.WriteLine(Math.Floor(1 / DeltaTime) + "FPS");
         lastTime = CurrentTime;
         //================================================================
 

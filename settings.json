@@ -22,7 +22,8 @@
   ],
   "Graphics": {
     "FOV": 70,
-    "RayCount": 100,
+    "RayCount": 10000,
+    "DepthOfField":  8,
     "WindowResolution": { "Width": 1280, "Height": 720 },
     "TextureDetail": "High"
   },

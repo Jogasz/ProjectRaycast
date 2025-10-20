@@ -2,6 +2,8 @@
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using System;
+using System.Collections.Generic;
+using System.Threading;
 
 public class EngineWindow
 {
@@ -13,11 +15,18 @@ public class EngineWindow
     int RayCount = Settings.Graphics.RayCount;
     int TileSize = Settings.Gameplay.TileSize;
     int[,] grid = Map.grid;
+    public float[] RayDistances = new float[Settings.Graphics.RayCount];
+
+
     public void Run()
     {
         using (GameWindow Screen = new GameWindow(DebugWindowWidth, DebugWindowHeight, GraphicsMode.Default, "Engine Screen"))
         {
             Engine engine = new Engine();
+
+            GraphicWindow graphicWindow = new GraphicWindow();
+            Thread graphicThread = new Thread(graphicWindow.Run);
+            graphicThread.Start();
 
             WindowManager.SetupPixelCoordinates(Screen);
 
@@ -46,7 +55,7 @@ public class EngineWindow
                 float OffsetY = 0f;
                 float VerticalPythagoras = 0f;
                 float HorizontalPythagoras = 0f;
-                int DepthOfField = 0;
+                int DepthOfField = Settings.Graphics.DepthOfField;
                 int CheckingMapCol = 0;
                 int CheckingMapRow = 0;
 
@@ -113,11 +122,11 @@ public class EngineWindow
                     CheckingMapCol = (int)Math.Floor(RayX / TileSize);
                     CheckingMapRow = (int)Math.Floor(RayY / TileSize);
 
-                    while (DepthOfField < 8 && CheckingMapRow >= 0 && CheckingMapRow < grid.GetLength(0) && CheckingMapCol >= 0 && CheckingMapCol < grid.GetLength(1))
+                    while (DepthOfField < Settings.Graphics.DepthOfField && CheckingMapRow >= 0 && CheckingMapRow < grid.GetLength(0) && CheckingMapCol >= 0 && CheckingMapCol < grid.GetLength(1))
                     {
                         if (grid[CheckingMapRow, CheckingMapCol] == 1)
                         {
-                            DepthOfField = 8;
+                            DepthOfField = Settings.Graphics.DepthOfField;
                         }
                         else
                         {
@@ -154,11 +163,11 @@ public class EngineWindow
                     CheckingMapCol = (int)Math.Floor(RayX / TileSize);
                     CheckingMapRow = (int)Math.Floor(RayY / TileSize);
 
-                    while (DepthOfField < 8 && CheckingMapRow >= 0 && CheckingMapRow < grid.GetLength(0) && CheckingMapCol >= 0 && CheckingMapCol < grid.GetLength(1))
+                    while (DepthOfField < Settings.Graphics.DepthOfField && CheckingMapRow >= 0 && CheckingMapRow < grid.GetLength(0) && CheckingMapCol >= 0 && CheckingMapCol < grid.GetLength(1))
                     {
                         if (grid[CheckingMapRow, CheckingMapCol] == 1)
                         {
-                            DepthOfField = 8;
+                            DepthOfField = Settings.Graphics.DepthOfField;
                         }
                         else
                         {
@@ -182,10 +191,13 @@ public class EngineWindow
                     GL.Vertex2(RayEndX, RayEndY);
                     GL.End();
 
+                    RayDistances[i] = Math.Min(VerticalPythagoras, HorizontalPythagoras);
+
                     RayAngle += RadBetweenRays;
                     RayAngle = (RayAngle % MathX.Quadrant4 + MathX.Quadrant4) % MathX.Quadrant4;
                 }
-                //map[row, col] = [y, x] = row -> y irány (fentről lefelé), col -> x irány (balről jobbra)
+
+                graphicWindow.UpdateFrame(RayDistances);
 
                 Screen.SwapBuffers();
             };
