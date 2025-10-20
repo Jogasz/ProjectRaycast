@@ -73,14 +73,13 @@ public class DebugWindow
                 GL.End();
 
                 //Drawing rays
+                GL.Color3(1f, 0f, 0f);
+                GL.LineWidth(1f);
+                GL.Begin(PrimitiveType.Lines);
                 for (int i = 0; i < RayCount; i++)
                 {
-                    GL.Color3(1f, 0f, 0f);
-                    GL.LineWidth(1f);
-                    GL.Begin(PrimitiveType.Lines);
                     GL.Vertex2(PlayerPosition.X, PlayerPosition.Y);
                     GL.Vertex2(RayDeltaDirections[i, 0], RayDeltaDirections[i, 1]);
-                    GL.End();
                 }
 
                 GL.Color3(0f, 1f, 0f);

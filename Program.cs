@@ -17,14 +17,14 @@ public class Program
             DebugWindow debugWindow = new DebugWindow();
             debugWindow.Run();
         });
-        
-        //Thread graphicThread = new Thread(() =>
-        //{
-        //    GraphicWindow graphicWindow = new GraphicWindow();
-        //    graphicWindow.Run();
-        //});
-        
+
+        Thread graphicThread = new Thread(() =>
+        {
+            GraphicWindow graphicWindow = new GraphicWindow();
+            graphicWindow.Run();
+        });
+
         debugThread.Start();
-        //graphicThread.Start();
+        graphicThread.Start();
     }
 }
