@@ -11,18 +11,18 @@
       "Name": "Fleshless",
       "Health": 50,
       "Armor": 0,
-      "MovementSpeed":  3.0,
+      "MovementSpeed":  3.0
     },
     {
       "Name": "RotWretch",
       "Health": 80,
       "Armor": 20,
       "MovementSpeed": 2.0
-    },
+    }
   ],
   "Graphics": {
     "FOV": 70,
-    "RayCount": 10000,
+    "RayCount": 100,
     "DepthOfField":  8,
     "WindowResolution": { "Width": 1280, "Height": 720 },
     "TextureDetail": "High"

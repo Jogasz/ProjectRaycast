@@ -1,57 +1,57 @@
-﻿using OpenTK;
-using OpenTK.Graphics;
-using OpenTK.Graphics.OpenGL;
-using System;
+﻿//using OpenTK;
+//using OpenTK.Graphics;
+//using OpenTK.Graphics.OpenGL;
+//using System;
 
-public class GraphicWindow
-{
-    int GraphicWindowWidth = 1000;
-    int GraphicWindowHeight = 600;
-    public float[] RayDistances = new float[Settings.Graphics.RayCount];
-    int RayCount = Settings.Graphics.RayCount;
+//public class GraphicWindow
+//{
+//    public static int ScreenWidth = 1000;
+//    public static int ScreenHeight = 800;
 
-    public void Run()
-    {
-        GameWindow Screen = new GameWindow(GraphicWindowWidth, GraphicWindowHeight, GraphicsMode.Default, "Graphic Screen");
-        WindowManager.SetupPixelCoordinates(Screen);
 
-        Screen.RenderFrame += (sender, e) =>
-        {
-            // Ég világoskék
-            GL.ClearColor(0.5f, 0.8f, 1f, 1f);
-            GL.Clear(ClearBufferMask.ColorBufferBit);
+//    public void Run()
+//    {
+//        GameWindow Screen = new GameWindow(ScreenWidth, ScreenHeight, GraphicsMode.Default, "Graphic Screen");
+//        WindowManager.SetupPixelCoordinates(Screen);
 
-            float wallWidth = GraphicWindowWidth / (float)RayCount;
+//        Screen.RenderFrame += (sender, e) =>
+//        {
+//            //Window color anf clear
+//            GL.ClearColor(0f, 0f, 0f, 1f);
+//            GL.Clear(ClearBufferMask.ColorBufferBit);
 
-            for (int i = 0; i < RayCount; i++)
-            {
-                float dist = RayDistances[i];
+//            Engine.Update();
+//            /*
+//            //Updated variables
+//            float WallWidth = Engine.WallWidth;
+//            float[] WallHeights = Engine.WallHeights;
 
-                // Erősebben csökkenő magasság a távolsággal
-                float height = 8000f / (dist + 0.001f);
+//            //Drawing walls
+//            for (int i = 0; i < WallHeights.Length; i++)
+//            {
+//                GL.Color3(0f, 2f, 0f);
+//                GL.Begin(PrimitiveType.Quads);
+//                GL.Vertex2(i * WallWidth, (ScreenHeight / 2) - (WallHeights[i] / 2));
+//                GL.Vertex2((i + 1) * WallWidth, (ScreenHeight / 2) - (WallHeights[i] / 2));
+//                GL.Vertex2((i + 1) * WallWidth, (ScreenHeight / 2) + WallHeights[i]);
+//                GL.Vertex2(i * WallWidth, (ScreenHeight / 2) + WallHeights[i]);
+//                GL.End();
+//            }
+//            */
+//            /*
+//            //Calculating graphic wall width and height
+//            WallWidth = (float)(GraphicWindow.ScreenWidth / RayCount);
 
-                float x = i * wallWidth;
-                float yTop = (GraphicWindowHeight / 2f) - (height / 2f);
-                float yBottom = yTop + height;
+//            for (int i = 0; i < RayCount; i++)
+//            {
+//                WallHeight = GraphicWindow.ScreenHeight - RayDistances[i];
+//                WallHeights[i] = WallHeight;
+//            }
+//            //================================================================
+//            */
+//            Screen.SwapBuffers();
+//        };
 
-                // Fal zöld
-                GL.Color3(0f, 1f, 0f);
-                GL.Begin(PrimitiveType.Quads);
-                GL.Vertex2(x, yTop);
-                GL.Vertex2(x + wallWidth, yTop);
-                GL.Vertex2(x + wallWidth, yBottom);
-                GL.Vertex2(x, yBottom);
-                GL.End();
-            }
-
-            Screen.SwapBuffers();
-        };
-
-        Screen.Run();
-    }
-
-    public void UpdateFrame(float[] rayDistances)
-    {
-        RayDistances = (float[])rayDistances.Clone();
-    }
-}
+//        Screen.Run();
+//    }
+//}
