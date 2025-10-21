@@ -20,7 +20,7 @@ public class DebugWindow
         using (GameWindow Screen = new GameWindow(ScreenWidth, ScreenHeight, GraphicsMode.Default, "Debug Window"))
         {
             //For test-only
-            //Screen.VSync = VSyncMode.Off;
+            Screen.VSync = VSyncMode.Off;
 
             WindowManager.SetupPixelCoordinates(Screen);
 
@@ -30,7 +30,7 @@ public class DebugWindow
                 GL.Clear(ClearBufferMask.ColorBufferBit);
 
                 //Getting calculations from engine
-                Engine.Update();
+                Engine.EngineUpdate();
 
                 //Updated variables
                 Vector2 PlayerPosition = Engine.playerPosition;
@@ -39,9 +39,7 @@ public class DebugWindow
                 float PlayerAngle = Engine.PlayerAngle;
                 float PlayerDeltaOffsetX = Engine.PlayerDeltaOffsetX;
                 float PlayerDeltaOffsetY = Engine.PlayerDeltaOffsetY;
-                float RayEndX = Engine.RayEndX;
-                float RayEndY = Engine.RayEndY;
-                float[,] RayDeltaDirections = Engine.RayDeltaDirections;
+                float[,] RayDatas = Engine.RayDatas;
 
                 //Drawing map
                 for (int x = 0; x < MapWalls.GetLength(1); x++)
@@ -79,7 +77,7 @@ public class DebugWindow
                 for (int i = 0; i < RayCount; i++)
                 {
                     GL.Vertex2(PlayerPosition.X, PlayerPosition.Y);
-                    GL.Vertex2(RayDeltaDirections[i, 0], RayDeltaDirections[i, 1]);
+                    GL.Vertex2(RayDatas[i, 1], RayDatas[i, 2]);
                 }
 
                 GL.Color3(0f, 1f, 0f);
