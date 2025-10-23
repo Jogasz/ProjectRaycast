@@ -20,7 +20,7 @@ public class DebugWindow
         using (GameWindow Screen = new GameWindow(ScreenWidth, ScreenHeight, GraphicsMode.Default, "Debug Window"))
         {
             //For test-only
-            Screen.VSync = VSyncMode.Off;
+            //Screen.VSync = VSyncMode.Off;
 
             WindowManager.SetupPixelCoordinates(Screen);
 
@@ -28,18 +28,6 @@ public class DebugWindow
             {
                 GL.ClearColor(0.6f, 0.6f, 0.6f, 1f);
                 GL.Clear(ClearBufferMask.ColorBufferBit);
-
-                //Getting calculations from engine
-                Engine.EngineUpdate();
-
-                //Updated variables
-                Vector2 PlayerPosition = Engine.playerPosition;
-                int PlayerWidth = Engine.PlayerWidth;
-                int PlayerHeight = Engine.PlayerHeight;
-                float PlayerAngle = Engine.PlayerAngle;
-                float PlayerDeltaOffsetX = Engine.PlayerDeltaOffsetX;
-                float PlayerDeltaOffsetY = Engine.PlayerDeltaOffsetY;
-                float[,] RayDatas = Engine.RayDatas;
 
                 //Drawing map
                 for (int x = 0; x < MapWalls.GetLength(1); x++)
@@ -61,6 +49,17 @@ public class DebugWindow
                     }
                 }
 
+                //Getting calculations from engine
+                Engine.EngineUpdate();
+
+                //Updated variables
+                Vector2 PlayerPosition = Engine.playerPosition;
+                int PlayerWidth = Engine.PlayerWidth;
+                int PlayerHeight = Engine.PlayerHeight;
+                float PlayerAngle = Engine.PlayerAngle;
+                float PlayerDeltaOffsetX = Engine.PlayerDeltaOffsetX;
+                float PlayerDeltaOffsetY = Engine.PlayerDeltaOffsetY;
+
                 //Drawing player
                 GL.Color3(0f, 0f, 1f);
                 GL.Begin(PrimitiveType.Quads);
@@ -71,13 +70,24 @@ public class DebugWindow
                 GL.End();
 
                 //Drawing rays
-                GL.Color3(1f, 0f, 0f);
                 GL.LineWidth(1f);
                 GL.Begin(PrimitiveType.Lines);
                 for (int i = 0; i < RayCount; i++)
                 {
+                    if (Engine.RayDatas[i, 5] == 1)
+                    {
+                        GL.Color3(0f, 1f, 0f);
+                    }
+                    else if (Engine.RayDatas[i, 5] == 2)
+                    {
+                        GL.Color3(0f, 0f, 1f);
+                    }
+                    else
+                    {
+                        GL.Color3(0.3f, 0.3f, 0.3f);
+                    }
                     GL.Vertex2(PlayerPosition.X, PlayerPosition.Y);
-                    GL.Vertex2(RayDatas[i, 1], RayDatas[i, 2]);
+                    GL.Vertex2(Engine.RayDatas[i, 1], Engine.RayDatas[i, 2]);
                 }
 
                 GL.Color3(0f, 1f, 0f);
