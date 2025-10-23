@@ -1,4 +1,5 @@
-﻿using OpenTK;
+﻿
+using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using System;
@@ -74,17 +75,18 @@ public class DebugWindow
                 GL.Begin(PrimitiveType.Lines);
                 for (int i = 0; i < RayCount; i++)
                 {
-                    if (Engine.RayDatas[i, 5] == 1)
+                    //No wall
+                    if (Engine.RayDatas[i, 5] == 0) {
+                        GL.Color3(0.3f, 0.3f, 0.3f);
+                    }
+
+                    else if (Engine.RayDatas[i, 5] == 1)
                     {
                         GL.Color3(0f, 1f, 0f);
                     }
                     else if (Engine.RayDatas[i, 5] == 2)
                     {
                         GL.Color3(0f, 0f, 1f);
-                    }
-                    else
-                    {
-                        GL.Color3(0.3f, 0.3f, 0.3f);
                     }
                     GL.Vertex2(PlayerPosition.X, PlayerPosition.Y);
                     GL.Vertex2(Engine.RayDatas[i, 1], Engine.RayDatas[i, 2]);

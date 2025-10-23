@@ -11,7 +11,8 @@ public class Program
         map.Load();
 
         Engine.Start();
-
+        Engine.EngineUpdate();
+        
         Thread debugThread = new Thread(() =>
         {
             DebugWindow debugWindow = new DebugWindow();
