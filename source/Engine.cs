@@ -1,12 +1,7 @@
 ﻿using OpenTK;
-using OpenTK.Graphics;
-using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 using System;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
-
 public class Engine
 {
     //Settings variables
@@ -50,6 +45,9 @@ public class Engine
     public static bool HorizontalWallFound { get; private set; } = false;
     public static float VerticalPythagoras { get; private set; } = 0f;
     public static float HorizontalPythagoras { get; private set; } = 0f;
+
+    //Textures
+    //public static int[,] Bricks { get; private set; } = new int[];
     public static int[,] TestTexture = 
     {
         { 1, 0, 1, 0 },
@@ -59,15 +57,25 @@ public class Engine
     };
     public static int[,] TestTexture2 =
     {
-        { 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 1, 1, 0, 0, 1, 1, 0 },
-        { 0, 1, 1, 0, 0, 1, 1, 0 },
-        { 0, 0, 0, 1, 1, 0, 0, 0 },
-        { 0, 0, 1, 1, 1, 1, 0, 0 },
-        { 0, 0, 1, 1, 1, 1, 0, 0 },
-        { 0, 0, 1, 0, 0, 1, 0, 0 },
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1},
+        {1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1},
+        {1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0},
+        {1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0},
+        {1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1},
+        {1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1},
+        {1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0},
+        {1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0},
+        {1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     };
+
     //Wall rendering variables
     public static float[,] RayDatas { get; private set; } = new float[RayCount, 7];
 
@@ -82,9 +90,10 @@ public class Engine
         //DeltaTime calculation
         float CurrentTime = (float)stopWatch.Elapsed.TotalSeconds;
         DeltaTime = CurrentTime - lastTime;
-        //For testing FPS
-        //Console.WriteLine(Math.Floor(1 / DeltaTime) + "FPS");
         lastTime = CurrentTime;
+
+        //For showing FPS
+        //Console.WriteLine(Math.Floor(1 / DeltaTime) + "FPS");
         //================================================================
 
         //Player movement, rotaion and collision detection

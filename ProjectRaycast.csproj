@@ -9,19 +9,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="assets\textures\wall\**" />
+    <EmbeddedResource Remove="assets\textures\wall\**" />
+    <None Remove="assets\textures\wall\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="assets\maps\map01.json" />
-    <None Remove="assets\textures\wall\images\brick_wall.txt" />
-    <None Remove="assets\textures\wall\settings\brick_wall.json.json" />
     <None Remove="settings.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="assets\textures\wall\images\brick_wall.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\textures\wall\settings\brick_wall.json.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="settings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

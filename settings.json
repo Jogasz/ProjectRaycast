@@ -22,7 +22,7 @@
   ],
   "Graphics": {
     "FOV": 70,
-    "RayCount": 300,
+    "RayCount": 1000,
     "DepthOfField": 8,
     "VerticalShade": 0.3,
     "HorizontalShade": 0,

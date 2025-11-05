@@ -1,5 +1,4 @@
-﻿
-using OpenTK;
+﻿using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using System;
@@ -41,7 +40,7 @@ public class GraphicWindow
                 //Vertical wall
                 else if (Engine.RayDatas[i, 4] == 1)
                 {
-                    if (Engine.RayDatas[i, 5] == 1)
+                    if (Engine.RayDatas[i, 5] == 2)
                     {
                         GL.Color3(0f, (1f - VerticalShade), 0f);
                         GL.Vertex2(i * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2));
@@ -49,7 +48,7 @@ public class GraphicWindow
                         GL.Vertex2((i + 1) * WallWidth, (ScreenHeight / 2) + (Engine.RayDatas[i, 6] / 2));
                         GL.Vertex2(i * WallWidth, (ScreenHeight / 2) + (Engine.RayDatas[i, 6] / 2));
                     }
-                    else if (Engine.RayDatas[i, 5] == 2)
+                    else if (Engine.RayDatas[i, 5] == 1)
                     {
                         for (int k = 0; k < Engine.TestTexture2.GetLength(0); k++) {
                             if (Engine.TestTexture2[k, (int)Math.Floor(Engine.RayDatas[i, 3] / (TileSize / (float)Engine.TestTexture2.GetLength(1)))] == 1)
@@ -74,18 +73,32 @@ public class GraphicWindow
                 //Horizontal wall
                 else if (Engine.RayDatas[i, 4] == 2)
                 {
-                    if (Engine.RayDatas[i, 5] == 1)
+                    if (Engine.RayDatas[i, 5] == 2)
                     {
                         GL.Color3(0f, (1f - HorizontalShade), 0f);
                     }
-                    else if (Engine.RayDatas[i, 5] == 2)
+                    else if (Engine.RayDatas[i, 5] == 1)
                     {
-                        GL.Color3(0f, 0f, (1f - HorizontalShade));
+                        for (int k = 0; k < Engine.TestTexture2.GetLength(0); k++)
+                        {
+                            if (Engine.TestTexture2[k, (int)Math.Floor(Engine.RayDatas[i, 3] / (TileSize / (float)Engine.TestTexture2.GetLength(1)))] == 1)
+                            {
+                                GL.Color3(1f, 1f, 1f);
+                                GL.Vertex2(i * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2) + (k * (Engine.RayDatas[i, 6] / Engine.TestTexture2.GetLength(0))));
+                                GL.Vertex2((i + 1) * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2) + (k * (Engine.RayDatas[i, 6] / Engine.TestTexture2.GetLength(0))));
+                                GL.Vertex2((i + 1) * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2) + ((k + 1) * (Engine.RayDatas[i, 6] / Engine.TestTexture2.GetLength(0))));
+                                GL.Vertex2(i * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2) + ((k + 1) * (Engine.RayDatas[i, 6] / Engine.TestTexture2.GetLength(0))));
+                            }
+                            else
+                            {
+                                GL.Color3(0f, 0f, 0f);
+                                GL.Vertex2(i * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2) + (k * (Engine.RayDatas[i, 6] / Engine.TestTexture2.GetLength(0))));
+                                GL.Vertex2((i + 1) * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2) + (k * (Engine.RayDatas[i, 6] / Engine.TestTexture2.GetLength(0))));
+                                GL.Vertex2((i + 1) * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2) + ((k + 1) * (Engine.RayDatas[i, 6] / Engine.TestTexture2.GetLength(0))));
+                                GL.Vertex2(i * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2) + ((k + 1) * (Engine.RayDatas[i, 6] / Engine.TestTexture2.GetLength(0))));
+                            }
+                        }
                     }
-                    GL.Vertex2(i * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2));
-                    GL.Vertex2((i + 1) * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2));
-                    GL.Vertex2((i + 1) * WallWidth, (ScreenHeight / 2) + (Engine.RayDatas[i, 6] / 2));
-                    GL.Vertex2(i * WallWidth, (ScreenHeight / 2) + (Engine.RayDatas[i, 6] / 2));
                 }
             }
             GL.End();
