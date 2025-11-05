@@ -40,7 +40,7 @@ public class GraphicWindow
                 //Vertical wall
                 else if (Engine.RayDatas[i, 4] == 1)
                 {
-                    if (Engine.RayDatas[i, 5] == 2)
+                    if (Engine.RayDatas[i, 5] == 1)
                     {
                         GL.Color3(0f, (1f - VerticalShade), 0f);
                         GL.Vertex2(i * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2));
@@ -48,7 +48,7 @@ public class GraphicWindow
                         GL.Vertex2((i + 1) * WallWidth, (ScreenHeight / 2) + (Engine.RayDatas[i, 6] / 2));
                         GL.Vertex2(i * WallWidth, (ScreenHeight / 2) + (Engine.RayDatas[i, 6] / 2));
                     }
-                    else if (Engine.RayDatas[i, 5] == 1)
+                    else if (Engine.RayDatas[i, 5] == 2)
                     {
                         for (int k = 0; k < Engine.TestTexture2.GetLength(0); k++) {
                             if (Engine.TestTexture2[k, (int)Math.Floor(Engine.RayDatas[i, 3] / (TileSize / (float)Engine.TestTexture2.GetLength(1)))] == 1)
@@ -73,11 +73,15 @@ public class GraphicWindow
                 //Horizontal wall
                 else if (Engine.RayDatas[i, 4] == 2)
                 {
-                    if (Engine.RayDatas[i, 5] == 2)
+                    if (Engine.RayDatas[i, 5] == 1)
                     {
                         GL.Color3(0f, (1f - HorizontalShade), 0f);
+                        GL.Vertex2(i * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2));
+                        GL.Vertex2((i + 1) * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2));
+                        GL.Vertex2((i + 1) * WallWidth, (ScreenHeight / 2) + (Engine.RayDatas[i, 6] / 2));
+                        GL.Vertex2(i * WallWidth, (ScreenHeight / 2) + (Engine.RayDatas[i, 6] / 2));
                     }
-                    else if (Engine.RayDatas[i, 5] == 1)
+                    else if (Engine.RayDatas[i, 5] == 2)
                     {
                         for (int k = 0; k < Engine.TestTexture2.GetLength(0); k++)
                         {
