@@ -37,73 +37,39 @@ public class GraphicWindow
                 {
                     continue;
                 }
-                //Vertical wall
-                else if (Engine.RayDatas[i, 4] == 1)
-                {
-                    if (Engine.RayDatas[i, 5] == 1)
+                //Wall
+                else {
+                    int[][] path = null;
+                    switch (Engine.RayDatas[i, 5])
                     {
-                        GL.Color3(0f, (1f - VerticalShade), 0f);
-                        GL.Vertex2(i * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2));
-                        GL.Vertex2((i + 1) * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2));
-                        GL.Vertex2((i + 1) * WallWidth, (ScreenHeight / 2) + (Engine.RayDatas[i, 6] / 2));
-                        GL.Vertex2(i * WallWidth, (ScreenHeight / 2) + (Engine.RayDatas[i, 6] / 2));
+                        case 1:
+                            path = Textures.bricksTexture;
+                            break;
+                        case 2:
+                            path = Textures.mossyBricksTexture;
+                            break;
                     }
-                    else if (Engine.RayDatas[i, 5] == 2)
-                    {
-                        for (int k = 0; k < Engine.TestTexture2.GetLength(0); k++) {
-                            if (Engine.TestTexture2[k, (int)Math.Floor(Engine.RayDatas[i, 3] / (TileSize / (float)Engine.TestTexture2.GetLength(1)))] == 1)
-                            {
-                                GL.Color3(1f, 1f, 1f);
-                                GL.Vertex2(i * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2) + (k * (Engine.RayDatas[i, 6] / Engine.TestTexture2.GetLength(0))));
-                                GL.Vertex2((i + 1) * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2) + (k * (Engine.RayDatas[i, 6] / Engine.TestTexture2.GetLength(0))));
-                                GL.Vertex2((i + 1) * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2) + ((k + 1) * (Engine.RayDatas[i, 6] / Engine.TestTexture2.GetLength(0))));
-                                GL.Vertex2(i * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2) + ((k + 1) * (Engine.RayDatas[i, 6] / Engine.TestTexture2.GetLength(0))));
-                            }
-                            else
-                            {
-                                GL.Color3(0f, 0f, 0f);
-                                GL.Vertex2(i * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2) + (k * (Engine.RayDatas[i, 6] / Engine.TestTexture2.GetLength(0))));
-                                GL.Vertex2((i + 1) * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2) + (k * (Engine.RayDatas[i, 6] / Engine.TestTexture2.GetLength(0))));
-                                GL.Vertex2((i + 1) * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2) + ((k + 1) * (Engine.RayDatas[i, 6] / Engine.TestTexture2.GetLength(0))));
-                                GL.Vertex2(i * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2) + ((k + 1) * (Engine.RayDatas[i, 6] / Engine.TestTexture2.GetLength(0))));
-                            }
-                        }
+                    for (int k = 0; k < path[0][1]; k++) {
+                        //Console.WriteLine("k: " + k);
+                        //Console.WriteLine("Méret: " + Textures.bricksTexture[1].Length);
+                        //Console.WriteLine("szél: " + Textures.bricksTexture[0][0]);
+                        //Console.WriteLine("hossz: " + Textures.bricksTexture[0][1]);
+                        //Console.WriteLine(0 + k * (Textures.bricksTexture[0][0] * 3) + ". : " + Textures.bricksTexture[1][0 + k * (Textures.bricksTexture[0][0] * 3)]);
+                        //Console.WriteLine(1 + k * (Textures.bricksTexture[0][0] * 3) + ". : " + Textures.bricksTexture[1][1 + k * (Textures.bricksTexture[0][0] * 3)]);
+                        //Console.WriteLine(2 + k * (Textures.bricksTexture[0][0] * 3) + ". : " + Textures.bricksTexture[1][2 + k * (Textures.bricksTexture[0][0] * 3)]);
+                        //Console.WriteLine(0 + (int)Math.Floor(Engine.RayDatas[i, 3] / (TileSize / (float)Textures.bricksTexture[0][0])));
+                        int r = path[1][(0 + ((int)Math.Floor(Engine.RayDatas[i, 3] / (TileSize / (float)path[0][0]))) * 3) + k * (path[0][0] * 3)];
+                        int g = path[1][(1 + ((int)Math.Floor(Engine.RayDatas[i, 3] / (TileSize / (float)path[0][0]))) * 3) + k * (path[0][0] * 3)];
+                        int b = path[1][(2 + ((int)Math.Floor(Engine.RayDatas[i, 3] / (TileSize / (float)path[0][0]))) * 3) + k * (path[0][0] * 3)];
+
+                        GL.Color3(r / 255f, g / 255f, b / 255f);
+                        GL.Vertex2(i * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2) + (k * (Engine.RayDatas[i, 6] / path[0][1])));
+                        GL.Vertex2((i + 1) * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2) + (k * (Engine.RayDatas[i, 6] / path[0][1])));
+                        GL.Vertex2((i + 1) * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2) + ((k + 1) * (Engine.RayDatas[i, 6] / path[0][1])));
+                        GL.Vertex2(i * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2) + ((k + 1) * (Engine.RayDatas[i, 6] / path[0][1])));
                     }
-                }
-                //Horizontal wall
-                else if (Engine.RayDatas[i, 4] == 2)
-                {
-                    if (Engine.RayDatas[i, 5] == 1)
-                    {
-                        GL.Color3(0f, (1f - HorizontalShade), 0f);
-                        GL.Vertex2(i * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2));
-                        GL.Vertex2((i + 1) * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2));
-                        GL.Vertex2((i + 1) * WallWidth, (ScreenHeight / 2) + (Engine.RayDatas[i, 6] / 2));
-                        GL.Vertex2(i * WallWidth, (ScreenHeight / 2) + (Engine.RayDatas[i, 6] / 2));
-                    }
-                    else if (Engine.RayDatas[i, 5] == 2)
-                    {
-                        for (int k = 0; k < Engine.TestTexture2.GetLength(0); k++)
-                        {
-                            if (Engine.TestTexture2[k, (int)Math.Floor(Engine.RayDatas[i, 3] / (TileSize / (float)Engine.TestTexture2.GetLength(1)))] == 1)
-                            {
-                                GL.Color3(1f, 1f, 1f);
-                                GL.Vertex2(i * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2) + (k * (Engine.RayDatas[i, 6] / Engine.TestTexture2.GetLength(0))));
-                                GL.Vertex2((i + 1) * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2) + (k * (Engine.RayDatas[i, 6] / Engine.TestTexture2.GetLength(0))));
-                                GL.Vertex2((i + 1) * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2) + ((k + 1) * (Engine.RayDatas[i, 6] / Engine.TestTexture2.GetLength(0))));
-                                GL.Vertex2(i * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2) + ((k + 1) * (Engine.RayDatas[i, 6] / Engine.TestTexture2.GetLength(0))));
-                            }
-                            else
-                            {
-                                GL.Color3(0f, 0f, 0f);
-                                GL.Vertex2(i * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2) + (k * (Engine.RayDatas[i, 6] / Engine.TestTexture2.GetLength(0))));
-                                GL.Vertex2((i + 1) * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2) + (k * (Engine.RayDatas[i, 6] / Engine.TestTexture2.GetLength(0))));
-                                GL.Vertex2((i + 1) * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2) + ((k + 1) * (Engine.RayDatas[i, 6] / Engine.TestTexture2.GetLength(0))));
-                                GL.Vertex2(i * WallWidth, (ScreenHeight / 2) - (Engine.RayDatas[i, 6] / 2) + ((k + 1) * (Engine.RayDatas[i, 6] / Engine.TestTexture2.GetLength(0))));
-                            }
-                        }
-                    }
-                }
+                    //Engine.TestTexture2[k, (int)Math.Floor(Engine.RayDatas[i, 3] / (TileSize / (float)Engine.TestTexture2.GetLength(1)))] == 1
+                };
             }
             GL.End();
 
