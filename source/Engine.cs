@@ -320,3 +320,62 @@ public class Engine
         //================================================================
     }
 }
+
+//for (int i = 0; i < Settings.Graphics.RayCount; i++)
+//{
+//    //Testing purposes
+//    if (Engine.RayDatas[i, 5] != 0 && Engine.RayDatas[i, 5] != 1 && Engine.RayDatas[i, 5] != 2 && Engine.RayDatas[i, 5] != 3)
+//    {
+//        Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+//        Console.WriteLine(Engine.RayDatas[i, 5]);
+//        Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+//    }
+
+//    //No wall
+//    if (Engine.RayDatas[i, 5] == 0)
+//    {
+//        continue;
+//    }
+//    //Wall
+//    else
+//    {
+//        int[][] path = null;
+
+//        //Textures
+//        switch (Engine.RayDatas[i, 5])
+//        {
+//            //Bricks
+//            case 1:
+//                path = Textures.bricksTexture;
+//                break;
+//            //Mossy Bricks
+//            case 2:
+//                path = Textures.mossyBricksTexture;
+//                break;
+//            //Test
+//            case 3:
+//                path = Textures.testTexture;
+//                break;
+//        }
+
+//        //Drawing pixels in lines from up to down
+//        for (int k = 0; k < path[0][1]; k++)
+//        {
+//            int tempRGBCalc = ((int)Math.Floor(Engine.RayDatas[i, 3] / (TileSize / (float)path[0][0])) * 3) + k * (path[0][0] * 3);
+
+//            float r = path[1][tempRGBCalc] / 255f;
+//            float g = path[1][1 + tempRGBCalc] / 255f;
+//            float b = path[1][2 + tempRGBCalc] / 255f;
+
+//            float tempLineCalcTop = (Screen.Height / 2) - (Engine.RayDatas[i, 6] / 2) + (k * (Engine.RayDatas[i, 6] / path[0][1]));
+//            float tempLineCalcBottom = (Screen.Height / 2) - (Engine.RayDatas[i, 6] / 2) + ((k + 1) * (Engine.RayDatas[i, 6] / path[0][1]));
+
+//            GL.Color3(r, g, b);
+//            GL.Vertex2(i * WallWidth, tempLineCalcTop);
+//            GL.Vertex2((i + 1) * WallWidth, tempLineCalcTop);
+//            GL.Vertex2((i + 1) * WallWidth, tempLineCalcBottom);
+//            GL.Vertex2(i * WallWidth, tempLineCalcBottom);
+//        }
+//    }
+//    ;
+//}

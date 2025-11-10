@@ -75,25 +75,20 @@ public class DebugWindow
                 GL.Begin(PrimitiveType.Lines);
                 for (int i = 0; i < RayCount; i++)
                 {
-                    //No wall
+                    //No wall hit (no render)
                     if (Engine.RayDatas[i, 5] == 0) {
                         GL.Color3(0.3f, 0.3f, 0.3f);
                     }
-
-                    else if (Engine.RayDatas[i, 5] == 1)
+                    else
                     {
                         GL.Color3(0f, 1f, 0f);
-                    }
-                    else if (Engine.RayDatas[i, 5] == 2)
-                    {
-                        GL.Color3(0f, 0f, 1f);
                     }
                     GL.Vertex2(PlayerPosition.X, PlayerPosition.Y);
                     GL.Vertex2(Engine.RayDatas[i, 1], Engine.RayDatas[i, 2]);
                 }
 
-                GL.Color3(0f, 1f, 0f);
-                GL.LineWidth(2f);
+                GL.Color3(1f, 0f, 0f);
+                GL.LineWidth(4f);
                 GL.Begin(PrimitiveType.Lines);
                 GL.Vertex2(PlayerPosition.X, PlayerPosition.Y);
                 GL.Vertex2(PlayerPosition.X + PlayerDeltaOffsetX * 100, PlayerPosition.Y + PlayerDeltaOffsetY * 100);

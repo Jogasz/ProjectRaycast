@@ -4,9 +4,11 @@ using System.IO;
 public static class Textures {
     public static int[][] bricksTexture { get; private set; }
     public static int[][] mossyBricksTexture { get; private set; }
+    public static int[][] testTexture { get; private set; }
     public static void Load() {
         bricksTexture = Read("assets/textures/bricks.txt");
         mossyBricksTexture = Read("assets/textures/mossy_bricks.txt");
+        testTexture = Read("assets/textures/test.txt");
     }
     public static int[][] Read(string path) {
         if (File.Exists(path))
@@ -29,7 +31,6 @@ public static class Textures {
                     texture[1][i - 3] = int.Parse(lines[i]);
                 }
             };
-            Console.WriteLine("Reading file was succesful!");
             return texture;
         }
         else {
