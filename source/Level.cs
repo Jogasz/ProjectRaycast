@@ -12,26 +12,51 @@ public class Level
 
     public void Load()
     {
-        string jsonText = File.ReadAllText("assets/maps/map01.json");
+        //Reading text in file
+        string path = File.ReadAllText("assets/maps/map01.json");
 
-        var data = JsonConvert.DeserializeObject<MapData>(jsonText);
+        //Deserialize text to data
+        var fileText = JsonConvert.DeserializeObject<MapData>(path);
 
-        var rows = data.MapWalls.Count;
-        var cols = data.MapWalls[0].Count;
+        var rows = fileText.MapWalls.Count;
+        var cols = fileText.MapWalls[0].Count;
 
+        mapCeiling = new int[rows, cols];
         mapWalls = new int[rows, cols];
+        mapFloor = new int[rows, cols];
 
+        //Declaring mapCeiling[]
         for (int y = 0; y < rows; y++)
         {
             for (int x = 0; x < cols; x++)
             {
-                mapWalls[y, x] = data.MapWalls[y][x];
+                mapCeiling[y, x] = fileText.MapCeiling[y][x];
+            }
+        }
+
+        //Declaring mapWalls[]
+        for (int y = 0; y < rows; y++)
+        {
+            for (int x = 0; x < cols; x++)
+            {
+                mapWalls[y, x] = fileText.MapWalls[y][x];
+            }
+        }
+
+        //Declaring mapFloor[]
+        for (int y = 0; y < rows; y++)
+        {
+            for (int x = 0; x < cols; x++)
+            {
+                mapFloor[y, x] = fileText.MapFloor[y][x];
             }
         }
     }
 
     private class MapData
     {
+        public List<List<int>> MapCeiling { get; set; }
         public List<List<int>> MapWalls { get; set; }
+        public List<List<int>> MapFloor { get; set; }
     }
 }
