@@ -30,105 +30,106 @@ public class GraphicWindow
 
             float WallWidth = (float)Screen.Width / (float)Settings.Graphics.RayCount;
 
-            //Drawing floor
-            for (int i = 0; i < Settings.Graphics.RayCount; i++) {
-                int[][] path = null;
+            ////Drawing floor
+            //for (int i = 0; i < Settings.Graphics.RayCount; i++) {
+            //    int[][] path = null;
 
-                //Textures
-                switch (Engine.RayDatas[i, 5])
-                {
-                    //Bricks
-                    case 1:
-                        path = Textures.bricksTexture;
-                        break;
-                    //Mossy Bricks
-                    case 2:
-                        path = Textures.mossyBricksTexture;
-                        break;
-                    //Test
-                    case 3:
-                        path = Textures.testTexture;
-                        break;
-                }
-
-                for (int k = 0; k < path[0][1]; k++)
-                {
-                    int tempRGBCalc = ((int)Math.Floor(Engine.RayDatas[i, 3] / (TileSize / (float)path[0][0])) * 3) + k * (path[0][0] * 3);
-
-                    float r = path[1][tempRGBCalc] / 255f;
-                    float g = path[1][1 + tempRGBCalc] / 255f;
-                    float b = path[1][2 + tempRGBCalc] / 255f;
-
-                    float tempLineCalcTop = (Screen.Height / 2) - (Engine.RayDatas[i, 6] / 2) + (k * (Engine.RayDatas[i, 6] / path[0][1]));
-                    float tempLineCalcBottom = (Screen.Height / 2) - (Engine.RayDatas[i, 6] / 2) + ((k + 1) * (Engine.RayDatas[i, 6] / path[0][1]));
-
-                    GL.Color3(r, g, b);
-                    GL.Vertex2(i * WallWidth, tempLineCalcTop);
-                    GL.Vertex2((i + 1) * WallWidth, tempLineCalcTop);
-                    GL.Vertex2((i + 1) * WallWidth, tempLineCalcBottom);
-                    GL.Vertex2(i * WallWidth, tempLineCalcBottom);
-                }
-            }
-
-            ////Drawing graphics
-            //GL.Begin(PrimitiveType.Quads);
-            //for (int i = 0; i < Settings.Graphics.RayCount; i++)
-            //{
-            //    ////Testing purposes
-            //    //if (Engine.RayDatas[i, 5] != 0 && Engine.RayDatas[i, 5] != 1 && Engine.RayDatas[i, 5] != 2 && Engine.RayDatas[i, 5] != 3)
-            //    //{
-            //    //    Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-            //    //    Console.WriteLine(Engine.RayDatas[i, 5]);
-            //    //    Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-            //    //}
-
-            //    //No wall
-            //    if (Engine.RayDatas[i, 5] == 0)
+            //    //Textures
+            //    switch (Engine.RayDatas[i, 5])
             //    {
-            //        continue;
+            //        //Bricks
+            //        case 1:
+            //            path = Textures.bricksTexture;
+            //            break;
+            //        //Mossy Bricks
+            //        case 2:
+            //            path = Textures.mossyBricksTexture;
+            //            break;
+            //        //Test
+            //        case 3:
+            //            path = Textures.testTexture;
+            //            break;
             //    }
-            //    //Wall
-            //    else
+
+            //    for (int k = 0; k < path[0][1]; k++)
             //    {
-            //        int[][] path = null;
+            //        int tempRGBCalc = ((int)Math.Floor(Engine.RayDatas[i, 3] / (TileSize / (float)path[0][0])) * 3) + k * (path[0][0] * 3);
 
-            //        //Textures
-            //        switch (Engine.RayDatas[i, 5])
-            //        {
-            //            //Bricks
-            //            case 1:
-            //                path = Textures.bricksTexture;
-            //                break;
-            //            //Mossy Bricks
-            //            case 2:
-            //                path = Textures.mossyBricksTexture;
-            //                break;
-            //            //Test
-            //            case 3:
-            //                path = Textures.testTexture;
-            //                break;
-            //        }
+            //        float r = path[1][tempRGBCalc] / 255f;
+            //        float g = path[1][1 + tempRGBCalc] / 255f;
+            //        float b = path[1][2 + tempRGBCalc] / 255f;
 
-            //        //Drawing pixels in lines from up to down (walls)
-            //        for (int k = 0; k < path[0][1]; k++)
-            //        {
-            //            int tempRGBCalc = ((int)Math.Floor(Engine.RayDatas[i, 3] / (TileSize / (float)path[0][0])) * 3) + k * (path[0][0] * 3);
+            //        float tempLineCalcTop = (Screen.Height / 2) - (Engine.RayDatas[i, 6] / 2) + (k * (Engine.RayDatas[i, 6] / path[0][1]));
+            //        float tempLineCalcBottom = (Screen.Height / 2) - (Engine.RayDatas[i, 6] / 2) + ((k + 1) * (Engine.RayDatas[i, 6] / path[0][1]));
 
-            //            float r = path[1][tempRGBCalc] / 255f;
-            //            float g = path[1][1 + tempRGBCalc] / 255f;
-            //            float b = path[1][2 + tempRGBCalc] / 255f;
-
-            //            float tempLineCalcTop = (Screen.Height / 2) - (Engine.RayDatas[i, 6] / 2) + (k * (Engine.RayDatas[i, 6] / path[0][1]));
-            //            float tempLineCalcBottom = (Screen.Height / 2) - (Engine.RayDatas[i, 6] / 2) + ((k + 1) * (Engine.RayDatas[i, 6] / path[0][1]));
-
-            //            GL.Color3(r, g, b);
-            //            GL.Vertex2(i * WallWidth, tempLineCalcTop);
-            //            GL.Vertex2((i + 1) * WallWidth, tempLineCalcTop);
-            //            GL.Vertex2((i + 1) * WallWidth, tempLineCalcBottom);
-            //            GL.Vertex2(i * WallWidth, tempLineCalcBottom);
-            //        }
-            //    };
+            //        GL.Color3(r, g, b);
+            //        GL.Vertex2(i * WallWidth, tempLineCalcTop);
+            //        GL.Vertex2((i + 1) * WallWidth, tempLineCalcTop);
+            //        GL.Vertex2((i + 1) * WallWidth, tempLineCalcBottom);
+            //        GL.Vertex2(i * WallWidth, tempLineCalcBottom);
+            //    }
             //}
+
+            //Drawing graphics
+            GL.Begin(PrimitiveType.Quads);
+            for (int i = 0; i < Settings.Graphics.RayCount; i++)
+            {
+                ////Testing purposes
+                //if (Engine.RayDatas[i, 5] != 0 && Engine.RayDatas[i, 5] != 1 && Engine.RayDatas[i, 5] != 2 && Engine.RayDatas[i, 5] != 3)
+                //{
+                //    Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                //    Console.WriteLine(Engine.RayDatas[i, 5]);
+                //    Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                //}
+
+                //No wall
+                if (Engine.RayDatas[i, 5] == 0)
+                {
+                    continue;
+                }
+                //Wall
+                else
+                {
+                    int[][] path = null;
+
+                    //Textures
+                    switch (Engine.RayDatas[i, 5])
+                    {
+                        //Bricks
+                        case 1:
+                            path = Textures.bricksTexture;
+                            break;
+                        //Mossy Bricks
+                        case 2:
+                            path = Textures.mossyBricksTexture;
+                            break;
+                        //Test
+                        case 3:
+                            path = Textures.testTexture;
+                            break;
+                    }
+
+                    //Drawing pixels in lines from up to down (walls)
+                    for (int k = 0; k < path[0][1]; k++)
+                    {
+                        int tempRGBCalc = ((int)Math.Floor(Engine.RayDatas[i, 3] / (TileSize / (float)path[0][0])) * 3) + k * (path[0][0] * 3);
+
+                        float r = path[1][tempRGBCalc] / 255f;
+                        float g = path[1][1 + tempRGBCalc] / 255f;
+                        float b = path[1][2 + tempRGBCalc] / 255f;
+
+                        float tempLineCalcTop = (Screen.Height / 2) - (Engine.RayDatas[i, 6] / 2) + (k * (Engine.RayDatas[i, 6] / path[0][1]));
+                        float tempLineCalcBottom = (Screen.Height / 2) - (Engine.RayDatas[i, 6] / 2) + ((k + 1) * (Engine.RayDatas[i, 6] / path[0][1]));
+
+                        GL.Color3(r, g, b);
+                        GL.Vertex2(i * WallWidth, tempLineCalcTop);
+                        GL.Vertex2((i + 1) * WallWidth, tempLineCalcTop);
+                        GL.Vertex2((i + 1) * WallWidth, tempLineCalcBottom);
+                        GL.Vertex2(i * WallWidth, tempLineCalcBottom);
+                    }
+                }
+                ;
+            }
             GL.End();
 
             Screen.SwapBuffers();
