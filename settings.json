@@ -22,12 +22,8 @@
   ],
   "Graphics": {
     "FOV": 70,
-    "RayCount": 1000,
-    "DepthOfField": 8,
-    "VerticalShade": 0.3,
-    "HorizontalShade": 0,
-    "WindowResolution": { "Width": 1280, "Height": 720 },
-    "TextureDetail": "High"
+    "RayCount": 50,
+    "DepthOfField": 10
   },
   "Gameplay": {
     "TileSize": 50,
