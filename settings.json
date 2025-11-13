@@ -22,8 +22,8 @@
   ],
   "Graphics": {
     "FOV": 70,
-    "RayCount": 100,
-    "DepthOfField": 12
+    "RayCount": 400,
+    "DepthOfField": 8
   },
   "Gameplay": {
     "TileSize": 50,
