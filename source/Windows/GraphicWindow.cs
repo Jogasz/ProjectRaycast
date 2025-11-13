@@ -48,7 +48,7 @@ public class GraphicWindow
                 tempIterator = 0;
 
                 //Ceiling
-                while (((Screen.Height / 2) + (Engine.RayDatas[i, 6] / 2) + (tempIterator * WallWidth)) < Screen.Height)
+                while (((Screen.Height / 2) - (Engine.RayDatas[i, 6] / 2) - (tempIterator * WallWidth)) > 0)
                 {
                     GL.Color3(0.7f, 0.7f, 0.7f);
                     GL.Vertex2(i * WallWidth, (Screen.Height / 2) - (Engine.RayDatas[i, 6] / 2) - (tempIterator * WallWidth));
