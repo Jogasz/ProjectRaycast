@@ -44,37 +44,7 @@ public class Engine
     public static bool VerticalWallFound { get; private set; } = false;
     public static bool HorizontalWallFound { get; private set; } = false;
     public static float VerticalPythagoras { get; private set; } = 0f;
-    public static float HorizontalPythagoras { get; private set; } = 0f;
-
-    //Textures
-    //public static int[,] Bricks { get; private set; } = new int[];
-    public static int[,] TestTexture = 
-    {
-        { 1, 0, 1, 0 },
-        { 0, 1, 0, 1 },
-        { 1, 0, 1, 0 },
-        { 0, 1, 0, 1 }
-    };
-    public static int[,] TestTexture2 =
-    {
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1},
-        {1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1},
-        {1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0},
-        {1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0},
-        {1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1},
-        {1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1},
-        {1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0},
-        {1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0},
-        {1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-    };
+    public static float HorizontalPythagoras { get; private set; } = 0f; 
 
     //Wall rendering variables
     public static float[,] RayDatas { get; private set; } = new float[RayCount, 7];
@@ -242,8 +212,8 @@ public class Engine
 
             VerticalPythagoras = (float)Math.Sqrt(Math.Pow(Math.Abs(PlayerPosition.X - VerticalRayHitX), 2) + Math.Pow(Math.Abs(PlayerPosition.Y - VerticalRayHitY), 2));
 
-                //Horizontal wall check
-                DepthOfField = 0;
+            //Horizontal wall check
+            DepthOfField = 0;
             if (RayAngle > MathX.Quadrant2)
             {
                 //Player is looking up

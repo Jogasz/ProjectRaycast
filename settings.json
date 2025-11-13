@@ -22,7 +22,7 @@
   ],
   "Graphics": {
     "FOV": 70,
-    "RayCount": 200,
+    "RayCount": 100,
     "DepthOfField": 12
   },
   "Gameplay": {

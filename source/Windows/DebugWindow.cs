@@ -86,12 +86,13 @@ public class DebugWindow
                     GL.Vertex2(PlayerPosition.X, PlayerPosition.Y);
                     GL.Vertex2(Engine.RayDatas[i, 1], Engine.RayDatas[i, 2]);
                 }
+                GL.End();
 
                 GL.Color3(1f, 0f, 0f);
-                GL.LineWidth(4f);
+                GL.LineWidth(6f);
                 GL.Begin(PrimitiveType.Lines);
                 GL.Vertex2(PlayerPosition.X, PlayerPosition.Y);
-                GL.Vertex2(PlayerPosition.X + PlayerDeltaOffsetX * 100, PlayerPosition.Y + PlayerDeltaOffsetY * 100);
+                GL.Vertex2(PlayerPosition.X + PlayerDeltaOffsetX * 300, PlayerPosition.Y + PlayerDeltaOffsetY * 300);
                 GL.End();
 
                 Screen.SwapBuffers();
