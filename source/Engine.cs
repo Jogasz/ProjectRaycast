@@ -271,18 +271,36 @@ public class Engine
                 RayDatas[i, 3] = VerticalRayHitY % TileSize;
                 RayDatas[i, 4] = 1;
                 RayDatas[i, 5] = MapWalls[VerticalRayCheckingRow, VerticalRayCheckingCol];
+                if (Engine.RayDatas[i, 5] != 0 && Engine.RayDatas[i, 5] != 1 && Engine.RayDatas[i, 5] != 2 && Engine.RayDatas[i, 5] != 3)
+                {
+                    Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!");
+                    Console.WriteLine("RayDatas[" + i + ", 5]" + Engine.RayDatas[i, 5]);
+                    Console.WriteLine("VerticalRayCheckingRow: " + VerticalRayCheckingRow);
+                    Console.WriteLine("VerticalRayCheckingCol: " + VerticalRayCheckingCol);
+                    Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!");
+                }
             }
             else if (RayDatas[i, 0] == HorizontalPythagoras && HorizontalWallFound)
             {
                 RayDatas[i, 3] = HorizontalRayHitX % TileSize;
                 RayDatas[i, 4] = 2;
                 RayDatas[i, 5] = MapWalls[HorizontalRayCheckingRow, HorizontalRayCheckingCol];
+                if (Engine.RayDatas[i, 5] != 0 && Engine.RayDatas[i, 5] != 1 && Engine.RayDatas[i, 5] != 2 && Engine.RayDatas[i, 5] != 3)
+                {
+                    Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!");
+                    Console.WriteLine("RayDatas[" + i + ", 5]" + Engine.RayDatas[i, 5]);
+                    Console.WriteLine("HorizontalRayCheckingRow: " + HorizontalRayCheckingRow);
+                    Console.WriteLine("HorizontalRayCheckingCol: " + HorizontalRayCheckingCol);
+                    Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!");
+                }
             }
             else
             {
                 RayDatas[i, 5] = 0;
             }
             RayDatas[i, 6] = (float)((TileSize * GraphicWindow.ScreenHeight) / (RayDatas[i, 0] * (float)Math.Cos(PlayerAngle - (PlayerAngle + FOVStart + i * RadBetweenRays))));
+
+            
 
             RayAngle += RadBetweenRays;
             RayAngle = (RayAngle % MathX.Quadrant4 + MathX.Quadrant4) % MathX.Quadrant4;

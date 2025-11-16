@@ -16,7 +16,7 @@ public class GraphicWindow
         GameWindow Screen = new GameWindow(ScreenWidth, ScreenHeight, GraphicsMode.Default, "Graphic Screen");
 
         //For test-only
-        //Screen.VSync = VSyncMode.Off;
+        Screen.VSync = VSyncMode.Off;
 
         WindowManager.SetupPixelCoordinates(Screen);
 
@@ -34,31 +34,6 @@ public class GraphicWindow
             GL.Begin(PrimitiveType.Quads);
             for (int i = 0; i < Settings.Graphics.RayCount; i++)
             {
-                int tempIterator = 0;
-                
-                //Floor
-                while (((Screen.Height / 2) + (Engine.RayDatas[i, 6] / 2) + (tempIterator * WallWidth)) < Screen.Height) {
-                    GL.Color3(0.3f, 0.3f, 0.3f);
-                    GL.Vertex2(i * WallWidth, (Screen.Height / 2) + (Engine.RayDatas[i, 6] / 2) + (tempIterator * WallWidth));
-                    GL.Vertex2((i + 1) * WallWidth, (Screen.Height / 2) + (Engine.RayDatas[i, 6] / 2) + (tempIterator * WallWidth));
-                    GL.Vertex2((i + 1) * WallWidth, (Screen.Height / 2) + (Engine.RayDatas[i, 6] / 2) + ((tempIterator + 1) * WallWidth));
-                    GL.Vertex2(i * WallWidth, (Screen.Height / 2) + (Engine.RayDatas[i, 6] / 2) + ((tempIterator + 1) * WallWidth));
-                    tempIterator += 1;
-                }
-                tempIterator = 0;
-
-                //Ceiling
-                while (((Screen.Height / 2) - (Engine.RayDatas[i, 6] / 2) - (tempIterator * WallWidth)) > 0)
-                {
-                    GL.Color3(0.7f, 0.7f, 0.7f);
-                    GL.Vertex2(i * WallWidth, (Screen.Height / 2) - (Engine.RayDatas[i, 6] / 2) - (tempIterator * WallWidth));
-                    GL.Vertex2((i + 1) * WallWidth, (Screen.Height / 2) - (Engine.RayDatas[i, 6] / 2) - (tempIterator * WallWidth));
-                    GL.Vertex2((i + 1) * WallWidth, (Screen.Height / 2) - (Engine.RayDatas[i, 6] / 2) - ((tempIterator + 1) * WallWidth));
-                    GL.Vertex2(i * WallWidth, (Screen.Height / 2) - (Engine.RayDatas[i, 6] / 2) - ((tempIterator + 1) * WallWidth));
-                    tempIterator += 1;
-                }
-                tempIterator = 0;
-
                 //No wall
                 if (Engine.RayDatas[i, 5] == 0)
                 {
@@ -67,7 +42,7 @@ public class GraphicWindow
                 //Wall
                 else
                 {
-                    int[][] path = null;
+                    int[][] path = Textures.testTexture;
 
                     //Textures
                     switch (Engine.RayDatas[i, 5])
@@ -84,6 +59,13 @@ public class GraphicWindow
                         case 3:
                             path = Textures.testTexture;
                             break;
+                    }
+
+                    if (Engine.RayDatas[i, 5] != 0 && Engine.RayDatas[i, 5] != 1 && Engine.RayDatas[i, 5] != 2 && Engine.RayDatas[i, 5] != 3)
+                    {
+                        Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!");
+                        Console.WriteLine(Engine.RayDatas[i, 5]);
+                        Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!");
                     }
 
                     //Drawing pixels in lines from up to down (walls)
