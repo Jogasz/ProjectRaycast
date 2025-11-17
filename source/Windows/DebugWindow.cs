@@ -51,7 +51,7 @@ public class DebugWindow
                 }
 
                 //Getting calculations from engine
-                Engine.EngineUpdate();
+                Engine.Update();
 
                 //Updated variables
                 Vector2 PlayerPosition = Engine.playerPosition;

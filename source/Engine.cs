@@ -30,7 +30,8 @@ public class Engine
     public static float FOVStart { get; private set; } = 0f;
     public static float RadBetweenRays { get; private set; } = 0f;
     public static float RayAngle { get; private set; } = 0f;
-    public static int DepthOfField { get; private set; } = 0;
+    public static int RenderDistance { get; private set; } = Settings.Graphics.RenderDistance;
+    public static int RenderDistanceIterator { get; private set; } = 0;
     public static float VerticalRayHitX { get; private set; } = 0f;
     public static float VerticalRayHitY { get; private set; } = 0f;
     public static float HorizontalRayHitX { get; private set; } = 0f;
@@ -56,7 +57,7 @@ public class Engine
         stopWatch.Start();
     }
 
-    public static void EngineUpdate() {
+    public static void Update() {
         //DeltaTime calculation
         float CurrentTime = (float)stopWatch.Elapsed.TotalSeconds;
         DeltaTime = CurrentTime - lastTime;
@@ -172,7 +173,6 @@ public class Engine
             HorizontalWallFound = false;
 
             //Vertical wall check
-            DepthOfField = 0;
             if (RayAngle > MathX.Quadrant3 || RayAngle < MathX.Quadrant1)
             {
                 //Player is looking right
@@ -193,18 +193,21 @@ public class Engine
             VerticalRayCheckingCol = (int)Math.Floor(VerticalRayHitX / TileSize);
             VerticalRayCheckingRow = (int)Math.Floor(VerticalRayHitY / TileSize);
 
-            while (DepthOfField < Settings.Graphics.DepthOfField && VerticalRayCheckingRow >= 0 && VerticalRayCheckingRow < MapWalls.GetLength(0) && VerticalRayCheckingCol >= 0 && VerticalRayCheckingCol < MapWalls.GetLength(1))
+            //Resetting iterator variable
+            RenderDistanceIterator = 0;
+
+            while (RenderDistanceIterator < RenderDistance && VerticalRayCheckingRow >= 0 && VerticalRayCheckingRow < MapWalls.GetLength(0) && VerticalRayCheckingCol >= 0 && VerticalRayCheckingCol < MapWalls.GetLength(1))
             {
                 if (MapWalls[VerticalRayCheckingRow, VerticalRayCheckingCol] > 0)
                 {
-                    DepthOfField = Settings.Graphics.DepthOfField;
+                    RenderDistanceIterator = RenderDistance;
                     VerticalWallFound = true;
                 }
                 else
                 {
                     VerticalRayHitX += OffsetX;
                     VerticalRayHitY += OffsetY;
-                    DepthOfField++;
+                    RenderDistanceIterator++;
                     VerticalRayCheckingCol = (int)(VerticalRayHitX / TileSize);
                     VerticalRayCheckingRow = (int)(VerticalRayHitY / TileSize);
                 }
@@ -213,7 +216,6 @@ public class Engine
             VerticalPythagoras = (float)Math.Sqrt(Math.Pow(Math.Abs(PlayerPosition.X - VerticalRayHitX), 2) + Math.Pow(Math.Abs(PlayerPosition.Y - VerticalRayHitY), 2));
 
             //Horizontal wall check
-            DepthOfField = 0;
             if (RayAngle > MathX.Quadrant2)
             {
                 //Player is looking up
@@ -235,18 +237,21 @@ public class Engine
             HorizontalRayCheckingCol = (int)Math.Floor(HorizontalRayHitX / TileSize);
             HorizontalRayCheckingRow = (int)Math.Floor(HorizontalRayHitY / TileSize);
 
-            while (DepthOfField < Settings.Graphics.DepthOfField && HorizontalRayCheckingRow >= 0 && HorizontalRayCheckingRow < MapWalls.GetLength(0) && HorizontalRayCheckingCol >= 0 && HorizontalRayCheckingCol < MapWalls.GetLength(1))
+            //Resetting iterator variable
+            RenderDistanceIterator = 0;
+
+            while (RenderDistanceIterator < RenderDistance && HorizontalRayCheckingRow >= 0 && HorizontalRayCheckingRow < MapWalls.GetLength(0) && HorizontalRayCheckingCol >= 0 && HorizontalRayCheckingCol < MapWalls.GetLength(1))
             {
                 if (MapWalls[HorizontalRayCheckingRow, HorizontalRayCheckingCol] > 0)
                 {
-                    DepthOfField = Settings.Graphics.DepthOfField;
+                    RenderDistanceIterator = RenderDistance;
                     HorizontalWallFound = true;
                 }
                 else
                 {
                     HorizontalRayHitY += OffsetY;
                     HorizontalRayHitX += OffsetX;
-                    DepthOfField++;
+                    RenderDistanceIterator++;
                     HorizontalRayCheckingCol = (int)(HorizontalRayHitX / TileSize);
                     HorizontalRayCheckingRow = (int)(HorizontalRayHitY / TileSize);
                 }
@@ -271,36 +276,18 @@ public class Engine
                 RayDatas[i, 3] = VerticalRayHitY % TileSize;
                 RayDatas[i, 4] = 1;
                 RayDatas[i, 5] = MapWalls[VerticalRayCheckingRow, VerticalRayCheckingCol];
-                if (Engine.RayDatas[i, 5] != 0 && Engine.RayDatas[i, 5] != 1 && Engine.RayDatas[i, 5] != 2 && Engine.RayDatas[i, 5] != 3)
-                {
-                    Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!");
-                    Console.WriteLine("RayDatas[" + i + ", 5]" + Engine.RayDatas[i, 5]);
-                    Console.WriteLine("VerticalRayCheckingRow: " + VerticalRayCheckingRow);
-                    Console.WriteLine("VerticalRayCheckingCol: " + VerticalRayCheckingCol);
-                    Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!");
-                }
             }
             else if (RayDatas[i, 0] == HorizontalPythagoras && HorizontalWallFound)
             {
                 RayDatas[i, 3] = HorizontalRayHitX % TileSize;
                 RayDatas[i, 4] = 2;
                 RayDatas[i, 5] = MapWalls[HorizontalRayCheckingRow, HorizontalRayCheckingCol];
-                if (Engine.RayDatas[i, 5] != 0 && Engine.RayDatas[i, 5] != 1 && Engine.RayDatas[i, 5] != 2 && Engine.RayDatas[i, 5] != 3)
-                {
-                    Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!");
-                    Console.WriteLine("RayDatas[" + i + ", 5]" + Engine.RayDatas[i, 5]);
-                    Console.WriteLine("HorizontalRayCheckingRow: " + HorizontalRayCheckingRow);
-                    Console.WriteLine("HorizontalRayCheckingCol: " + HorizontalRayCheckingCol);
-                    Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!");
-                }
             }
             else
             {
                 RayDatas[i, 5] = 0;
             }
             RayDatas[i, 6] = (float)((TileSize * GraphicWindow.ScreenHeight) / (RayDatas[i, 0] * (float)Math.Cos(PlayerAngle - (PlayerAngle + FOVStart + i * RadBetweenRays))));
-
-            
 
             RayAngle += RadBetweenRays;
             RayAngle = (RayAngle % MathX.Quadrant4 + MathX.Quadrant4) % MathX.Quadrant4;

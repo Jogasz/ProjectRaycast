@@ -13,21 +13,22 @@ public class Program
         map.Load();
 
         Engine.Start();
-        Engine.EngineUpdate();
 
-        Thread debugThread = new Thread(() =>
-        {
-            DebugWindow debugWindow = new DebugWindow();
-            debugWindow.Run();
-        });
+        GraphicWindow.Run();
 
-        Thread graphicThread = new Thread(() =>
-        {
-            GraphicWindow graphicWindow = new GraphicWindow();
-            graphicWindow.Run();
-        });
+        //Thread debugThread = new Thread(() =>
+        //{
+        //    DebugWindow debugWindow = new DebugWindow();
+        //    debugWindow.Run();
+        //});
 
-        debugThread.Start();
-        graphicThread.Start();
+        //Thread graphicThread = new Thread(() =>
+        //{
+        //    GraphicWindow graphicWindow = new GraphicWindow();
+        //    graphicWindow.Run();
+        //});
+
+        //debugThread.Start();
+        //graphicThread.Start();
     }
 }

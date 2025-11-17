@@ -53,17 +53,15 @@ public static class Settings
     {
         public int FOV { get; private set; }
         public int RayCount { get; private set; }
-        public int DepthOfField { get; private set; }
-        public float VerticalShade { get; private set; }
-        public float HorizontalShade { get; private set; }
+        public int RenderDistance { get; private set; }
+        public float DistanceShade { get; private set; }
 
         [JsonConstructor]
-        public GraphicsSettings(int fov, int rayCount, int depthOfField, float verticalShade, float horizontalShade) {
+        public GraphicsSettings(int fov, int rayCount, int renderDistance, float distanceShade) {
             FOV = fov;
             RayCount = rayCount;
-            DepthOfField = depthOfField;
-            VerticalShade = verticalShade;
-            HorizontalShade = horizontalShade;
+            RenderDistance = renderDistance;
+            DistanceShade = (distanceShade / 10);
         }
     }
 

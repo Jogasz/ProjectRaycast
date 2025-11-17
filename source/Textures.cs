@@ -4,11 +4,13 @@ using System.IO;
 public static class Textures {
     public static int[][] bricksTexture { get; private set; }
     public static int[][] mossyBricksTexture { get; private set; }
-    public static int[][] testTexture { get; private set; }
+    public static int[][] stoneBricksTexture { get; private set; }
+    public static int[][] missingTexture { get; private set; }
     public static void Load() {
         bricksTexture = Read("assets/textures/bricks.txt");
         mossyBricksTexture = Read("assets/textures/mossy_bricks.txt");
-        testTexture = Read("assets/textures/test.txt");
+        stoneBricksTexture = Read("assets/textures/stonebricks.txt");
+        missingTexture = Read("assets/textures/missing.txt");
     }
     public static int[][] Read(string path) {
         if (File.Exists(path))
