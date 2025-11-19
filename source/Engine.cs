@@ -264,7 +264,7 @@ public class Engine
             //RayDatas[i, 1]: Ray's X offset
             //RayDatas[i, 2]: Ray's Y offset
             //RayDatas[i, 3]: VerticalRayHitY or HorizontalRayHitX
-            //RayDatas[i, 4]: Wall side (1 = Vertical, 2 = Horizontal)
+            //RayDatas[i, 4]: Wall side (1 = left, 2 = right, 3 = top, 4 = bottom)
             //RayDatas[i, 5]: Wall type (0 = No wall, 0> = Wall)
             //RayDatas[i, 6]: Wall height
 
@@ -274,13 +274,32 @@ public class Engine
             if (RayDatas[i, 0] == VerticalPythagoras && VerticalWallFound)
             {
                 RayDatas[i, 3] = VerticalRayHitY % TileSize;
-                RayDatas[i, 4] = 1;
+                //If wall is vertical
+                //If wall side is left
+                if (RayAngle > MathX.Quadrant1 && RayAngle < MathX.Quadrant3) {
+                    RayDatas[i, 4] = 1;
+                }
+                //If wall side is right
+                else if (RayAngle > MathX.Quadrant3 || RayAngle < MathX.Quadrant1)
+                {
+                    RayDatas[i, 4] = 2;
+                }
                 RayDatas[i, 5] = MapWalls[VerticalRayCheckingRow, VerticalRayCheckingCol];
             }
             else if (RayDatas[i, 0] == HorizontalPythagoras && HorizontalWallFound)
             {
                 RayDatas[i, 3] = HorizontalRayHitX % TileSize;
-                RayDatas[i, 4] = 2;
+                //If wall is horizontal
+                //If wall side is top
+                if (RayAngle > 0 && RayAngle < MathX.PI)
+                {
+                    RayDatas[i, 4] = 3;
+                }
+                //If wall side is bottom
+                else if (RayAngle > MathX.PI && RayAngle < MathX.Quadrant4)
+                {
+                    RayDatas[i, 4] = 4;
+                }
                 RayDatas[i, 5] = MapWalls[HorizontalRayCheckingRow, HorizontalRayCheckingCol];
             }
             else

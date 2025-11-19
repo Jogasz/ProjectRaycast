@@ -24,7 +24,7 @@
     "FOV": 70,
     "RayCount": 300,
     "RenderDistance": 12,
-    "DistanceShade":  2.6
+    "DistanceShade":  3
   },
   "Gameplay": {
     "TileSize": 50,
