@@ -1,6 +1,7 @@
 ﻿using OpenTK;
 using OpenTK.Input;
 using System;
+using System.ComponentModel.Design;
 using System.Diagnostics;
 public class Engine
 {
@@ -71,6 +72,11 @@ public class Engine
         float DeltaMovementSpeed = MovementSpeed * DeltaTime;
         var keyboard = Keyboard.GetState();
         var PlayerPosition = playerPosition;
+
+        if (keyboard.IsKeyDown(Key.Escape))
+        {
+            Environment.Exit(0);
+        }
 
         PlayerDeltaOffsetX = (float)Math.Cos(PlayerAngle);
         PlayerDeltaOffsetY = (float)Math.Sin(PlayerAngle);

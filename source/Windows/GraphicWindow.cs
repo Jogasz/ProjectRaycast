@@ -11,10 +11,20 @@ public class GraphicWindow
 
     public static void Run()
     {
-        GameWindow Screen = new GameWindow(1000, 1000, GraphicsMode.Default, "Graphic Screen");
+        GameWindow Screen = new GameWindow
+        (
+            1920,
+            1080,
+            GraphicsMode.Default,
+            "Graphic Screen",
+            GameWindowFlags.Fullscreen
+        );
+
+        Screen.CursorVisible = false;
+        Screen.CursorGrabbed = true;
 
         //For test-only
-        Screen.VSync = VSyncMode.Off;
+        //Screen.VSync = VSyncMode.Off;
 
         WindowManager.SetupPixelCoordinates(Screen);
 
@@ -44,48 +54,48 @@ public class GraphicWindow
                     (Engine.RayDatas[i, 0] * (float)Math.Cos(Engine.PlayerAngle -
                     (Engine.PlayerAngle + Engine.FOVStart + i * Engine.RadBetweenRays))));
 
-                int tempIterator = 0;
-                //Floor and ceiling X position variables
-                float tempFloorCeilingXLeft = i * WallWidth + screenHorizontalOffset;
-                float tempFloorCeilingXRight = (i + 1) * WallWidth + screenHorizontalOffset;
+                //int tempIterator = 0;
+                ////Floor and ceiling X position variables
+                //float tempFloorCeilingXLeft = i * WallWidth + screenHorizontalOffset;
+                //float tempFloorCeilingXRight = (i + 1) * WallWidth + screenHorizontalOffset;
 
-                //Floor Y position variables
-                float tempFloorYTop = (interpolatedScreenHeight / 2) + (WallHeight / 2) + (tempIterator * WallWidth);
-                float tempFloorYBottom = (interpolatedScreenHeight / 2) + (WallHeight / 2) + ((tempIterator + 1) * WallWidth);
+                ////Floor Y position variables
+                //float tempFloorYTop = (interpolatedScreenHeight / 2) + (WallHeight / 2) + (tempIterator * WallWidth);
+                //float tempFloorYBottom = (interpolatedScreenHeight / 2) + (WallHeight / 2) + ((tempIterator + 1) * WallWidth);
 
-                //Ceiling Y position variables
-                float tempCeilingYTop = (interpolatedScreenHeight / 2) - (WallHeight / 2) - (tempIterator * WallWidth);
-                float tempCeilingYBottom = (interpolatedScreenHeight / 2) - (WallHeight / 2) - ((tempIterator + 1) * WallWidth);
+                ////Ceiling Y position variables
+                //float tempCeilingYTop = (interpolatedScreenHeight / 2) - (WallHeight / 2) - (tempIterator * WallWidth);
+                //float tempCeilingYBottom = (interpolatedScreenHeight / 2) - (WallHeight / 2) - ((tempIterator + 1) * WallWidth);
 
-                //Floor drawing
-                while (tempFloorYTop < Screen.Height)
-                {
-                    GL.Color3(0.3f, 0.3f, 0.3f);
-                    GL.Vertex2(tempFloorCeilingXLeft, tempFloorYTop);
-                    GL.Vertex2(tempFloorCeilingXRight, tempFloorYTop);
-                    GL.Vertex2(tempFloorCeilingXRight, tempFloorYBottom);
-                    GL.Vertex2(tempFloorCeilingXLeft, tempFloorYBottom);
+                ////Floor drawing
+                //while (tempFloorYTop < Screen.Height)
+                //{
+                //    GL.Color3(0.3f, 0.3f, 0.3f);
+                //    GL.Vertex2(tempFloorCeilingXLeft, tempFloorYTop);
+                //    GL.Vertex2(tempFloorCeilingXRight, tempFloorYTop);
+                //    GL.Vertex2(tempFloorCeilingXRight, tempFloorYBottom);
+                //    GL.Vertex2(tempFloorCeilingXLeft, tempFloorYBottom);
 
-                    tempFloorYTop += WallWidth;
-                    tempFloorYBottom += WallWidth;
-                    tempIterator += 1;
-                }
-                tempIterator = 0;
+                //    tempFloorYTop += WallWidth;
+                //    tempFloorYBottom += WallWidth;
+                //    tempIterator += 1;
+                //}
+                //tempIterator = 0;
 
-                //Ceiling drawing
-                while (tempCeilingYTop > 0)
-                {
-                    GL.Color3(0.7f, 0.7f, 0.7f);
-                    GL.Vertex2(tempFloorCeilingXLeft, tempCeilingYTop);
-                    GL.Vertex2(tempFloorCeilingXRight, tempCeilingYTop);
-                    GL.Vertex2(tempFloorCeilingXRight, tempCeilingYBottom);
-                    GL.Vertex2(tempFloorCeilingXLeft, tempCeilingYBottom);
+                ////Ceiling drawing
+                //while (tempCeilingYTop > 0)
+                //{
+                //    GL.Color3(0.7f, 0.7f, 0.7f);
+                //    GL.Vertex2(tempFloorCeilingXLeft, tempCeilingYTop);
+                //    GL.Vertex2(tempFloorCeilingXRight, tempCeilingYTop);
+                //    GL.Vertex2(tempFloorCeilingXRight, tempCeilingYBottom);
+                //    GL.Vertex2(tempFloorCeilingXLeft, tempCeilingYBottom);
 
-                    tempCeilingYTop -= WallWidth;
-                    tempCeilingYBottom -= WallWidth;
-                    tempIterator += 1;
-                }
-                tempIterator = 0;
+                //    tempCeilingYTop -= WallWidth;
+                //    tempCeilingYBottom -= WallWidth;
+                //    tempIterator += 1;
+                //}
+                //tempIterator = 0;
 
                 int[][] path = null;
 
@@ -133,6 +143,23 @@ public class GraphicWindow
                     GL.Vertex2(i * WallWidth + screenHorizontalOffset, tempLineCalcBottom);
                 }
             }
+
+            //Vertical overflow fix
+            if (Screen.Height > Screen.Width) {
+                //Top
+                GL.Color3(0f, 0f, 0f);
+                GL.Vertex2(0, 0);
+                GL.Vertex2(interpolatedScreenWidth, 0);
+                GL.Vertex2(interpolatedScreenWidth, (Screen.Height / 2) - (interpolatedScreenHeight / 2));
+                GL.Vertex2(0, (Screen.Height / 2) - (interpolatedScreenHeight / 2));
+
+                //Bottom
+                GL.Vertex2(0, (Screen.Height / 2) + (interpolatedScreenHeight / 2));
+                GL.Vertex2(interpolatedScreenWidth, (Screen.Height / 2) + (interpolatedScreenHeight / 2));
+                GL.Vertex2(interpolatedScreenWidth, Screen.Height);
+                GL.Vertex2(0, Screen.Height);
+            }
+
             GL.End();
 
             Screen.SwapBuffers();
