@@ -267,16 +267,16 @@ public class Engine
 
             //Ray data storage
             //RayDatas[i, 0]: Ray's length
-            //RayDatas[i, 1]: Ray's X offset
-            //RayDatas[i, 2]: Ray's Y offset
+            //RayDatas[i, 1]: Ray's delta X
+            //RayDatas[i, 2]: Ray's delta Y
             //RayDatas[i, 3]: VerticalRayHitY or HorizontalRayHitX
             //RayDatas[i, 4]: Wall side (1 = left, 2 = right, 3 = top, 4 = bottom)
             //RayDatas[i, 5]: Wall type (0 = No wall, 0> = Wall)
-            //RayDatas[i, 6]: Wall height
+            //RayDatas[i, 6]: Wall height !!!NOT USING RN!!!
 
             RayDatas[i, 0] = Math.Min(VerticalPythagoras, HorizontalPythagoras);
-            RayDatas[i, 1] = PlayerPosition.X + (float)Math.Cos(RayAngle) * Math.Min(VerticalPythagoras, HorizontalPythagoras);
-            RayDatas[i, 2] = PlayerPosition.Y + (float)Math.Sin(RayAngle) * Math.Min(VerticalPythagoras, HorizontalPythagoras);
+            RayDatas[i, 1] = (float)Math.Cos(RayAngle);
+            RayDatas[i, 2] = (float)Math.Sin(RayAngle);
             if (RayDatas[i, 0] == VerticalPythagoras && VerticalWallFound)
             {
                 RayDatas[i, 3] = VerticalRayHitY % TileSize;
