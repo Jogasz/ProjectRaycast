@@ -20,9 +20,9 @@ public class Engine
     public static Vector2 playerPosition { get; private set; } = new Vector2(100, 100);
     public static int PlayerWidth { get; private set; } = 10;
     public static int PlayerHeight { get; private set; } = 10;
-    public static float PlayerAngle { get; private set; } = 0f;
-    public static float PlayerDeltaOffsetX { get; private set; } = 0f;
-    public static float PlayerDeltaOffsetY { get; private set; } = 0f;
+    public static float PlayerAngle { get; set; } = 0f;
+    public static float PlayerDeltaOffsetX { get; set; } = 0f;
+    public static float PlayerDeltaOffsetY { get; set; } = 0f;
     public static int PlayerRadius { get; private set; } = 10;
     public static bool BlockedX { get; private set; } = false;
     public static bool BlockedY { get; private set; } = false;

@@ -1,8 +1,8 @@
 ﻿using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
+using OpenTK.Input;
 using System;
-
 public class GraphicWindow
 {
     public static int TileSize = Settings.Gameplay.TileSize;
@@ -10,6 +10,7 @@ public class GraphicWindow
     public static int ScreenHeight;
     public static int[,] MapFloor = Level.mapFloor;
     public static int[,] MapCeiling = Level.mapCeiling;
+    public static OpenTK.Vector2 _lastMousePosition = new OpenTK.Vector2();
 
     public static void Run()
     {
@@ -61,6 +62,25 @@ public class GraphicWindow
             GL.Vertex2(screenHorizontalOffset + minimumScreenWidth, screenVerticalOffset);
             GL.Vertex2(screenHorizontalOffset + minimumScreenWidth, screenVerticalOffset + minimumScreenHeight);
             GL.Vertex2(screenHorizontalOffset, screenVerticalOffset + minimumScreenHeight);
+
+            //mouse
+            OpenTK.Input.MouseState currentMouseState = OpenTK.Input.Mouse.GetState();
+            OpenTK.Vector2 currentMousePosition = new OpenTK.Vector2(currentMouseState.X, currentMouseState.Y);
+            OpenTK.Vector2 mouseOffset = currentMousePosition - _lastMousePosition;
+            _lastMousePosition = currentMousePosition;
+
+            Console.WriteLine("X: " + mouseOffset.X + "Y: " + mouseOffset.Y);
+
+            if (mouseOffset.X != 0)
+            {
+                Engine.PlayerAngle += Settings.Player.MouseSensitivity * Engine.DeltaTime * mouseOffset.X;
+                if (Engine.PlayerAngle > (2 * MathX.PI))
+                {
+                    Engine.PlayerAngle -= (2 * MathX.PI);
+                }
+                Engine.PlayerDeltaOffsetX = (float)Math.Cos(Engine.PlayerAngle);
+                Engine.PlayerDeltaOffsetY = (float)Math.Sin(Engine.PlayerAngle);
+            }
 
             int RGBCalc;
             float rowY, shadeCalc, r, g, b;
