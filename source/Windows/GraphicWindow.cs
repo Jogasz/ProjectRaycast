@@ -9,6 +9,7 @@ public class GraphicWindow
     public static int ScreenWidth;
     public static int ScreenHeight;
     public static int[,] MapFloor = Level.mapFloor;
+    public static int[,] MapCeiling = Level.mapCeiling;
 
     public static void Run()
     {
@@ -17,12 +18,12 @@ public class GraphicWindow
             1000,
             1000,
             GraphicsMode.Default,
-            "Graphic Screen"
-            //GameWindowFlags.Fullscreen
+            "Graphic Screen",
+            GameWindowFlags.Fullscreen
         );
 
-        //Screen.CursorVisible = false;
-        //Screen.CursorGrabbed = true;
+        Screen.CursorVisible = false;
+        Screen.CursorGrabbed = true;
 
         //For test-only
         //Screen.VSync = VSyncMode.Off;
@@ -32,7 +33,7 @@ public class GraphicWindow
         Screen.RenderFrame += (sender, e) =>
         {
             //Window color and clear
-            GL.ClearColor(0.1f, 0.1f, 0.1f, 1f);
+            GL.ClearColor(0f, 0f, 0.1f, 1f);
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
             //Setting up screen pixel coordinates
@@ -62,7 +63,7 @@ public class GraphicWindow
             GL.Vertex2(screenHorizontalOffset, screenVerticalOffset + minimumScreenHeight);
 
             int RGBCalc;
-            float shadeCalc, r, g, b;
+            float rowY, shadeCalc, r, g, b;
 
             //Z position of camera (Right now its exactly the middle of the screen)
             float cameraZ = minimumScreenHeight / 2f;
@@ -89,10 +90,9 @@ public class GraphicWindow
                 float ceilingPixelYTop = (minimumScreenHeight / 2) - (WallHeight / 2) -  WallWidth + screenVerticalOffset;
                 float ceilingPixelYBottom = (minimumScreenHeight / 2) - (WallHeight / 2) + screenVerticalOffset;
 
-                float ceilingPixelDistance,
+                float ceilingFloorPixelDistance,
                       ceilingPixelXWorldPosition,
                       ceilingPixelYWorldPosition,
-                      floorPixelDistance,
                       floorPixelXWorldPosition,
                       floorPixelYWorldPosition;
 
@@ -109,16 +109,46 @@ public class GraphicWindow
                     ceilingPixelYTop;
 
                     //Y of the current pixel on the screen
-                    float rowY = (Screen.Height / 2) - (ceilingPixelYTop + ((ceilingPixelYBottom - ceilingPixelYTop) / 2));
+                    rowY = (Screen.Height / 2) - (ceilingPixelYTop + ((ceilingPixelYBottom - ceilingPixelYTop) / 2));
 
-                    ceilingPixelDistance = (cameraZ / rowY) * TileSize;
+                    ceilingFloorPixelDistance = ((cameraZ / rowY) * TileSize) / ((float)Math.Cos(Engine.PlayerAngle - Engine.RayDatas[i, 6]));
 
-                    shadeCalc = ceilingPixelDistance * Settings.Graphics.DistanceShade;
+                    //World position of the pixel
+                    ceilingPixelXWorldPosition = Engine.playerPosition.X + (Engine.RayDatas[i, 1] * ceilingFloorPixelDistance);
+                    ceilingPixelYWorldPosition = Engine.playerPosition.Y + (Engine.RayDatas[i, 2] * ceilingFloorPixelDistance);
 
-                    r = (100f - shadeCalc) < 0 ? 0f : (100f - shadeCalc) / 255f;
-                    g = (100f - shadeCalc) < 0 ? 0f : (100f - shadeCalc) / 255f;
-                    b = (100f - shadeCalc) < 0 ? 0f : (100f - shadeCalc) / 255f;
+                    //Textures
+                    switch (MapCeiling[(int)Math.Floor(ceilingPixelYWorldPosition / TileSize), (int)Math.Floor(ceilingPixelXWorldPosition / TileSize)])
+                    {
+                        //No floor
+                        case 0:
+                            continue;
+                        //Floor
+                        //Default textures
+                        case 1:
+                            path = Textures.planksTexture;
+                            break;
+                        case 2:
+                            path = Textures.mossyPlanksTexture;
+                            break;
+                        case 3:
+                            path = Textures.stoneBricksTexture;
+                            break;
+                    }
 
+                    //Calculating RGB variables
+                    RGBCalc = ((int)Math.Floor(path[0][1] / (TileSize / (ceilingPixelYWorldPosition % TileSize))) * path[0][1] * 3) +
+                              ((int)Math.Floor(path[0][0] / (TileSize / (ceilingPixelXWorldPosition % TileSize))) * 3);
+
+                    //Calculating shading and lighting with distance
+                    shadeCalc = ceilingFloorPixelDistance * Settings.Graphics.DistanceShade;
+
+                    //Applying shading and using the needed pixel
+                    r = (path[1][RGBCalc] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc] - shadeCalc) / 255f;
+                    g = (path[1][RGBCalc + 1] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 1] - shadeCalc) / 255f;
+                    b = (path[1][RGBCalc + 2] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 2] - shadeCalc) / 255f;
+
+                    //Drawing pixel
                     GL.Color3(r, g, b);
                     GL.Vertex2(floorCeilingPixelXLeft, ceilingPixelYTop);
                     GL.Vertex2(floorCeilingPixelXRight, ceilingPixelYTop);
@@ -142,19 +172,17 @@ public class GraphicWindow
                     floorPixelYBottom;
 
                     //Y of the current pixel on the screen
-                    float rowY = floorPixelYTop + ((floorPixelYBottom - floorPixelYTop) / 2) - (Screen.Height / 2);
+                    rowY = floorPixelYTop + ((floorPixelYBottom - floorPixelYTop) / 2) - (Screen.Height / 2);
 
                     //Distance of the currently drawn pixel and fisheye correction
-                    floorPixelDistance = ((cameraZ / rowY) * TileSize) / ((float)Math.Cos(Engine.PlayerAngle - Engine.RayDatas[i, 6]));
+                    ceilingFloorPixelDistance = ((cameraZ / rowY) * TileSize) / ((float)Math.Cos(Engine.PlayerAngle - Engine.RayDatas[i, 6]));
 
                     //World position of the pixel
-                    floorPixelXWorldPosition = Engine.playerPosition.X + (Engine.RayDatas[i, 1] * floorPixelDistance);
-                    floorPixelYWorldPosition = Engine.playerPosition.Y + (Engine.RayDatas[i, 2] * floorPixelDistance);
-
-                    int mapFloorTextureNum = MapFloor[(int)Math.Floor(floorPixelYWorldPosition / TileSize), (int)Math.Floor(floorPixelXWorldPosition / TileSize)];
+                    floorPixelXWorldPosition = Engine.playerPosition.X + (Engine.RayDatas[i, 1] * ceilingFloorPixelDistance);
+                    floorPixelYWorldPosition = Engine.playerPosition.Y + (Engine.RayDatas[i, 2] * ceilingFloorPixelDistance);
 
                     //Textures
-                    switch (mapFloorTextureNum)
+                    switch (MapFloor[(int)Math.Floor(floorPixelYWorldPosition / TileSize), (int)Math.Floor(floorPixelXWorldPosition / TileSize)])
                     {
                         //No floor
                         case 0:
@@ -162,19 +190,29 @@ public class GraphicWindow
                         //Floor
                         //Default textures
                         case 1:
+                            path = Textures.planksTexture;
+                            break;
+                        case 2:
+                            path = Textures.mossyPlanksTexture;
+                            break;
+                        case 3:
                             path = Textures.stoneBricksTexture;
                             break;
                     }
 
+                    //Calculating RGB variables
                     RGBCalc = ((int)Math.Floor(path[0][1] / (TileSize / (floorPixelYWorldPosition % TileSize))) * path[0][1] * 3) +
                               ((int)Math.Floor(path[0][0] / (TileSize / (floorPixelXWorldPosition % TileSize))) * 3);
 
-                    shadeCalc = floorPixelDistance * Settings.Graphics.DistanceShade;
+                    //Calculating shading and lighting with distance
+                    shadeCalc = ceilingFloorPixelDistance * Settings.Graphics.DistanceShade;
 
+                    //Applying shading and using the needed pixel
                     r = (path[1][RGBCalc] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc] - shadeCalc) / 255f;
-                        g = (path[1][RGBCalc + 1] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 1] - shadeCalc) / 255f;
-                        b = (path[1][RGBCalc + 2] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 2] - shadeCalc) / 255f;
+                    g = (path[1][RGBCalc + 1] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 1] - shadeCalc) / 255f;
+                    b = (path[1][RGBCalc + 2] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 2] - shadeCalc) / 255f;
 
+                    //Drawing pixel
                     GL.Color3(r, g, b);
                     GL.Vertex2(floorCeilingPixelXLeft, floorPixelYTop);
                     GL.Vertex2(floorCeilingPixelXRight, floorPixelYTop);
@@ -184,8 +222,6 @@ public class GraphicWindow
                     floorPixelYTop = floorPixelYBottom;
                     floorPixelYBottom += WallWidth;
                 }
-
-                path = null;
 
                 //Textures
                 switch (Engine.RayDatas[i, 5])
@@ -203,6 +239,9 @@ public class GraphicWindow
                         break;
                     case 3:
                         path = Textures.mossyBricksTexture;
+                        break;
+                    case 4:
+                        path = Textures.windowStoneBricksTexture;
                         break;
 
                         //Window textures
@@ -242,7 +281,7 @@ public class GraphicWindow
                         (screenVerticalOffset + minimumScreenHeight) :
                         tempPixelCalcBottom;
 
-                        //Mirroring wrong textures
+                        //Mirroring wrong textures, Calculating RGB variables
                         RGBCalc = (Engine.RayDatas[i, 4] == 1 || Engine.RayDatas[i, 4] == 3) ?
                             ((int)Math.Floor((TileSize - Engine.RayDatas[i, 3]) / (TileSize / (float)path[0][0])) * 3) + k * (path[0][0] * 3) :
                             ((int)Math.Floor(Engine.RayDatas[i, 3] / (TileSize / (float)path[0][0])) * 3) + k * (path[0][0] * 3);
@@ -250,12 +289,12 @@ public class GraphicWindow
                         //Calculating shading and lighting with distance
                         shadeCalc = Engine.RayDatas[i, 0] * Settings.Graphics.DistanceShade;
 
-                        //Calculating RGB
+                        //Applying shading and using the needed pixel
                         r = (path[1][RGBCalc] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc] - shadeCalc) / 255f;
                         g = (path[1][RGBCalc + 1] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 1] - shadeCalc) / 255f;
                         b = (path[1][RGBCalc + 2] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 2] - shadeCalc) / 255f;
 
-                        //Drawing the line
+                        //Drawing pixel
                         GL.Color3(r, g, b);
                         GL.Vertex2(i * WallWidth + screenHorizontalOffset, tempPixelCalcTop);
                         GL.Vertex2((i + 1) * WallWidth + screenHorizontalOffset, tempPixelCalcTop);
@@ -264,22 +303,6 @@ public class GraphicWindow
                     }
                 }
             }
-
-            //Testing movie look
-            //GL.Begin(PrimitiveType.Lines);
-            //GL.Color3(1f, 0f, 0f);
-
-            //GL.Vertex2(screenHorizontalOffset, screenVerticalOffset);
-            //GL.Vertex2(screenHorizontalOffset + minimumScreenWidth, screenVerticalOffset);
-
-            //GL.Vertex2(screenHorizontalOffset + minimumScreenWidth, screenVerticalOffset);
-            //GL.Vertex2(screenHorizontalOffset + minimumScreenWidth, screenVerticalOffset + minimumScreenHeight);
-
-            //GL.Vertex2(screenHorizontalOffset + minimumScreenWidth, screenVerticalOffset + minimumScreenHeight);
-            //GL.Vertex2(screenHorizontalOffset, screenVerticalOffset + minimumScreenHeight);
-
-            //GL.Vertex2(screenHorizontalOffset, screenVerticalOffset + minimumScreenHeight);
-            //GL.Vertex2(screenHorizontalOffset, screenVerticalOffset);
 
             GL.End();
 

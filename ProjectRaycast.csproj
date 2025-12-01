@@ -20,8 +20,11 @@
     <None Remove="assets\textures\floorTest.txt" />
     <None Remove="assets\textures\missing.txt" />
     <None Remove="assets\textures\mossy_bricks.txt" />
+    <None Remove="assets\textures\mossy_planks.txt" />
+    <None Remove="assets\textures\planks.txt" />
     <None Remove="assets\textures\stonebricks.txt" />
     <None Remove="assets\textures\test.txt" />
+    <None Remove="assets\textures\window_stonebricks.txt" />
     <None Remove="settings.json" />
   </ItemGroup>
 
@@ -35,7 +38,16 @@
     <Content Include="assets\textures\mossy_bricks.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="assets\textures\mossy_planks.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\textures\planks.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="assets\textures\stonebricks.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\textures\window_stonebricks.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="settings.json">
