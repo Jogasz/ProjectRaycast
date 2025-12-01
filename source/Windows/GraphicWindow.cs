@@ -54,9 +54,6 @@ public class GraphicWindow
             //Calculating wall width
             float WallWidth = (float)minimumScreenWidth / (float)Settings.Graphics.RayCount;
 
-            //Magic height multiplier for perfect square tiles
-            float magicHeightMultiplier = 0.92f;
-
             //Allowed screen's background color
             GL.Color3(0f, 0f, 0f);
             GL.Vertex2(screenHorizontalOffset, screenVerticalOffset);
@@ -68,7 +65,7 @@ public class GraphicWindow
             float shadeCalc, r, g, b;
 
             //Z position of camera (Right now its exactly the middle of the screen)
-            int cameraZ = minimumScreenHeight / 2;
+            float cameraZ = minimumScreenHeight / 2f;
 
             //Drawing graphics
             for (int i = 0; i < Settings.Graphics.RayCount; i++)
@@ -78,8 +75,7 @@ public class GraphicWindow
                 //Calculating wall height using interpolated values for movie look
                 float WallHeight = (float)((TileSize * minimumScreenHeight) /
                     (Engine.RayDatas[i, 0] * (float)Math.Cos(Engine.PlayerAngle -
-                    (Engine.PlayerAngle + Engine.FOVStart + i * Engine.RadBetweenRays)))) *
-                    magicHeightMultiplier;
+                    (Engine.PlayerAngle + Engine.FOVStart + i * Engine.RadBetweenRays))));
 
                 //Floor and ceiling X position variables
                 float floorCeilingPixelXLeft = i * WallWidth + screenHorizontalOffset;
@@ -146,10 +142,12 @@ public class GraphicWindow
                     floorPixelYBottom;
 
                     //Y of the current pixel on the screen
-                    float rowY = (floorPixelYTop + ((floorPixelYBottom - floorPixelYTop) / 2)) - (Screen.Height / 2);
+                    float rowY = floorPixelYTop + ((floorPixelYBottom - floorPixelYTop) / 2) - (Screen.Height / 2);
 
-                    floorPixelDistance = (cameraZ / rowY) * TileSize;
+                    //Distance of the currently drawn pixel and fisheye correction
+                    floorPixelDistance = ((cameraZ / rowY) * TileSize) / ((float)Math.Cos(Engine.PlayerAngle - Engine.RayDatas[i, 6]));
 
+                    //World position of the pixel
                     floorPixelXWorldPosition = Engine.playerPosition.X + (Engine.RayDatas[i, 1] * floorPixelDistance);
                     floorPixelYWorldPosition = Engine.playerPosition.Y + (Engine.RayDatas[i, 2] * floorPixelDistance);
 
@@ -164,7 +162,7 @@ public class GraphicWindow
                         //Floor
                         //Default textures
                         case 1:
-                            path = Textures.bricksTexture;
+                            path = Textures.stoneBricksTexture;
                             break;
                     }
 

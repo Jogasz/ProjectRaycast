@@ -272,7 +272,7 @@ public class Engine
             //RayDatas[i, 3]: VerticalRayHitY or HorizontalRayHitX
             //RayDatas[i, 4]: Wall side (1 = left, 2 = right, 3 = top, 4 = bottom)
             //RayDatas[i, 5]: Wall type (0 = No wall, 0> = Wall)
-            //RayDatas[i, 6]: Wall height !!!NOT USING RN!!!
+            //RayDatas[i, 6]: Ray's angle
 
             RayDatas[i, 0] = Math.Min(VerticalPythagoras, HorizontalPythagoras);
             RayDatas[i, 1] = (float)Math.Cos(RayAngle);
@@ -312,7 +312,7 @@ public class Engine
             {
                 RayDatas[i, 5] = 0;
             }
-            RayDatas[i, 6] = (float)((TileSize * GraphicWindow.ScreenHeight) / (RayDatas[i, 0] * (float)Math.Cos(PlayerAngle - (PlayerAngle + FOVStart + i * RadBetweenRays))));
+            RayDatas[i, 6] = RayAngle;
 
             RayAngle += RadBetweenRays;
             RayAngle = (RayAngle % MathX.Quadrant4 + MathX.Quadrant4) % MathX.Quadrant4;

@@ -5,10 +5,12 @@ public static class Textures {
     public static int[][] bricksTexture { get; private set; }
     public static int[][] mossyBricksTexture { get; private set; }
     public static int[][] stoneBricksTexture { get; private set; }
+    public static int[][] floorTestTexture { get; private set; }
     public static void Load() {
         bricksTexture = Read("assets/textures/bricks.txt");
         mossyBricksTexture = Read("assets/textures/mossy_bricks.txt");
         stoneBricksTexture = Read("assets/textures/stonebricks.txt");
+        floorTestTexture = Read("assets/textures/floorTest.txt");
     }
     public static int[][] Read(string path) {
         if (File.Exists(path))
