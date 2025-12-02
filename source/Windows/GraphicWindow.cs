@@ -63,13 +63,11 @@ public class GraphicWindow
             GL.Vertex2(screenHorizontalOffset + minimumScreenWidth, screenVerticalOffset + minimumScreenHeight);
             GL.Vertex2(screenHorizontalOffset, screenVerticalOffset + minimumScreenHeight);
 
-            //mouse
+            //Mouse
             OpenTK.Input.MouseState currentMouseState = OpenTK.Input.Mouse.GetState();
             OpenTK.Vector2 currentMousePosition = new OpenTK.Vector2(currentMouseState.X, currentMouseState.Y);
             OpenTK.Vector2 mouseOffset = currentMousePosition - _lastMousePosition;
             _lastMousePosition = currentMousePosition;
-
-            Console.WriteLine("X: " + mouseOffset.X + "Y: " + mouseOffset.Y);
 
             if (mouseOffset.X != 0)
             {

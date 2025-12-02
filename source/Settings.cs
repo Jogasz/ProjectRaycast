@@ -45,7 +45,7 @@ public static class Settings
             Armor = armor;
             Stamina = stamina;
             MovementSpeed = movementSpeed * 10;
-            MouseSensitivity = mouseSensitivity / 5;
+            MouseSensitivity = mouseSensitivity / 50;
         }
     }
 
