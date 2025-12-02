@@ -73,37 +73,73 @@ public class Engine
         var keyboard = Keyboard.GetState();
         var PlayerPosition = playerPosition;
 
+        //Escape - exiting game
         if (keyboard.IsKeyDown(Key.Escape))
         {
             Environment.Exit(0);
         }
 
+        //Temporary variables for less calculation in movement collision (Not sure but doesn't seem like the best solution...)
+        int BlockedX_Y_Minus = (int)((PlayerPosition.Y - PlayerRadius) / TileSize);
+        int BlockedX_Y_Plus = (int)((PlayerPosition.Y + PlayerRadius) / TileSize);
+        int BlockedY_X_Minus = (int)((PlayerPosition.X - PlayerRadius) / TileSize);
+        int BlockedX_X_Plus = (int)((PlayerPosition.X + PlayerRadius) / TileSize);
+
+        //Forward and backward variables
         PlayerDeltaOffsetX = (float)Math.Cos(PlayerAngle);
         PlayerDeltaOffsetY = (float)Math.Sin(PlayerAngle);
+
+        //Forward
+        int forwardBlockedX_X_Plus = (int)(((int)(PlayerPosition.X + PlayerRadius + PlayerDeltaOffsetX * DeltaMovementSpeed)) / TileSize);
+        int forwardBlockedX_X_Minus = (int)(((int)(PlayerPosition.X - PlayerRadius + PlayerDeltaOffsetX * DeltaMovementSpeed)) / TileSize);
+        int forwardBlockedY_Y_Plus = (int)(((int)(PlayerPosition.Y + PlayerRadius + PlayerDeltaOffsetY * DeltaMovementSpeed)) / TileSize);
+        int forwardBlockedY_Y_Minus = (int)(((int)(PlayerPosition.Y - PlayerRadius + PlayerDeltaOffsetY * DeltaMovementSpeed)) / TileSize);
+
+        //Backward
+        int backwardBlockedX_X_Plus = (int)(((int)(PlayerPosition.X + PlayerRadius - PlayerDeltaOffsetX * DeltaMovementSpeed)) / TileSize);
+        int backwardBlockedX_X_Minus = (int)(((int)(PlayerPosition.X - PlayerRadius - PlayerDeltaOffsetX * DeltaMovementSpeed)) / TileSize);
+        int backwardBlockedY_Y_Plus = (int)(((int)(PlayerPosition.Y + PlayerRadius - PlayerDeltaOffsetY * DeltaMovementSpeed)) / TileSize);
+        int backwardBlockedY_Y_Minus = (int)(((int)(PlayerPosition.Y - PlayerRadius - PlayerDeltaOffsetY * DeltaMovementSpeed)) / TileSize);
+
+        //Left and right variables
+        float PlayerDeltaOffsetXMinusQuadrant = (float)Math.Cos(PlayerAngle - MathX.Quadrant1);
+        float PlayerDeltaOffsetYMinusQuadrant = (float)Math.Sin(PlayerAngle - MathX.Quadrant1);
+
+        //Left
+        int leftBlockedX_X_Plus = (int)(((int)(PlayerPosition.X + PlayerRadius + PlayerDeltaOffsetXMinusQuadrant * DeltaMovementSpeed)) / TileSize);
+        int leftBlockedX_X_Minus = (int)(((int)(PlayerPosition.X - PlayerRadius + PlayerDeltaOffsetXMinusQuadrant * DeltaMovementSpeed)) / TileSize);
+        int leftBlockedY_Y_Plus = (int)(((int)(PlayerPosition.Y + PlayerRadius + PlayerDeltaOffsetYMinusQuadrant * DeltaMovementSpeed)) / TileSize);
+        int leftBlockedY_Y_Minus = (int)(((int)(PlayerPosition.Y - PlayerRadius + PlayerDeltaOffsetYMinusQuadrant * DeltaMovementSpeed)) / TileSize);
+
+        //Right
+        int rightBlockedX_X_Plus = (int)(((int)(PlayerPosition.X + PlayerRadius - PlayerDeltaOffsetXMinusQuadrant * DeltaMovementSpeed)) / TileSize);
+        int rightBlockedX_X_Minus = (int)(((int)(PlayerPosition.X - PlayerRadius - PlayerDeltaOffsetXMinusQuadrant * DeltaMovementSpeed)) / TileSize);
+        int rightBlockedY_Y_Plus = (int)(((int)(PlayerPosition.Y + PlayerRadius - PlayerDeltaOffsetYMinusQuadrant * DeltaMovementSpeed)) / TileSize);
+        int rightBlockedY_Y_Minus = (int)(((int)(PlayerPosition.Y - PlayerRadius - PlayerDeltaOffsetYMinusQuadrant * DeltaMovementSpeed)) / TileSize);
 
         //Forward movement and forward collision detection
         if (keyboard.IsKeyDown(Key.W))
         {
             BlockedX =
-                MapWalls[(int)((PlayerPosition.Y - PlayerRadius) / TileSize), (int)(((int)(PlayerPosition.X + PlayerRadius + (float)Math.Cos(PlayerAngle) * DeltaMovementSpeed)) / TileSize)] > 0 ||
-                MapWalls[(int)((PlayerPosition.Y - PlayerRadius) / TileSize), (int)(((int)(PlayerPosition.X - PlayerRadius + (float)Math.Cos(PlayerAngle) * DeltaMovementSpeed)) / TileSize)] > 0 ||
-                MapWalls[(int)((PlayerPosition.Y + PlayerRadius) / TileSize), (int)(((int)(PlayerPosition.X + PlayerRadius + (float)Math.Cos(PlayerAngle) * DeltaMovementSpeed)) / TileSize)] > 0 ||
-                MapWalls[(int)((PlayerPosition.Y + PlayerRadius) / TileSize), (int)(((int)(PlayerPosition.X - PlayerRadius + (float)Math.Cos(PlayerAngle) * DeltaMovementSpeed)) / TileSize)] > 0;
+                MapWalls[BlockedX_Y_Minus, forwardBlockedX_X_Plus] > 0 ||
+                MapWalls[BlockedX_Y_Minus, forwardBlockedX_X_Minus] > 0 ||
+                MapWalls[BlockedX_Y_Plus, forwardBlockedX_X_Plus] > 0 ||
+                MapWalls[BlockedX_Y_Plus, forwardBlockedX_X_Minus] > 0;
 
             BlockedY =
-                MapWalls[(int)(((int)(PlayerPosition.Y + PlayerRadius + (float)Math.Sin(PlayerAngle) * DeltaMovementSpeed)) / TileSize), (int)((PlayerPosition.X - PlayerRadius) / TileSize)] > 0 ||
-                MapWalls[(int)(((int)(PlayerPosition.Y - PlayerRadius + (float)Math.Sin(PlayerAngle) * DeltaMovementSpeed)) / TileSize), (int)((PlayerPosition.X - PlayerRadius) / TileSize)] > 0 ||
-                MapWalls[(int)(((int)(PlayerPosition.Y + PlayerRadius + (float)Math.Sin(PlayerAngle) * DeltaMovementSpeed)) / TileSize), (int)((PlayerPosition.X + PlayerRadius) / TileSize)] > 0 ||
-                MapWalls[(int)(((int)(PlayerPosition.Y - PlayerRadius + (float)Math.Sin(PlayerAngle) * DeltaMovementSpeed)) / TileSize), (int)((PlayerPosition.X + PlayerRadius) / TileSize)] > 0;
+                MapWalls[forwardBlockedY_Y_Plus, BlockedY_X_Minus] > 0 ||
+                MapWalls[forwardBlockedY_Y_Minus, BlockedY_X_Minus] > 0 ||
+                MapWalls[forwardBlockedY_Y_Plus, BlockedX_X_Plus] > 0 ||
+                MapWalls[forwardBlockedY_Y_Minus, BlockedX_X_Plus] > 0;
 
             if (!BlockedX)
             {
-                PlayerPosition.X += (float)Math.Cos(PlayerAngle) * DeltaMovementSpeed;
+                PlayerPosition.X += PlayerDeltaOffsetX * DeltaMovementSpeed;
             }
 
             if (!BlockedY)
             {
-                PlayerPosition.Y += (float)Math.Sin(PlayerAngle) * DeltaMovementSpeed;
+                PlayerPosition.Y += PlayerDeltaOffsetY * DeltaMovementSpeed;
             }
         }
 
@@ -111,25 +147,25 @@ public class Engine
         if (keyboard.IsKeyDown(Key.A))
         {
             BlockedX =
-                MapWalls[(int)((PlayerPosition.Y - PlayerRadius) / TileSize), (int)(((int)(PlayerPosition.X + PlayerRadius + (float)Math.Cos(PlayerAngle - MathX.Quadrant1) * DeltaMovementSpeed)) / TileSize)] > 0 ||
-                MapWalls[(int)((PlayerPosition.Y - PlayerRadius) / TileSize), (int)(((int)(PlayerPosition.X - PlayerRadius + (float)Math.Cos(PlayerAngle - MathX.Quadrant1) * DeltaMovementSpeed)) / TileSize)] > 0 ||
-                MapWalls[(int)((PlayerPosition.Y + PlayerRadius) / TileSize), (int)(((int)(PlayerPosition.X + PlayerRadius + (float)Math.Cos(PlayerAngle - MathX.Quadrant1) * DeltaMovementSpeed)) / TileSize)] > 0 ||
-                MapWalls[(int)((PlayerPosition.Y + PlayerRadius) / TileSize), (int)(((int)(PlayerPosition.X - PlayerRadius + (float)Math.Cos(PlayerAngle - MathX.Quadrant1) * DeltaMovementSpeed)) / TileSize)] > 0;
+                MapWalls[BlockedX_Y_Minus, leftBlockedX_X_Plus] > 0 ||
+                MapWalls[BlockedX_Y_Minus, leftBlockedX_X_Minus] > 0 ||
+                MapWalls[BlockedX_Y_Plus, leftBlockedX_X_Plus] > 0 ||
+                MapWalls[BlockedX_Y_Plus, leftBlockedX_X_Minus] > 0;
 
             BlockedY =
-                MapWalls[(int)(((int)(PlayerPosition.Y + PlayerRadius + (float)Math.Sin(PlayerAngle - MathX.Quadrant1) * DeltaMovementSpeed)) / TileSize), (int)((PlayerPosition.X - PlayerRadius) / TileSize)] > 0 ||
-                MapWalls[(int)(((int)(PlayerPosition.Y - PlayerRadius + (float)Math.Sin(PlayerAngle - MathX.Quadrant1) * DeltaMovementSpeed)) / TileSize), (int)((PlayerPosition.X - PlayerRadius) / TileSize)] > 0 ||
-                MapWalls[(int)(((int)(PlayerPosition.Y + PlayerRadius + (float)Math.Sin(PlayerAngle - MathX.Quadrant1) * DeltaMovementSpeed)) / TileSize), (int)((PlayerPosition.X + PlayerRadius) / TileSize)] > 0 ||
-                MapWalls[(int)(((int)(PlayerPosition.Y - PlayerRadius + (float)Math.Sin(PlayerAngle - MathX.Quadrant1) * DeltaMovementSpeed)) / TileSize), (int)((PlayerPosition.X + PlayerRadius) / TileSize)] > 0;
+                MapWalls[leftBlockedY_Y_Plus, BlockedY_X_Minus] > 0 ||
+                MapWalls[leftBlockedY_Y_Minus, BlockedY_X_Minus] > 0 ||
+                MapWalls[leftBlockedY_Y_Plus, BlockedX_X_Plus] > 0 ||
+                MapWalls[leftBlockedY_Y_Minus, BlockedX_X_Plus] > 0;
 
             if (!BlockedX)
             {
-                PlayerPosition.X += (float)Math.Cos(PlayerAngle - MathX.Quadrant1) * DeltaMovementSpeed;
+                PlayerPosition.X += PlayerDeltaOffsetXMinusQuadrant * DeltaMovementSpeed;
             }
 
             if (!BlockedY)
             {
-                PlayerPosition.Y += (float)Math.Sin(PlayerAngle - MathX.Quadrant1) * DeltaMovementSpeed;
+                PlayerPosition.Y += PlayerDeltaOffsetYMinusQuadrant * DeltaMovementSpeed;
             }
         }
 
@@ -137,25 +173,25 @@ public class Engine
         if (keyboard.IsKeyDown(Key.S))
         {
             BlockedX =
-                MapWalls[(int)((PlayerPosition.Y - PlayerRadius) / TileSize), (int)(((int)(PlayerPosition.X + PlayerRadius - (float)Math.Cos(PlayerAngle) * DeltaMovementSpeed)) / TileSize)] > 0 ||
-                MapWalls[(int)((PlayerPosition.Y - PlayerRadius) / TileSize), (int)(((int)(PlayerPosition.X - PlayerRadius - (float)Math.Cos(PlayerAngle) * DeltaMovementSpeed)) / TileSize)] > 0 ||
-                MapWalls[(int)((PlayerPosition.Y + PlayerRadius) / TileSize), (int)(((int)(PlayerPosition.X + PlayerRadius - (float)Math.Cos(PlayerAngle) * DeltaMovementSpeed)) / TileSize)] > 0 ||
-                MapWalls[(int)((PlayerPosition.Y + PlayerRadius) / TileSize), (int)(((int)(PlayerPosition.X - PlayerRadius - (float)Math.Cos(PlayerAngle) * DeltaMovementSpeed)) / TileSize)] > 0;
+                MapWalls[BlockedX_Y_Minus, backwardBlockedX_X_Plus] > 0 ||
+                MapWalls[BlockedX_Y_Minus, backwardBlockedX_X_Minus] > 0 ||
+                MapWalls[BlockedX_Y_Plus, backwardBlockedX_X_Plus] > 0 ||
+                MapWalls[BlockedX_Y_Plus, backwardBlockedX_X_Minus] > 0;
 
             BlockedY =
-                MapWalls[(int)(((int)(PlayerPosition.Y + PlayerRadius - (float)Math.Sin(PlayerAngle) * DeltaMovementSpeed)) / TileSize), (int)((PlayerPosition.X - PlayerRadius) / TileSize)] > 0 ||
-                MapWalls[(int)(((int)(PlayerPosition.Y - PlayerRadius - (float)Math.Sin(PlayerAngle) * DeltaMovementSpeed)) / TileSize), (int)((PlayerPosition.X - PlayerRadius) / TileSize)] > 0 ||
-                MapWalls[(int)(((int)(PlayerPosition.Y + PlayerRadius - (float)Math.Sin(PlayerAngle) * DeltaMovementSpeed)) / TileSize), (int)((PlayerPosition.X + PlayerRadius) / TileSize)] > 0 ||
-                MapWalls[(int)(((int)(PlayerPosition.Y - PlayerRadius - (float)Math.Sin(PlayerAngle) * DeltaMovementSpeed)) / TileSize), (int)((PlayerPosition.X + PlayerRadius) / TileSize)] > 0;
+                MapWalls[backwardBlockedY_Y_Plus, BlockedY_X_Minus] > 0 ||
+                MapWalls[backwardBlockedY_Y_Minus, BlockedY_X_Minus] > 0 ||
+                MapWalls[backwardBlockedY_Y_Plus, BlockedX_X_Plus] > 0 ||
+                MapWalls[backwardBlockedY_Y_Minus, BlockedX_X_Plus] > 0;
 
             if (!BlockedX)
             {
-                PlayerPosition.X -= (float)Math.Cos(PlayerAngle) * DeltaMovementSpeed;
+                PlayerPosition.X -= PlayerDeltaOffsetX * DeltaMovementSpeed;
             }
 
             if (!BlockedY)
             {
-                PlayerPosition.Y -= (float)Math.Sin(PlayerAngle) * DeltaMovementSpeed;
+                PlayerPosition.Y -= PlayerDeltaOffsetY * DeltaMovementSpeed;
             }
         }
 
@@ -163,25 +199,25 @@ public class Engine
         if (keyboard.IsKeyDown(Key.D))
         {
             BlockedX =
-                MapWalls[(int)((PlayerPosition.Y - PlayerRadius) / TileSize), (int)(((int)(PlayerPosition.X + PlayerRadius - (float)Math.Cos(PlayerAngle - MathX.Quadrant1) * DeltaMovementSpeed)) / TileSize)] > 0 ||
-                MapWalls[(int)((PlayerPosition.Y - PlayerRadius) / TileSize), (int)(((int)(PlayerPosition.X - PlayerRadius - (float)Math.Cos(PlayerAngle - MathX.Quadrant1) * DeltaMovementSpeed)) / TileSize)] > 0 ||
-                MapWalls[(int)((PlayerPosition.Y + PlayerRadius) / TileSize), (int)(((int)(PlayerPosition.X + PlayerRadius - (float)Math.Cos(PlayerAngle - MathX.Quadrant1) * DeltaMovementSpeed)) / TileSize)] > 0 ||
-                MapWalls[(int)((PlayerPosition.Y + PlayerRadius) / TileSize), (int)(((int)(PlayerPosition.X - PlayerRadius - (float)Math.Cos(PlayerAngle - MathX.Quadrant1) * DeltaMovementSpeed)) / TileSize)] > 0;
+                MapWalls[BlockedX_Y_Minus, rightBlockedX_X_Plus] > 0 ||
+                MapWalls[BlockedX_Y_Minus, rightBlockedX_X_Minus] > 0 ||
+                MapWalls[BlockedX_Y_Plus, rightBlockedX_X_Plus] > 0 ||
+                MapWalls[BlockedX_Y_Plus, rightBlockedX_X_Minus] > 0;
 
             BlockedY =
-                MapWalls[(int)(((int)(PlayerPosition.Y + PlayerRadius - (float)Math.Sin(PlayerAngle - MathX.Quadrant1) * DeltaMovementSpeed)) / TileSize), (int)((PlayerPosition.X - PlayerRadius) / TileSize)] > 0 ||
-                MapWalls[(int)(((int)(PlayerPosition.Y - PlayerRadius - (float)Math.Sin(PlayerAngle - MathX.Quadrant1) * DeltaMovementSpeed)) / TileSize), (int)((PlayerPosition.X - PlayerRadius) / TileSize)] > 0 ||
-                MapWalls[(int)(((int)(PlayerPosition.Y + PlayerRadius - (float)Math.Sin(PlayerAngle - MathX.Quadrant1) * DeltaMovementSpeed)) / TileSize), (int)((PlayerPosition.X + PlayerRadius) / TileSize)] > 0 ||
-                MapWalls[(int)(((int)(PlayerPosition.Y - PlayerRadius - (float)Math.Sin(PlayerAngle - MathX.Quadrant1) * DeltaMovementSpeed)) / TileSize), (int)((PlayerPosition.X + PlayerRadius) / TileSize)] > 0;
+                MapWalls[rightBlockedY_Y_Plus, BlockedY_X_Minus] > 0 ||
+                MapWalls[rightBlockedY_Y_Minus, BlockedY_X_Minus] > 0 ||
+                MapWalls[rightBlockedY_Y_Plus, BlockedX_X_Plus] > 0 ||
+                MapWalls[rightBlockedY_Y_Minus, BlockedX_X_Plus] > 0;
 
             if (!BlockedX)
             {
-                PlayerPosition.X -= (float)Math.Cos(PlayerAngle - MathX.Quadrant1) * DeltaMovementSpeed;
+                PlayerPosition.X -= PlayerDeltaOffsetXMinusQuadrant * DeltaMovementSpeed;
             }
 
             if (!BlockedY)
             {
-                PlayerPosition.Y -= (float)Math.Sin(PlayerAngle - MathX.Quadrant1) * DeltaMovementSpeed;
+                PlayerPosition.Y -= PlayerDeltaOffsetYMinusQuadrant * DeltaMovementSpeed;
             }
         }
 
