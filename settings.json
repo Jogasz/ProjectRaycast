@@ -22,7 +22,7 @@
   ],
   "Graphics": {
     "FOV": 55,
-    "RayCount": 200,
+    "RayCount": 300,
     "RenderDistance": 5,
     "DistanceShade": 3
   },

@@ -1,0 +1,5 @@
+A tömbön való túlmutatás mind az Y, mind az X helyén előfordulhat.
+Jelenleg csak a ceiling-nél mutatkozik.
+Tesztek után a probléma csak lassú fps környezetében mutatkozik, legalábbis akkor a leggykrabban.
+----------------
+A hiba a pixel világban való pozíciójának számolásánál történik, képes elmenni az 1600~-ig is. (Jelenlegi helyzetben a maximum 12 * 50 = 600 lehetne)
