@@ -22,8 +22,8 @@
   ],
   "Graphics": {
     "FOV": 55,
-    "RayCount": 300,
-    "RenderDistance": 5,
+    "RayCount": 100,
+    "RenderDistance": 12,
     "DistanceShade": 3
   },
   "Gameplay": {

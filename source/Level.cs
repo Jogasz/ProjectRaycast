@@ -18,12 +18,12 @@ public class Level
         //Deserialize text to data
         var fileText = JsonConvert.DeserializeObject<MapData>(path);
 
-        var rows = fileText.MapWalls.Count;
-        var cols = fileText.MapWalls[0].Count;
+        int rows, cols;
+
+        rows = fileText.MapCeiling.Count;
+        cols = fileText.MapCeiling[0].Count;
 
         mapCeiling = new int[rows, cols];
-        mapWalls = new int[rows, cols];
-        mapFloor = new int[rows, cols];
 
         //Declaring mapCeiling[]
         for (int y = 0; y < rows; y++)
@@ -34,6 +34,11 @@ public class Level
             }
         }
 
+        rows = fileText.MapWalls.Count;
+        cols = fileText.MapWalls[0].Count;
+
+        mapWalls = new int[rows, cols];
+
         //Declaring mapWalls[]
         for (int y = 0; y < rows; y++)
         {
@@ -42,6 +47,11 @@ public class Level
                 mapWalls[y, x] = fileText.MapWalls[y][x];
             }
         }
+
+        rows = fileText.MapFloor.Count;
+        cols = fileText.MapFloor[0].Count;
+
+        mapFloor = new int[rows, cols];
 
         //Declaring mapFloor[]
         for (int y = 0; y < rows; y++)

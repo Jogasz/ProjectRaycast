@@ -57,7 +57,7 @@ public class GraphicWindow
             float WallWidth = (float)minimumScreenWidth / (float)Settings.Graphics.RayCount;
 
             //Allowed screen's background color
-            GL.Color3(0f, 0f, 0f);
+            GL.Color3(0.3f, 0.3f, 0.95f);
             GL.Vertex2(screenHorizontalOffset, screenVerticalOffset);
             GL.Vertex2(screenHorizontalOffset + minimumScreenWidth, screenVerticalOffset);
             GL.Vertex2(screenHorizontalOffset + minimumScreenWidth, screenVerticalOffset + minimumScreenHeight);
@@ -129,59 +129,24 @@ public class GraphicWindow
                     //Y of the current pixel on the screen
                     rowY = (Screen.Height / 2) - (ceilingPixelYTop + ((ceilingPixelYBottom - ceilingPixelYTop) / 2));
 
-                    ceilingFloorPixelDistance = ((cameraZ / rowY) * TileSize) / ((float)Math.Cos(Engine.PlayerAngle - Engine.RayDatas[i, 6]));
-
-                    if (ceilingFloorPixelDistance > 600 || ceilingFloorPixelDistance < 0)
-                    {
-                        Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!");
-                        Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!");
-                        Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!");
-                        Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!");
-                        Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!");
-                        Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!");
-                        Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!");
-                        Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!");
-                        Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!");
-                        Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!");
-                        Console.WriteLine("ceilingFloorPixelDistance: " + ceilingFloorPixelDistance);
-                        Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!");
-                        Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!");
-                        Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!");
-                        Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!");
-                        Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!");
-                        Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!");
-                        Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!");
-                        Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!");
-                        Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!");
-                        Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!");
-                        //Environment.Exit(0);
-                    }
-
-                    ceilingFloorPixelDistance = ceilingFloorPixelDistance > 600 ?
-                        600 :
-                        ceilingFloorPixelDistance;
-
-                    ceilingFloorPixelDistance = ceilingFloorPixelDistance <= 0 ?
-                        0 :
-                        ceilingFloorPixelDistance;
+                    ceilingFloorPixelDistance = ((cameraZ / rowY) * TileSize) / (float)Math.Abs(Math.Cos(Engine.PlayerAngle - Engine.RayDatas[i, 6]));
 
                     //World position of the pixel
-                    ceilingPixelXWorldPosition = Engine.playerPosition.X + (Engine.RayDatas[i, 1] * ceilingFloorPixelDistance);
-                    ceilingPixelYWorldPosition = Engine.playerPosition.Y + (Engine.RayDatas[i, 2] * ceilingFloorPixelDistance);
+                    ceilingPixelXWorldPosition = Math.Abs(Engine.playerPosition.X + (Engine.RayDatas[i, 1] * ceilingFloorPixelDistance)) >= MapCeiling.GetLength(1) * TileSize ?
+                        MapCeiling.GetLength(1) * TileSize - 0.0001f :
+                        Math.Abs(Engine.playerPosition.X + (Engine.RayDatas[i, 1] * ceilingFloorPixelDistance));
 
-                    int mCY = (int)Math.Floor(ceilingPixelYWorldPosition / TileSize) > 11 ?
-                        11 :
-                        (int)Math.Floor(ceilingPixelYWorldPosition / TileSize);
-                    int mCX = (int)Math.Floor(ceilingPixelXWorldPosition / TileSize) > 11 ?
-                        11 :
-                        (int)Math.Floor(ceilingPixelXWorldPosition / TileSize);
-
+                    ceilingPixelYWorldPosition = Math.Abs(Engine.playerPosition.Y + (Engine.RayDatas[i, 2] * ceilingFloorPixelDistance)) >= MapCeiling.GetLength(0) * TileSize ?
+                        MapCeiling.GetLength(0) * TileSize - 0.0001f :
+                        Math.Abs(Engine.playerPosition.Y + (Engine.RayDatas[i, 2] * ceilingFloorPixelDistance));
 
                     //Textures
-                    switch (MapCeiling[mCY, mCX]) //Az index a tömb határán kívülre mutatott
+                    switch (MapCeiling[(int)Math.Floor(ceilingPixelYWorldPosition / TileSize), (int)Math.Floor(ceilingPixelXWorldPosition / TileSize)]) //Az index a tömb határán kívülre mutatott
                     {
                         //No floor
                         case 0:
+                            ceilingPixelYBottom = ceilingPixelYTop;
+                            ceilingPixelYTop -= WallWidth;
                             continue;
                         //Floor
                         //Default textures
@@ -235,45 +200,24 @@ public class GraphicWindow
                     rowY = floorPixelYTop + ((floorPixelYBottom - floorPixelYTop) / 2) - (Screen.Height / 2);
 
                     //Distance of the currently drawn pixel and fisheye correction
-                    ceilingFloorPixelDistance = ((cameraZ / rowY) * TileSize) / ((float)Math.Cos(Engine.PlayerAngle - Engine.RayDatas[i, 6]));
+                    ceilingFloorPixelDistance = ((cameraZ / rowY) * TileSize) / (float)Math.Abs(Math.Cos(Engine.PlayerAngle - Engine.RayDatas[i, 6]));
 
                     //World position of the pixel
-                    floorPixelXWorldPosition = Engine.playerPosition.X + (Engine.RayDatas[i, 1] * ceilingFloorPixelDistance);
-                    floorPixelYWorldPosition = Engine.playerPosition.Y + (Engine.RayDatas[i, 2] * ceilingFloorPixelDistance);
+                    floorPixelXWorldPosition = Math.Abs(Engine.playerPosition.X + (Engine.RayDatas[i, 1] * ceilingFloorPixelDistance)) >= MapFloor.GetLength(1) * TileSize ?
+                        MapFloor.GetLength(1) * TileSize - 0.0001f :
+                        Math.Abs(Engine.playerPosition.X + (Engine.RayDatas[i, 1] * ceilingFloorPixelDistance));
 
-                    int mCY, mCX;
-
-                    if ((int)Math.Floor(floorPixelYWorldPosition / TileSize) > 11)
-                    {
-                        mCY = 11;
-                    }
-                    else if ((int)Math.Floor(floorPixelYWorldPosition / TileSize) < 0)
-                    {
-                        mCY = 0;
-                    }
-                    else
-                    {
-                        mCY = (int)Math.Floor(floorPixelYWorldPosition / TileSize);
-                    }
-
-                    if ((int)Math.Floor(floorPixelXWorldPosition / TileSize) > 11)
-                    {
-                        mCX = 11;
-                    }
-                    else if ((int)Math.Floor(floorPixelXWorldPosition / TileSize) < 0)
-                    {
-                        mCX = 0;
-                    }
-                    else
-                    {
-                        mCX = (int)Math.Floor(floorPixelXWorldPosition / TileSize);
-                    }
+                    floorPixelYWorldPosition = Math.Abs(Engine.playerPosition.Y + (Engine.RayDatas[i, 2] * ceilingFloorPixelDistance)) >= MapFloor.GetLength(0) * TileSize ?
+                        MapFloor.GetLength(0) * TileSize - 0.0001f :
+                        Math.Abs(Engine.playerPosition.Y + (Engine.RayDatas[i, 2] * ceilingFloorPixelDistance));
 
                     //Textures
-                    switch (MapFloor[mCY, mCX])
+                    switch (MapFloor[(int)Math.Floor(floorPixelYWorldPosition / TileSize), (int)Math.Floor(floorPixelXWorldPosition / TileSize)])
                     {
                         //No floor
                         case 0:
+                            floorPixelYTop = floorPixelYBottom;
+                            floorPixelYBottom += WallWidth;
                             continue;
                         //Floor
                         //Default textures
@@ -372,9 +316,6 @@ public class GraphicWindow
                         (screenVerticalOffset + minimumScreenHeight) :
                         tempPixelCalcBottom;
 
-                        //((int)Math.Floor(path[0][1] / (TileSize / (floorPixelYWorldPosition % TileSize))) * path[0][1] * 3) +
-                        //((int)Math.Floor(path[0][0] / (TileSize / (floorPixelXWorldPosition % TileSize))) * 3);
-
                         //Mirroring wrong textures, Calculating RGB variables
                         if (Engine.RayDatas[i, 4] == 1 || Engine.RayDatas[i, 4] == 3)
                         {
@@ -383,11 +324,6 @@ public class GraphicWindow
                         else
                         {
                             RGBCalc = ((int)Math.Floor(Engine.RayDatas[i, 3] / (TileSize / (float)path[0][0])) * 3) + k * (path[0][0] * 3);
-                        }
-
-                        if (path[1][RGBCalc] - shadeCalc < 0)
-                        {
-                            Console.WriteLine(path[1][RGBCalc] - shadeCalc);
                         }
 
                         //Applying shading and using the needed pixel
