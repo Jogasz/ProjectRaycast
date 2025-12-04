@@ -1,7 +1,6 @@
 ﻿using OpenTK;
 using OpenTK.Input;
 using System;
-using System.ComponentModel.Design;
 using System.Diagnostics;
 public class Engine
 {
@@ -11,44 +10,16 @@ public class Engine
     static int TileSize = Settings.Gameplay.TileSize;
     static int[,] MapWalls = Level.mapWalls;
     static float MovementSpeed = Settings.Player.MovementSpeed;
-    static float MouseSensitivity = Settings.Player.MouseSensitivity;
-
-    //Engine variables
-    public static float DeltaTime { get; private set; } = 0.0167f;
 
     //Player variables
     public static Vector2 playerPosition { get; private set; } = new Vector2(100, 100);
-    public static int PlayerWidth { get; private set; } = 10;
-    public static int PlayerHeight { get; private set; } = 10;
     public static float PlayerAngle { get; set; } = 0f;
-    public static float PlayerDeltaOffsetX { get; set; } = 0f;
-    public static float PlayerDeltaOffsetY { get; set; } = 0f;
     public static int PlayerRadius { get; private set; } = 10;
-    public static bool BlockedX { get; private set; } = false;
-    public static bool BlockedY { get; private set; } = false;
 
-    //Raycasting variables
+    //Engine variables
+    public static float DeltaTime { get; private set; } = 0.0167f;
     public static float FOVStart { get; private set; } = 0f;
     public static float RadBetweenRays { get; private set; } = 0f;
-    public static float RayAngle { get; private set; } = 0f;
-    public static int RenderDistance { get; private set; } = Settings.Graphics.RenderDistance;
-    public static int RenderDistanceIterator { get; private set; } = 0;
-    public static float VerticalRayHitX { get; private set; } = 0f;
-    public static float VerticalRayHitY { get; private set; } = 0f;
-    public static float HorizontalRayHitX { get; private set; } = 0f;
-    public static float HorizontalRayHitY { get; private set; } = 0f;
-    public static float OffsetX { get; private set; } = 0f;
-    public static float OffsetY { get; private set; } = 0f;
-    public static int VerticalRayCheckingCol { get; private set; } = 0;
-    public static int VerticalRayCheckingRow { get; private set; } = 0;
-    public static int HorizontalRayCheckingCol { get; private set; } = 0;
-    public static int HorizontalRayCheckingRow { get; private set; } = 0;
-    public static bool VerticalWallFound { get; private set; } = false;
-    public static bool HorizontalWallFound { get; private set; } = false;
-    public static float VerticalPythagoras { get; private set; } = 0f;
-    public static float HorizontalPythagoras { get; private set; } = 0f; 
-
-    //Wall rendering variables
     public static float[,] RayDatas { get; private set; } = new float[RayCount, 7];
 
     private static Stopwatch stopWatch = new Stopwatch();
@@ -68,7 +39,7 @@ public class Engine
         //Console.WriteLine(Math.Floor(1 / DeltaTime) + "FPS");
         //================================================================
 
-        //Player controls, rotaion and collision detection
+        //Keybinds, player controls and collision detection
         float DeltaMovementSpeed = MovementSpeed * DeltaTime;
         var keyboard = Keyboard.GetState();
         var PlayerPosition = playerPosition;
@@ -79,149 +50,52 @@ public class Engine
             Environment.Exit(0);
         }
 
-        //Temporary variables for less calculation in movement collision (Not sure but doesn't seem like the best solution...)
-        int BlockedX_Y_Minus = (int)((PlayerPosition.Y - PlayerRadius) / TileSize);
-        int BlockedX_Y_Plus = (int)((PlayerPosition.Y + PlayerRadius) / TileSize);
-        int BlockedY_X_Minus = (int)((PlayerPosition.X - PlayerRadius) / TileSize);
-        int BlockedX_X_Plus = (int)((PlayerPosition.X + PlayerRadius) / TileSize);
+        Vector2 movementVector;
 
-        //Forward and backward variables
-        PlayerDeltaOffsetX = (float)Math.Cos(PlayerAngle);
-        PlayerDeltaOffsetY = (float)Math.Sin(PlayerAngle);
+        //Checking the movement input
+        movementVector.X = (keyboard.IsKeyDown(Key.A) ? 1f : 0f) + (keyboard.IsKeyDown(Key.D) ? -1f : 0f);
+        movementVector.Y = (keyboard.IsKeyDown(Key.W) ? 1f : 0f) + (keyboard.IsKeyDown(Key.S) ? -1f : 0f);
 
-        //Forward
-        int forwardBlockedX_X_Plus = (int)(((int)(PlayerPosition.X + PlayerRadius + PlayerDeltaOffsetX * DeltaMovementSpeed)) / TileSize);
-        int forwardBlockedX_X_Minus = (int)(((int)(PlayerPosition.X - PlayerRadius + PlayerDeltaOffsetX * DeltaMovementSpeed)) / TileSize);
-        int forwardBlockedY_Y_Plus = (int)(((int)(PlayerPosition.Y + PlayerRadius + PlayerDeltaOffsetY * DeltaMovementSpeed)) / TileSize);
-        int forwardBlockedY_Y_Minus = (int)(((int)(PlayerPosition.Y - PlayerRadius + PlayerDeltaOffsetY * DeltaMovementSpeed)) / TileSize);
-
-        //Backward
-        int backwardBlockedX_X_Plus = (int)(((int)(PlayerPosition.X + PlayerRadius - PlayerDeltaOffsetX * DeltaMovementSpeed)) / TileSize);
-        int backwardBlockedX_X_Minus = (int)(((int)(PlayerPosition.X - PlayerRadius - PlayerDeltaOffsetX * DeltaMovementSpeed)) / TileSize);
-        int backwardBlockedY_Y_Plus = (int)(((int)(PlayerPosition.Y + PlayerRadius - PlayerDeltaOffsetY * DeltaMovementSpeed)) / TileSize);
-        int backwardBlockedY_Y_Minus = (int)(((int)(PlayerPosition.Y - PlayerRadius - PlayerDeltaOffsetY * DeltaMovementSpeed)) / TileSize);
-
-        //Left and right variables
-        float PlayerDeltaOffsetXMinusQuadrant = (float)Math.Cos(PlayerAngle - MathX.Quadrant1);
-        float PlayerDeltaOffsetYMinusQuadrant = (float)Math.Sin(PlayerAngle - MathX.Quadrant1);
-
-        //Left
-        int leftBlockedX_X_Plus = (int)(((int)(PlayerPosition.X + PlayerRadius + PlayerDeltaOffsetXMinusQuadrant * DeltaMovementSpeed)) / TileSize);
-        int leftBlockedX_X_Minus = (int)(((int)(PlayerPosition.X - PlayerRadius + PlayerDeltaOffsetXMinusQuadrant * DeltaMovementSpeed)) / TileSize);
-        int leftBlockedY_Y_Plus = (int)(((int)(PlayerPosition.Y + PlayerRadius + PlayerDeltaOffsetYMinusQuadrant * DeltaMovementSpeed)) / TileSize);
-        int leftBlockedY_Y_Minus = (int)(((int)(PlayerPosition.Y - PlayerRadius + PlayerDeltaOffsetYMinusQuadrant * DeltaMovementSpeed)) / TileSize);
-
-        //Right
-        int rightBlockedX_X_Plus = (int)(((int)(PlayerPosition.X + PlayerRadius - PlayerDeltaOffsetXMinusQuadrant * DeltaMovementSpeed)) / TileSize);
-        int rightBlockedX_X_Minus = (int)(((int)(PlayerPosition.X - PlayerRadius - PlayerDeltaOffsetXMinusQuadrant * DeltaMovementSpeed)) / TileSize);
-        int rightBlockedY_Y_Plus = (int)(((int)(PlayerPosition.Y + PlayerRadius - PlayerDeltaOffsetYMinusQuadrant * DeltaMovementSpeed)) / TileSize);
-        int rightBlockedY_Y_Minus = (int)(((int)(PlayerPosition.Y - PlayerRadius - PlayerDeltaOffsetYMinusQuadrant * DeltaMovementSpeed)) / TileSize);
-
-        //Forward movement and forward collision detection
-        if (keyboard.IsKeyDown(Key.W))
+        //Checking if the movement vector's magnitude is higher than 1
+        if (MathX.Hypotenuse(movementVector.X, movementVector.Y) > 1f)
         {
-            BlockedX =
-                MapWalls[BlockedX_Y_Minus, forwardBlockedX_X_Plus] > 0 ||
-                MapWalls[BlockedX_Y_Minus, forwardBlockedX_X_Minus] > 0 ||
-                MapWalls[BlockedX_Y_Plus, forwardBlockedX_X_Plus] > 0 ||
-                MapWalls[BlockedX_Y_Plus, forwardBlockedX_X_Minus] > 0;
-
-            BlockedY =
-                MapWalls[forwardBlockedY_Y_Plus, BlockedY_X_Minus] > 0 ||
-                MapWalls[forwardBlockedY_Y_Minus, BlockedY_X_Minus] > 0 ||
-                MapWalls[forwardBlockedY_Y_Plus, BlockedX_X_Plus] > 0 ||
-                MapWalls[forwardBlockedY_Y_Minus, BlockedX_X_Plus] > 0;
-
-            if (!BlockedX)
-            {
-                PlayerPosition.X += PlayerDeltaOffsetX * DeltaMovementSpeed;
-            }
-
-            if (!BlockedY)
-            {
-                PlayerPosition.Y += PlayerDeltaOffsetY * DeltaMovementSpeed;
-            }
+            movementVector.Normalize();
         }
 
-        //Left movement and left collision detection
-        if (keyboard.IsKeyDown(Key.A))
+        Vector2 rotatedVector;
+
+        //Rotating the movement vector to the angle of the player
+        rotatedVector.X = (float)(movementVector.X * Math.Cos(PlayerAngle - MathX.Quadrant1)) - (float)(movementVector.Y * Math.Sin(PlayerAngle - MathX.Quadrant1));
+        rotatedVector.Y = (float)(movementVector.X * Math.Sin(PlayerAngle - MathX.Quadrant1)) + (float)(movementVector.Y * Math.Cos(PlayerAngle - MathX.Quadrant1));
+
+        bool IsXBlocked = false;
+        bool IsYBlocked = false;
+
+        //Collision checking
+        IsXBlocked =
+                MapWalls[(int)((PlayerPosition.Y + PlayerRadius) / TileSize), (int)(((int)(PlayerPosition.X + PlayerRadius + rotatedVector.X * DeltaMovementSpeed)) / TileSize)] > 0 ||
+                MapWalls[(int)((PlayerPosition.Y + PlayerRadius) / TileSize), (int)(((int)(PlayerPosition.X - PlayerRadius + rotatedVector.X * DeltaMovementSpeed)) / TileSize)] > 0 ||
+                MapWalls[(int)((PlayerPosition.Y - PlayerRadius) / TileSize), (int)(((int)(PlayerPosition.X + PlayerRadius + rotatedVector.X * DeltaMovementSpeed)) / TileSize)] > 0 ||
+                MapWalls[(int)((PlayerPosition.Y - PlayerRadius) / TileSize), (int)(((int)(PlayerPosition.X - PlayerRadius + rotatedVector.X * DeltaMovementSpeed)) / TileSize)] > 0;
+
+        IsYBlocked =
+                MapWalls[(int)(((int)(PlayerPosition.Y + PlayerRadius + rotatedVector.Y * DeltaMovementSpeed)) / TileSize), (int)((PlayerPosition.X + PlayerRadius) / TileSize)] > 0 ||
+                MapWalls[(int)(((int)(PlayerPosition.Y - PlayerRadius + rotatedVector.Y * DeltaMovementSpeed)) / TileSize), (int)((PlayerPosition.X + PlayerRadius) / TileSize)] > 0 ||
+                MapWalls[(int)(((int)(PlayerPosition.Y + PlayerRadius + rotatedVector.Y * DeltaMovementSpeed)) / TileSize), (int)((PlayerPosition.X - PlayerRadius) / TileSize)] > 0 ||
+                MapWalls[(int)(((int)(PlayerPosition.Y - PlayerRadius + rotatedVector.Y * DeltaMovementSpeed)) / TileSize), (int)((PlayerPosition.X - PlayerRadius) / TileSize)] > 0;
+
+        //Allowing player to move if the collision checker gave permission
+        if (!IsXBlocked)
         {
-            BlockedX =
-                MapWalls[BlockedX_Y_Minus, leftBlockedX_X_Plus] > 0 ||
-                MapWalls[BlockedX_Y_Minus, leftBlockedX_X_Minus] > 0 ||
-                MapWalls[BlockedX_Y_Plus, leftBlockedX_X_Plus] > 0 ||
-                MapWalls[BlockedX_Y_Plus, leftBlockedX_X_Minus] > 0;
-
-            BlockedY =
-                MapWalls[leftBlockedY_Y_Plus, BlockedY_X_Minus] > 0 ||
-                MapWalls[leftBlockedY_Y_Minus, BlockedY_X_Minus] > 0 ||
-                MapWalls[leftBlockedY_Y_Plus, BlockedX_X_Plus] > 0 ||
-                MapWalls[leftBlockedY_Y_Minus, BlockedX_X_Plus] > 0;
-
-            if (!BlockedX)
-            {
-                PlayerPosition.X += PlayerDeltaOffsetXMinusQuadrant * DeltaMovementSpeed;
-            }
-
-            if (!BlockedY)
-            {
-                PlayerPosition.Y += PlayerDeltaOffsetYMinusQuadrant * DeltaMovementSpeed;
-            }
+            PlayerPosition.X += rotatedVector.X * DeltaMovementSpeed;
         }
 
-        //Backward movement and backward collision detection
-        if (keyboard.IsKeyDown(Key.S))
+        if (!IsYBlocked)
         {
-            BlockedX =
-                MapWalls[BlockedX_Y_Minus, backwardBlockedX_X_Plus] > 0 ||
-                MapWalls[BlockedX_Y_Minus, backwardBlockedX_X_Minus] > 0 ||
-                MapWalls[BlockedX_Y_Plus, backwardBlockedX_X_Plus] > 0 ||
-                MapWalls[BlockedX_Y_Plus, backwardBlockedX_X_Minus] > 0;
-
-            BlockedY =
-                MapWalls[backwardBlockedY_Y_Plus, BlockedY_X_Minus] > 0 ||
-                MapWalls[backwardBlockedY_Y_Minus, BlockedY_X_Minus] > 0 ||
-                MapWalls[backwardBlockedY_Y_Plus, BlockedX_X_Plus] > 0 ||
-                MapWalls[backwardBlockedY_Y_Minus, BlockedX_X_Plus] > 0;
-
-            if (!BlockedX)
-            {
-                PlayerPosition.X -= PlayerDeltaOffsetX * DeltaMovementSpeed;
-            }
-
-            if (!BlockedY)
-            {
-                PlayerPosition.Y -= PlayerDeltaOffsetY * DeltaMovementSpeed;
-            }
+            PlayerPosition.Y += rotatedVector.Y * DeltaMovementSpeed;
         }
 
-        //Right movement and Right collision detection
-        if (keyboard.IsKeyDown(Key.D))
-        {
-            BlockedX =
-                MapWalls[BlockedX_Y_Minus, rightBlockedX_X_Plus] > 0 ||
-                MapWalls[BlockedX_Y_Minus, rightBlockedX_X_Minus] > 0 ||
-                MapWalls[BlockedX_Y_Plus, rightBlockedX_X_Plus] > 0 ||
-                MapWalls[BlockedX_Y_Plus, rightBlockedX_X_Minus] > 0;
-
-            BlockedY =
-                MapWalls[rightBlockedY_Y_Plus, BlockedY_X_Minus] > 0 ||
-                MapWalls[rightBlockedY_Y_Minus, BlockedY_X_Minus] > 0 ||
-                MapWalls[rightBlockedY_Y_Plus, BlockedX_X_Plus] > 0 ||
-                MapWalls[rightBlockedY_Y_Minus, BlockedX_X_Plus] > 0;
-
-            if (!BlockedX)
-            {
-                PlayerPosition.X -= PlayerDeltaOffsetXMinusQuadrant * DeltaMovementSpeed;
-            }
-
-            if (!BlockedY)
-            {
-                PlayerPosition.Y -= PlayerDeltaOffsetYMinusQuadrant * DeltaMovementSpeed;
-            }
-        }
-
-            playerPosition = PlayerPosition;
+        playerPosition = PlayerPosition;
         //================================================================
 
         //FOV Calculation
@@ -230,13 +104,23 @@ public class Engine
         //================================================================
 
         //Casting rays until they hit a wall
-        RayAngle = PlayerAngle + FOVStart;
+        float RayAngle = PlayerAngle + FOVStart;
+
+        float VerticalRayHitX = 0f;
+        float VerticalRayHitY = 0f;
+
+        int VerticalRayCheckingCol = 0;
+        int VerticalRayCheckingRow = 0;
+
+        float OffsetX = 0f;
+        float OffsetY = 0f;
+
+        bool VerticalWallFound = false;
+        bool HorizontalWallFound = false;
 
         for (int i = 0; i < RayCount; i++)
         {
             RayAngle = (RayAngle % MathX.Quadrant4 + MathX.Quadrant4) % MathX.Quadrant4;
-            VerticalWallFound = false;
-            HorizontalWallFound = false;
 
             //Vertical wall check
             if (RayAngle > MathX.Quadrant3 || RayAngle < MathX.Quadrant1)
@@ -260,7 +144,8 @@ public class Engine
             VerticalRayCheckingRow = (int)Math.Floor(VerticalRayHitY / TileSize);
 
             //Resetting iterator variable
-            RenderDistanceIterator = 0;
+            int RenderDistance = Settings.Graphics.RenderDistance;
+            int RenderDistanceIterator = 0;
 
             while (RenderDistanceIterator < RenderDistance && VerticalRayCheckingRow >= 0 && VerticalRayCheckingRow < MapWalls.GetLength(0) && VerticalRayCheckingCol >= 0 && VerticalRayCheckingCol < MapWalls.GetLength(1))
             {
@@ -279,7 +164,13 @@ public class Engine
                 }
             }
 
-            VerticalPythagoras = (float)Math.Sqrt(Math.Pow(Math.Abs(PlayerPosition.X - VerticalRayHitX), 2) + Math.Pow(Math.Abs(PlayerPosition.Y - VerticalRayHitY), 2));
+            float VerticalPythagoras = (float)Math.Sqrt(Math.Pow(Math.Abs(PlayerPosition.X - VerticalRayHitX), 2) + Math.Pow(Math.Abs(PlayerPosition.Y - VerticalRayHitY), 2));
+
+            float HorizontalRayHitX = 0f;
+            float HorizontalRayHitY = 0f;
+
+            int HorizontalRayCheckingCol = 0;
+            int HorizontalRayCheckingRow = 0;
 
             //Horizontal wall check
             if (RayAngle > MathX.Quadrant2)
@@ -323,7 +214,7 @@ public class Engine
                 }
             }
 
-            HorizontalPythagoras = (float)Math.Sqrt(Math.Pow(Math.Abs(PlayerPosition.X - HorizontalRayHitX), 2) + Math.Pow(Math.Abs(PlayerPosition.Y - HorizontalRayHitY), 2));
+            float HorizontalPythagoras = (float)Math.Sqrt(Math.Pow(Math.Abs(PlayerPosition.X - HorizontalRayHitX), 2) + Math.Pow(Math.Abs(PlayerPosition.Y - HorizontalRayHitY), 2));
 
             //Ray data storage
             //RayDatas[i, 0]: Ray's length

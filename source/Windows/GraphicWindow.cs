@@ -19,8 +19,8 @@ public class GraphicWindow
             1000,
             1000,
             GraphicsMode.Default,
-            "Graphic Screen",
-            GameWindowFlags.Fullscreen
+            "Graphic Screen"
+            //GameWindowFlags.Fullscreen
         );
 
         Screen.CursorVisible = false;
@@ -76,8 +76,6 @@ public class GraphicWindow
                 {
                     Engine.PlayerAngle -= (2 * MathX.PI);
                 }
-                Engine.PlayerDeltaOffsetX = (float)Math.Cos(Engine.PlayerAngle);
-                Engine.PlayerDeltaOffsetY = (float)Math.Sin(Engine.PlayerAngle);
             }
 
             int RGBCalc;
@@ -165,20 +163,9 @@ public class GraphicWindow
                     //Calculating shading and lighting with distance
                     shadeCalc = ceilingFloorPixelDistance * Settings.Graphics.DistanceShade;
 
-                    //Optimizing (drawing black pixel without searcing for pixel and applying shadow, if it would already supposed to be black)
-                    if ((path[1][RGBCalc] - shadeCalc) <= 0)
-                    {
-                        r = 0f;
-                        g = 0f;
-                        b = 0f;
-                    }
-                    else
-                    {
-                        //Applying shading and using the needed pixel
-                        r = (path[1][RGBCalc] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc] - shadeCalc) / 255f;
-                        g = (path[1][RGBCalc + 1] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 1] - shadeCalc) / 255f;
-                        b = (path[1][RGBCalc + 2] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 2] - shadeCalc) / 255f;
-                    }
+                    r = (path[1][RGBCalc] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc] - shadeCalc) / 255f;
+                    g = (path[1][RGBCalc + 1] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 1] - shadeCalc) / 255f;
+                    b = (path[1][RGBCalc + 2] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 2] - shadeCalc) / 255f;
 
                     //Drawing pixel
                     GL.Color3(r, g, b);
@@ -252,20 +239,9 @@ public class GraphicWindow
                     //Calculating shading and lighting with distance
                     shadeCalc = ceilingFloorPixelDistance * Settings.Graphics.DistanceShade;
 
-                    //Optimizing (drawing black pixel without searcing for pixel and applying shadow, if it would already supposed to be black)
-                    if ((path[1][RGBCalc] - shadeCalc) <= 0)
-                    {
-                        r = 0f;
-                        g = 0f;
-                        b = 0f;
-                    }
-                    else
-                    {
-                        //Applying shading and using the needed pixel
-                        r = (path[1][RGBCalc] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc] - shadeCalc) / 255f;
-                        g = (path[1][RGBCalc + 1] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 1] - shadeCalc) / 255f;
-                        b = (path[1][RGBCalc + 2] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 2] - shadeCalc) / 255f;
-                    }
+                    r = (path[1][RGBCalc] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc] - shadeCalc) / 255f;
+                    g = (path[1][RGBCalc + 1] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 1] - shadeCalc) / 255f;
+                    b = (path[1][RGBCalc + 2] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 2] - shadeCalc) / 255f;
 
                     //Drawing pixel
                     GL.Color3(r, g, b);
@@ -345,20 +321,9 @@ public class GraphicWindow
                             RGBCalc = ((int)Math.Floor((TileSize - Engine.RayDatas[i, 3]) / (TileSize / (float)path[0][0])) * 3) + k * (path[0][0] * 3) :
                             RGBCalc = ((int)Math.Floor(Engine.RayDatas[i, 3] / (TileSize / (float)path[0][0])) * 3) + k * (path[0][0] * 3);
 
-                        //Optimizing (drawing black pixel without searcing for pixel and applying shadow, if it would already supposed to be black)
-                        if ((path[1][RGBCalc] - shadeCalc) <= 0)
-                        {
-                            r = 0f;
-                            g = 0f;
-                            b = 0f;
-                        }
-                        else
-                        {
-                            //Applying shading and using the needed pixel
-                            r = (path[1][RGBCalc] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc] - shadeCalc) / 255f;
-                            g = (path[1][RGBCalc + 1] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 1] - shadeCalc) / 255f;
-                            b = (path[1][RGBCalc + 2] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 2] - shadeCalc) / 255f;
-                        }
+                        r = (path[1][RGBCalc] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc] - shadeCalc) / 255f;
+                        g = (path[1][RGBCalc + 1] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 1] - shadeCalc) / 255f;
+                        b = (path[1][RGBCalc + 2] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 2] - shadeCalc) / 255f;
 
                         //Drawing pixel
                         GL.Color3(r, g, b);

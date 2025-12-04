@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security.Cryptography.X509Certificates;
 
 public static class MathX {
     //Default math variables
@@ -8,4 +7,8 @@ public static class MathX {
     public const float Quadrant2 = PI;
     public const float Quadrant3 = (PI * 3) / 2;
     public const float Quadrant4 = PI * 2;
+
+    public static float Hypotenuse(float a, float b) {
+        return (float)(Math.Sqrt(a * a + b * b));
+    }
 }
