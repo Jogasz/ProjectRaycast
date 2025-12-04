@@ -114,8 +114,8 @@ public class GraphicWindow
                 while (ceilingPixelYTop < (screenVerticalOffset + ((minimumScreenHeight - WallHeight) / 2)))
                 {
                     /* 
-                    * If the pixel's bottom position is inside the correct screen, but the top position sticks out,
-                    * the top position's Y value may be equal to the allowed screen's top value.
+                    * If the pixel's top position is in the correct screen, but the bottom position is in the wall,
+                    * the bottom position's Y value may be equal to the wall's top value.
                     */
                     ceilingPixelYBottom =
                     (ceilingPixelYBottom > (screenVerticalOffset + ((minimumScreenHeight - WallHeight) / 2))) ?
@@ -127,11 +127,12 @@ public class GraphicWindow
 
                     ceilingFloorPixelDistance = ((cameraZ / rowY) * TileSize) / (float)Math.Abs(Math.Cos(Engine.PlayerAngle - Engine.RayDatas[i, 6]));
 
-                    //World position of the pixel
+                    //World X position of the pixel
                     ceilingPixelXWorldPosition = Math.Abs(Engine.playerPosition.X + (Engine.RayDatas[i, 1] * ceilingFloorPixelDistance)) >= MapCeiling.GetLength(1) * TileSize ?
                         MapCeiling.GetLength(1) * TileSize - 0.0001f :
                         Math.Abs(Engine.playerPosition.X + (Engine.RayDatas[i, 1] * ceilingFloorPixelDistance));
 
+                    //World Y position of the pixel
                     ceilingPixelYWorldPosition = Math.Abs(Engine.playerPosition.Y + (Engine.RayDatas[i, 2] * ceilingFloorPixelDistance)) >= MapCeiling.GetLength(0) * TileSize ?
                         MapCeiling.GetLength(0) * TileSize - 0.0001f :
                         Math.Abs(Engine.playerPosition.Y + (Engine.RayDatas[i, 2] * ceilingFloorPixelDistance));
@@ -164,10 +165,20 @@ public class GraphicWindow
                     //Calculating shading and lighting with distance
                     shadeCalc = ceilingFloorPixelDistance * Settings.Graphics.DistanceShade;
 
-                    //Applying shading and using the needed pixel
-                    r = (path[1][RGBCalc] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc] - shadeCalc) / 255f;
-                    g = (path[1][RGBCalc + 1] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 1] - shadeCalc) / 255f;
-                    b = (path[1][RGBCalc + 2] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 2] - shadeCalc) / 255f;
+                    //Optimizing (drawing black pixel without searcing for pixel and applying shadow, if it would already supposed to be black)
+                    if ((path[1][RGBCalc] - shadeCalc) <= 0)
+                    {
+                        r = 0f;
+                        g = 0f;
+                        b = 0f;
+                    }
+                    else
+                    {
+                        //Applying shading and using the needed pixel
+                        r = (path[1][RGBCalc] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc] - shadeCalc) / 255f;
+                        g = (path[1][RGBCalc + 1] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 1] - shadeCalc) / 255f;
+                        b = (path[1][RGBCalc + 2] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 2] - shadeCalc) / 255f;
+                    }
 
                     //Drawing pixel
                     GL.Color3(r, g, b);
@@ -176,6 +187,7 @@ public class GraphicWindow
                     GL.Vertex2(floorCeilingPixelXRight, ceilingPixelYBottom);
                     GL.Vertex2(floorCeilingPixelXLeft, ceilingPixelYBottom);
 
+                    //Incremental increasing of the top and bottom values of the pixel
                     ceilingPixelYTop = ceilingPixelYBottom;
                     ceilingPixelYBottom += WallWidth;
                 }
@@ -188,8 +200,8 @@ public class GraphicWindow
                 while (floorPixelYBottom > (screenVerticalOffset + (minimumScreenHeight / 2) + (WallHeight / 2)))
                 {
                     /* 
-                    * If the pixel's top position is inside the correct screen, but the bottom position sticks out,
-                    * the bottom position's Y value may be equal to the allowed screen's bottom value.
+                    * If the pixel's bottom position is in the correct screen, but the top position is in the wall,
+                    * the top position's Y value may be equal to the wall's bottom value.
                     */
                     floorPixelYTop =
                     (floorPixelYTop < (screenVerticalOffset + (minimumScreenHeight / 2) + (WallHeight / 2))) ?
@@ -207,6 +219,7 @@ public class GraphicWindow
                         MapFloor.GetLength(1) * TileSize - 0.0001f :
                         Math.Abs(Engine.playerPosition.X + (Engine.RayDatas[i, 1] * ceilingFloorPixelDistance));
 
+                    //World Y position of the pixel
                     floorPixelYWorldPosition = Math.Abs(Engine.playerPosition.Y + (Engine.RayDatas[i, 2] * ceilingFloorPixelDistance)) >= MapFloor.GetLength(0) * TileSize ?
                         MapFloor.GetLength(0) * TileSize - 0.0001f :
                         Math.Abs(Engine.playerPosition.Y + (Engine.RayDatas[i, 2] * ceilingFloorPixelDistance));
@@ -239,10 +252,20 @@ public class GraphicWindow
                     //Calculating shading and lighting with distance
                     shadeCalc = ceilingFloorPixelDistance * Settings.Graphics.DistanceShade;
 
-                    //Applying shading and using the needed pixel
-                    r = (path[1][RGBCalc] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc] - shadeCalc) / 255f;
-                    g = (path[1][RGBCalc + 1] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 1] - shadeCalc) / 255f;
-                    b = (path[1][RGBCalc + 2] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 2] - shadeCalc) / 255f;
+                    //Optimizing (drawing black pixel without searcing for pixel and applying shadow, if it would already supposed to be black)
+                    if ((path[1][RGBCalc] - shadeCalc) <= 0)
+                    {
+                        r = 0f;
+                        g = 0f;
+                        b = 0f;
+                    }
+                    else
+                    {
+                        //Applying shading and using the needed pixel
+                        r = (path[1][RGBCalc] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc] - shadeCalc) / 255f;
+                        g = (path[1][RGBCalc + 1] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 1] - shadeCalc) / 255f;
+                        b = (path[1][RGBCalc + 2] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 2] - shadeCalc) / 255f;
+                    }
 
                     //Drawing pixel
                     GL.Color3(r, g, b);
@@ -251,6 +274,7 @@ public class GraphicWindow
                     GL.Vertex2(floorCeilingPixelXRight, floorPixelYBottom);
                     GL.Vertex2(floorCeilingPixelXLeft, floorPixelYBottom);
 
+                    //Incremental increasing of the top and bottom values of the pixel
                     floorPixelYBottom = floorPixelYTop;
                     floorPixelYTop -= WallWidth;
                 }
@@ -317,19 +341,24 @@ public class GraphicWindow
                         tempPixelCalcBottom;
 
                         //Mirroring wrong textures, Calculating RGB variables
-                        if (Engine.RayDatas[i, 4] == 1 || Engine.RayDatas[i, 4] == 3)
+                        RGBCalc = (Engine.RayDatas[i, 4] == 1 || Engine.RayDatas[i, 4] == 3) ?
+                            RGBCalc = ((int)Math.Floor((TileSize - Engine.RayDatas[i, 3]) / (TileSize / (float)path[0][0])) * 3) + k * (path[0][0] * 3) :
+                            RGBCalc = ((int)Math.Floor(Engine.RayDatas[i, 3] / (TileSize / (float)path[0][0])) * 3) + k * (path[0][0] * 3);
+
+                        //Optimizing (drawing black pixel without searcing for pixel and applying shadow, if it would already supposed to be black)
+                        if ((path[1][RGBCalc] - shadeCalc) <= 0)
                         {
-                            RGBCalc = ((int)Math.Floor((TileSize - Engine.RayDatas[i, 3]) / (TileSize / (float)path[0][0])) * 3) + k * (path[0][0] * 3);
+                            r = 0f;
+                            g = 0f;
+                            b = 0f;
                         }
                         else
                         {
-                            RGBCalc = ((int)Math.Floor(Engine.RayDatas[i, 3] / (TileSize / (float)path[0][0])) * 3) + k * (path[0][0] * 3);
+                            //Applying shading and using the needed pixel
+                            r = (path[1][RGBCalc] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc] - shadeCalc) / 255f;
+                            g = (path[1][RGBCalc + 1] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 1] - shadeCalc) / 255f;
+                            b = (path[1][RGBCalc + 2] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 2] - shadeCalc) / 255f;
                         }
-
-                        //Applying shading and using the needed pixel
-                        r = (path[1][RGBCalc] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc] - shadeCalc) / 255f;
-                        g = (path[1][RGBCalc + 1] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 1] - shadeCalc) / 255f;
-                        b = (path[1][RGBCalc + 2] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 2] - shadeCalc) / 255f;
 
                         //Drawing pixel
                         GL.Color3(r, g, b);
