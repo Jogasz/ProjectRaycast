@@ -19,8 +19,8 @@ public class GraphicWindow
             1000,
             1000,
             GraphicsMode.Default,
-            "Graphic Screen"
-            //GameWindowFlags.Fullscreen
+            "Graphic Screen",
+            GameWindowFlags.Fullscreen
         );
 
         Screen.CursorVisible = false;
@@ -100,13 +100,9 @@ public class GraphicWindow
                 float floorCeilingPixelXLeft = i * WallWidth + screenHorizontalOffset;
                 float floorCeilingPixelXRight = (i + 1) * WallWidth + screenHorizontalOffset;
 
-                //Floor Y position variables
-                float floorPixelYTop = (minimumScreenHeight / 2) + (WallHeight / 2) + screenVerticalOffset;
-                float floorPixelYBottom = (minimumScreenHeight / 2) + (WallHeight / 2) +  WallWidth + screenVerticalOffset;
-
                 //Ceiling Y position variables
-                float ceilingPixelYTop = (minimumScreenHeight / 2) - (WallHeight / 2) -  WallWidth + screenVerticalOffset;
-                float ceilingPixelYBottom = (minimumScreenHeight / 2) - (WallHeight / 2) + screenVerticalOffset;
+                float ceilingPixelYTop = screenVerticalOffset;
+                float ceilingPixelYBottom = screenVerticalOffset + WallWidth;
 
                 float ceilingFloorPixelDistance,
                       ceilingPixelXWorldPosition,
@@ -115,16 +111,16 @@ public class GraphicWindow
                       floorPixelYWorldPosition;
 
                 //Ceiling drawing
-                while (ceilingPixelYBottom > screenVerticalOffset)
+                while (ceilingPixelYTop < (screenVerticalOffset + ((minimumScreenHeight - WallHeight) / 2)))
                 {
                     /* 
                     * If the pixel's bottom position is inside the correct screen, but the top position sticks out,
                     * the top position's Y value may be equal to the allowed screen's top value.
                     */
-                    ceilingPixelYTop =
-                    (ceilingPixelYTop < screenVerticalOffset) ?
-                    screenVerticalOffset :
-                    ceilingPixelYTop;
+                    ceilingPixelYBottom =
+                    (ceilingPixelYBottom > (screenVerticalOffset + ((minimumScreenHeight - WallHeight) / 2))) ?
+                    (screenVerticalOffset + ((minimumScreenHeight - WallHeight) / 2)) :
+                    ceilingPixelYBottom;
 
                     //Y of the current pixel on the screen
                     rowY = (Screen.Height / 2) - (ceilingPixelYTop + ((ceilingPixelYBottom - ceilingPixelYTop) / 2));
@@ -141,12 +137,12 @@ public class GraphicWindow
                         Math.Abs(Engine.playerPosition.Y + (Engine.RayDatas[i, 2] * ceilingFloorPixelDistance));
 
                     //Textures
-                    switch (MapCeiling[(int)Math.Floor(ceilingPixelYWorldPosition / TileSize), (int)Math.Floor(ceilingPixelXWorldPosition / TileSize)]) //Az index a tömb határán kívülre mutatott
+                    switch (MapCeiling[(int)Math.Floor(ceilingPixelYWorldPosition / TileSize), (int)Math.Floor(ceilingPixelXWorldPosition / TileSize)])
                     {
                         //No floor
                         case 0:
-                            ceilingPixelYBottom = ceilingPixelYTop;
-                            ceilingPixelYTop -= WallWidth;
+                            ceilingPixelYTop = ceilingPixelYBottom;
+                            ceilingPixelYBottom += WallWidth;
                             continue;
                         //Floor
                         //Default textures
@@ -180,21 +176,25 @@ public class GraphicWindow
                     GL.Vertex2(floorCeilingPixelXRight, ceilingPixelYBottom);
                     GL.Vertex2(floorCeilingPixelXLeft, ceilingPixelYBottom);
 
-                    ceilingPixelYBottom = ceilingPixelYTop;
-                    ceilingPixelYTop -= WallWidth;
+                    ceilingPixelYTop = ceilingPixelYBottom;
+                    ceilingPixelYBottom += WallWidth;
                 }
 
+                //Floor Y position variables
+                float floorPixelYTop = screenVerticalOffset + minimumScreenHeight - WallWidth;
+                float floorPixelYBottom = screenVerticalOffset + minimumScreenHeight;
+
                 //Floor drawing
-                while (floorPixelYTop < (screenVerticalOffset + minimumScreenHeight))
+                while (floorPixelYBottom > (screenVerticalOffset + (minimumScreenHeight / 2) + (WallHeight / 2)))
                 {
                     /* 
                     * If the pixel's top position is inside the correct screen, but the bottom position sticks out,
                     * the bottom position's Y value may be equal to the allowed screen's bottom value.
                     */
-                    floorPixelYBottom =
-                    (floorPixelYBottom > (screenVerticalOffset + minimumScreenHeight)) ?
-                    (screenVerticalOffset + minimumScreenHeight) :
-                    floorPixelYBottom;
+                    floorPixelYTop =
+                    (floorPixelYTop < (screenVerticalOffset + (minimumScreenHeight / 2) + (WallHeight / 2))) ?
+                    (screenVerticalOffset + (minimumScreenHeight / 2) + (WallHeight / 2)) :
+                    floorPixelYTop;
 
                     //Y of the current pixel on the screen
                     rowY = floorPixelYTop + ((floorPixelYBottom - floorPixelYTop) / 2) - (Screen.Height / 2);
@@ -216,8 +216,8 @@ public class GraphicWindow
                     {
                         //No floor
                         case 0:
-                            floorPixelYTop = floorPixelYBottom;
-                            floorPixelYBottom += WallWidth;
+                            floorPixelYBottom = floorPixelYTop;
+                            floorPixelYTop -= WallWidth;
                             continue;
                         //Floor
                         //Default textures
@@ -251,8 +251,8 @@ public class GraphicWindow
                     GL.Vertex2(floorCeilingPixelXRight, floorPixelYBottom);
                     GL.Vertex2(floorCeilingPixelXLeft, floorPixelYBottom);
 
-                    floorPixelYTop = floorPixelYBottom;
-                    floorPixelYBottom += WallWidth;
+                    floorPixelYBottom = floorPixelYTop;
+                    floorPixelYTop -= WallWidth;
                 }
 
                 //Textures

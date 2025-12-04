@@ -22,9 +22,9 @@
   ],
   "Graphics": {
     "FOV": 55,
-    "RayCount": 100,
+    "RayCount": 80,
     "RenderDistance": 12,
-    "DistanceShade": 3
+    "DistanceShade": 4
   },
   "Gameplay": {
     "TileSize": 50,
