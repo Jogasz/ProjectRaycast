@@ -136,24 +136,13 @@ public class GraphicWindow
                         Math.Abs(Engine.playerPosition.Y + (Engine.RayDatas[i, 2] * ceilingFloorPixelDistance));
 
                     //Textures
-                    switch (MapCeiling[(int)Math.Floor(ceilingPixelYWorldPosition / TileSize), (int)Math.Floor(ceilingPixelXWorldPosition / TileSize)])
+                    path = textureMapper((int)MapCeiling[(int)Math.Floor(ceilingPixelYWorldPosition / TileSize), (int)Math.Floor(ceilingPixelXWorldPosition / TileSize)]);
+
+                    if (path == null)
                     {
-                        //No floor
-                        case 0:
-                            ceilingPixelYTop = ceilingPixelYBottom;
-                            ceilingPixelYBottom += WallWidth;
-                            continue;
-                        //Floor
-                        //Default textures
-                        case 1:
-                            path = Textures.planksTexture;
-                            break;
-                        case 2:
-                            path = Textures.mossyPlanksTexture;
-                            break;
-                        case 3:
-                            path = Textures.stoneBricksTexture;
-                            break;
+                        ceilingPixelYTop = ceilingPixelYBottom;
+                        ceilingPixelYBottom += WallWidth;
+                        continue;
                     }
 
                     //Calculating RGB variables
@@ -211,25 +200,14 @@ public class GraphicWindow
                         MapFloor.GetLength(0) * TileSize - 0.0001f :
                         Math.Abs(Engine.playerPosition.Y + (Engine.RayDatas[i, 2] * ceilingFloorPixelDistance));
 
+                    path = textureMapper((int)MapFloor[(int)Math.Floor(floorPixelYWorldPosition / TileSize), (int)Math.Floor(floorPixelXWorldPosition / TileSize)]);
+
                     //Textures
-                    switch (MapFloor[(int)Math.Floor(floorPixelYWorldPosition / TileSize), (int)Math.Floor(floorPixelXWorldPosition / TileSize)])
+                    if (path == null)
                     {
-                        //No floor
-                        case 0:
-                            floorPixelYBottom = floorPixelYTop;
-                            floorPixelYTop -= WallWidth;
-                            continue;
-                        //Floor
-                        //Default textures
-                        case 1:
-                            path = Textures.planksTexture;
-                            break;
-                        case 2:
-                            path = Textures.mossyPlanksTexture;
-                            break;
-                        case 3:
-                            path = Textures.stoneBricksTexture;
-                            break;
+                        floorPixelYBottom = floorPixelYTop;
+                        floorPixelYTop -= WallWidth;
+                        continue;
                     }
 
                     //Calculating RGB variables
@@ -256,29 +234,11 @@ public class GraphicWindow
                 }
 
                 //Textures
-                switch (Engine.RayDatas[i, 5])
+                path = textureMapper((int)Engine.RayDatas[i, 5]);
+
+                if (path == null)
                 {
-                    //No wall
-                    case 0:
-                        continue;
-                    //Wall
-                    //Default textures
-                    case 1:
-                        path = Textures.bricksTexture;
-                        break;
-                    case 2:
-                        path = Textures.stoneBricksTexture;
-                        break;
-                    case 3:
-                        path = Textures.mossyBricksTexture;
-                        break;
-                    case 4:
-                        path = Textures.windowStoneBricksTexture;
-                        break;
-
-                        //Window textures
-
-                        //Paintings
+                    continue;
                 }
 
                 //Calculating shading and lighting with distance
@@ -340,5 +300,64 @@ public class GraphicWindow
             Screen.SwapBuffers();
         };
         Screen.Run();
+    }
+
+    public static int[][] textureMapper(int x)
+    {
+        int[][] path = null;
+
+        switch (x)
+        {
+            //Wall hit
+            //Default textures
+            case 1:
+                path = Textures.planksTexture;
+                break;
+            case 2:
+                path = Textures.mossyPlanksTexture;
+                break;
+            case 3:
+                path = Textures.stoneBricksTexture;
+                break;
+            case 4:
+                path = Textures.mossyStoneBricksTexture;
+                break;
+
+            //Door textures
+            case 5:
+                path = Textures.doorStoneBricksTexture;
+                break;
+            case 6:
+                path = Textures.doorMossyStoneBricksTexture;
+                break;
+
+            //Window textures
+            case 7:
+                path = Textures.windowStoneBricksTexture;
+                break;
+            case 8:
+                path = Textures.windowMossyStoneBricksTexture;
+                break;
+
+            //Painting textures
+            case 9:
+                path = Textures.painting_a_stoneBricksTexture;
+                break;
+            case 10:
+                path = Textures.painting_b_stoneBricksTexture;
+                break;
+            case 11:
+                path = Textures.painting_a_mossyStoneBricksTexture;
+                break;
+            case 12:
+                path = Textures.painting_b_mossyStoneBricksTexture;
+                break;
+
+            //Test textures
+            case 13:
+                path = Textures.floorTestTexture;
+                break;
+        }
+        return path;
     }
 }

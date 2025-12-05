@@ -2,19 +2,51 @@
 using System.IO;
 
 public static class Textures {
-    public static int[][] bricksTexture { get; private set; }
-    public static int[][] mossyBricksTexture { get; private set; }
-    public static int[][] stoneBricksTexture { get; private set; }
+    //Default textures
     public static int[][] planksTexture { get; private set; }
     public static int[][] mossyPlanksTexture { get; private set; }
+    public static int[][] stoneBricksTexture { get; private set; }
+    public static int[][] mossyStoneBricksTexture { get; private set; }
+
+    //Door textures
+    public static int[][] doorStoneBricksTexture { get; private set; }
+    public static int[][] doorMossyStoneBricksTexture { get; private set; }
+
+    //Window textures
     public static int[][] windowStoneBricksTexture { get; private set; }
+    public static int[][] windowMossyStoneBricksTexture { get; private set; }
+
+    //Painting textures
+    public static int[][] painting_a_stoneBricksTexture { get; private set; }
+    public static int[][] painting_b_stoneBricksTexture { get; private set; }
+    public static int[][] painting_a_mossyStoneBricksTexture { get; private set; }
+    public static int[][] painting_b_mossyStoneBricksTexture { get; private set; }
+
+    //Test textures
+    public static int[][] floorTestTexture { get; private set; }
     public static void Load() {
-        bricksTexture = Read("assets/textures/bricks.txt");
-        mossyBricksTexture = Read("assets/textures/mossy_bricks.txt");
-        stoneBricksTexture = Read("assets/textures/stonebricks.txt");
+        //Default textures
         planksTexture = Read("assets/textures/planks.txt");
         mossyPlanksTexture = Read("assets/textures/mossy_planks.txt");
+        stoneBricksTexture = Read("assets/textures/stonebricks.txt");
+        mossyStoneBricksTexture = Read("assets/textures/mossy_stonebricks.txt");
+
+        //Door textures
+        doorStoneBricksTexture = Read("assets/textures/door_stonebricks.txt");
+        doorMossyStoneBricksTexture = Read("assets/textures/door_mossy_stonebricks.txt");
+
+        //Window textures
         windowStoneBricksTexture = Read("assets/textures/window_stonebricks.txt");
+        windowMossyStoneBricksTexture = Read("assets/textures/window_mossy_stonebricks.txt");
+
+        //Painting textures
+        painting_a_stoneBricksTexture = Read("assets/textures/painting_a_stonebricks.txt");
+        painting_b_stoneBricksTexture = Read("assets/textures/painting_b_stonebricks.txt");
+        painting_a_mossyStoneBricksTexture = Read("assets/textures/painting_a_mossy_stonebricks.txt");
+        painting_b_mossyStoneBricksTexture = Read("assets/textures/painting_b_mossy_stonebricks.txt");
+
+        //Test textures
+        floorTestTexture = Read("assets/textures/floorTest.txt");
     }
     public static int[][] Read(string path) {
         if (File.Exists(path))
