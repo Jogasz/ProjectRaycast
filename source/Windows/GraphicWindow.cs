@@ -155,7 +155,7 @@ public class GraphicWindow
                     ceilingPixelYWorldPosition >= MapCeiling.GetLength(0) * TileSize ||
                     ceilingPixelYWorldPosition < 0f) ?
                         null :
-                        textureMapper((int)MapFloor[(int)Math.Floor(ceilingPixelYWorldPosition / TileSize), (int)Math.Floor(ceilingPixelXWorldPosition / TileSize)]);
+                        textureMapper((int)MapCeiling[(int)Math.Floor(ceilingPixelYWorldPosition / TileSize), (int)Math.Floor(ceilingPixelXWorldPosition / TileSize)]);
 
                     if (path == null)
                     {
@@ -299,8 +299,23 @@ public class GraphicWindow
 
                         //Mirroring wrong textures, Calculating RGB variables
                         RGBCalc = (Engine.RayDatas[i, 4] == 1 || Engine.RayDatas[i, 4] == 3) ?
-                        RGBCalc = ((int)Math.Floor((TileSize - Engine.RayDatas[i, 3]) / (TileSize / (float)path[0][0])) * 3) + k * (path[0][0] * 3) :
-                        RGBCalc = ((int)Math.Floor(Engine.RayDatas[i, 3] / (TileSize / (float)path[0][0])) * 3) + k * (path[0][0] * 3);
+                            ((int)Math.Floor((TileSize - Engine.RayDatas[i, 3]) / (TileSize / (float)path[0][0])) * 3) + k * (path[0][0] * 3) :
+                            ((int)Math.Floor(Engine.RayDatas[i, 3] / (TileSize / (float)path[0][0])) * 3) + k * (path[0][0] * 3);
+
+                        if (RGBCalc == 3888)
+                        {
+                            Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!");
+                            Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!");
+                            Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!");
+                            Console.WriteLine("RGBCalc határérték (3888) hiba lett volna!");
+                            Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!");
+                            Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!");
+                            Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!");
+                        }
+
+                        RGBCalc = (RGBCalc == 3888) ?
+                            3886 :
+                            RGBCalc;
 
                         r = (path[1][RGBCalc] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc] - shadeCalc) / 255f;
                         g = (path[1][RGBCalc + 1] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 1] - shadeCalc) / 255f;
@@ -315,6 +330,18 @@ public class GraphicWindow
                     }
                 }
             }
+
+            //Crosshair
+            GL.Color3(1f, 1f, 1f);
+            GL.Vertex2(screenHorizontalOffset + (minimumScreenWidth / 2) - (minimumScreenWidth / 500f), screenVerticalOffset + (minimumScreenHeight / 2) - (minimumScreenHeight / 50f));
+            GL.Vertex2(screenHorizontalOffset + (minimumScreenWidth / 2) + (minimumScreenWidth / 500f), screenVerticalOffset + (minimumScreenHeight / 2) - (minimumScreenHeight / 50f));
+            GL.Vertex2(screenHorizontalOffset + (minimumScreenWidth / 2) + (minimumScreenWidth / 500f), screenVerticalOffset + (minimumScreenHeight / 2) + (minimumScreenHeight / 50f));
+            GL.Vertex2(screenHorizontalOffset + (minimumScreenWidth / 2) - (minimumScreenWidth / 500f), screenVerticalOffset + (minimumScreenHeight / 2) + (minimumScreenHeight / 50f));
+
+            GL.Vertex2(screenHorizontalOffset + (minimumScreenWidth / 2) - (minimumScreenWidth / 50f), screenVerticalOffset + (minimumScreenHeight / 2) - (minimumScreenHeight / 500f));
+            GL.Vertex2(screenHorizontalOffset + (minimumScreenWidth / 2) + (minimumScreenWidth / 50f), screenVerticalOffset + (minimumScreenHeight / 2) - (minimumScreenHeight / 500f));
+            GL.Vertex2(screenHorizontalOffset + (minimumScreenWidth / 2) + (minimumScreenWidth / 50f), screenVerticalOffset + (minimumScreenHeight / 2) + (minimumScreenHeight / 500f));
+            GL.Vertex2(screenHorizontalOffset + (minimumScreenWidth / 2) - (minimumScreenWidth / 50f), screenVerticalOffset + (minimumScreenHeight / 2) + (minimumScreenHeight / 500f));
 
             GL.End();
 

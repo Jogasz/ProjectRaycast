@@ -71,6 +71,18 @@ public class Engine
         bool IsXBlocked = false;
         bool IsYBlocked = false;
 
+        //Sprint
+        if (keyboard.IsKeyDown(Key.W) && keyboard.IsKeyDown(Key.ShiftLeft))
+        {
+            DeltaMovementSpeed = DeltaTime * MovementSpeed * 1.7f;
+            FOV = (int)(Settings.Graphics.FOV / 1.05f);
+        }
+        else
+        {
+            DeltaMovementSpeed = DeltaTime * MovementSpeed;
+            FOV = Settings.Graphics.FOV;
+        }
+
         //Collision checking
         IsXBlocked =
                 PlayerPosition.X - PlayerRadius + rotatedVector.X * DeltaMovementSpeed <= 0f ||
