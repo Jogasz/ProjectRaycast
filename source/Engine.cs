@@ -12,7 +12,7 @@ public class Engine
     static float MovementSpeed = Settings.Player.MovementSpeed;
 
     //Player variables
-    public static Vector2 playerPosition { get; private set; } = new Vector2(100, 100);
+    public static Vector2 playerPosition { get; private set; } = new Vector2(75, 75);
     public static float PlayerAngle { get; set; } = 0f;
     public static int PlayerRadius { get; private set; } = 10;
 
@@ -25,10 +25,32 @@ public class Engine
     private static Stopwatch stopWatch = new Stopwatch();
     private static float lastTime = 0f;
 
+    //Starting stopwatch for DeltaTime
     public static void Start() {
         stopWatch.Start();
     }
 
+    //Handling controls
+    public static void Controls(object sender, OpenTK.Input.KeyboardKeyEventArgs e)
+    {
+        //Jumping mechanic
+        if (
+            e.Key == Key.Space ||
+            e.Key == Key.E ||
+            e.Key == Key.Tab
+        )
+        {
+            Console.WriteLine($"You pressed '{e.Key}', this mechanic is missig!");
+        }
+
+        //Exiting program
+        else if (e.Key == Key.Escape)
+        {
+            Environment.Exit(0);
+        }
+    }
+
+    //Engine variable updater (core)
     public static void Update() {
         //DeltaTime calculation
         float CurrentTime = (float)stopWatch.Elapsed.TotalSeconds;
@@ -39,16 +61,10 @@ public class Engine
         //Console.WriteLine(Math.Floor(1 / DeltaTime) + "FPS");
         //================================================================
 
-        //Keybinds, player controls and collision detection
+        //Player movement and collision detection
         float DeltaMovementSpeed = MovementSpeed * DeltaTime;
         var keyboard = Keyboard.GetState();
         var PlayerPosition = playerPosition;
-
-        //Escape - exiting game
-        if (keyboard.IsKeyDown(Key.Escape))
-        {
-            Environment.Exit(0);
-        }
 
         Vector2 movementVector;
 
@@ -304,7 +320,7 @@ public class Engine
 
             //The current ray's angle
             RayDatas[i, 6] = RayAngle;
-            
+
             //Incrementing the value of the ray's angle for the next ray in FOV
             RayAngle = ((RayAngle + RadBetweenRays) % MathX.Quadrant4 + MathX.Quadrant4) % MathX.Quadrant4;
         }

@@ -3,6 +3,7 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 using System;
+using System.Runtime.CompilerServices;
 public class GraphicWindow
 {
     public static int TileSize = Settings.Gameplay.TileSize;
@@ -31,6 +32,8 @@ public class GraphicWindow
         //Screen.VSync = VSyncMode.Off;
 
         WindowManager.SetupPixelCoordinates(Screen);
+
+        Screen.KeyDown += Engine.Controls;
 
         Screen.RenderFrame += (sender, e) =>
         {
@@ -265,16 +268,35 @@ public class GraphicWindow
                 //Calculating shading and lighting with distance
                 shadeCalc = Engine.RayDatas[i, 0] * Settings.Graphics.DistanceShade;
 
+                //Optimizing with shade (if the shade would have been strong enaougn to make everything black, just paint the line black)
+                int shadeOptimizationLimit = 255;
+
+                if (shadeCalc >= shadeOptimizationLimit)
+                {
+                    float lineCalcTop = (Screen.Height / 2) - (WallHeight / 2) + pitch;
+                    float lineCalcBottom = (Screen.Height / 2) - (WallHeight / 2) + (path[0][1] * (WallHeight / path[0][1])) + pitch;
+
+                    GL.Color3(1f, 0f, 0f);
+                    GL.Vertex2(i * WallWidth + screenHorizontalOffset, lineCalcTop);
+                    GL.Vertex2((i + 1) * WallWidth + screenHorizontalOffset, lineCalcTop);
+                    GL.Vertex2((i + 1) * WallWidth + screenHorizontalOffset, lineCalcBottom);
+                    GL.Vertex2(i * WallWidth + screenHorizontalOffset, lineCalcBottom);
+
+                    continue;
+                }
+
+                float pixelCalcTop = (Screen.Height / 2) - (WallHeight / 2) + pitch;
+                float pixelCalcBottom = (Screen.Height / 2) - (WallHeight / 2) + (WallHeight / path[0][1]) + pitch;
+
                 //Drawing pixels in lines from up to down (walls)
                 for (int k = 0; k < path[0][1]; k++)
                 {
-                    //Temporal calculation for line positions to avoid repetition
-                    float tempPixelCalcTop = (Screen.Height / 2) - (WallHeight / 2) + (k * (WallHeight / path[0][1])) + pitch;
-                    float tempPixelCalcBottom = (Screen.Height / 2) - (WallHeight / 2) + ((k + 1) * (WallHeight / path[0][1])) + pitch;
-
                     //Ensuring that the graphical image stays within the interpolated screen size
-                    if (tempPixelCalcBottom < screenVerticalOffset || tempPixelCalcTop > (screenVerticalOffset + minimumScreenHeight))
+                    if (pixelCalcBottom < screenVerticalOffset || pixelCalcTop > (screenVerticalOffset + minimumScreenHeight))
                     {
+                        pixelCalcTop = pixelCalcBottom;
+                        pixelCalcBottom += (WallHeight / path[0][1]);
+
                         continue;
                     }
                     else
@@ -283,19 +305,19 @@ public class GraphicWindow
                          * If the pixel's bottom position is inside the correct screen, but the top position sticks out,
                          * the top position's Y value may be equal to the allowed screen's top value.
                         */
-                        tempPixelCalcTop =
-                        (tempPixelCalcTop < screenVerticalOffset && tempPixelCalcBottom > screenVerticalOffset) ?
+                        pixelCalcTop =
+                        (pixelCalcTop < screenVerticalOffset && pixelCalcBottom > screenVerticalOffset) ?
                         screenVerticalOffset :
-                        tempPixelCalcTop;
+                        pixelCalcTop;
 
                         /* 
                          * If the pixel's top position is inside the correct screen, but the bottom position sticks out,
                          * the bottom position's Y value may be equal to the allowed screen's bottom value.
                         */
-                        tempPixelCalcBottom =
-                        (tempPixelCalcTop < (screenVerticalOffset + minimumScreenHeight) && tempPixelCalcBottom > (screenVerticalOffset + minimumScreenHeight)) ?
+                        pixelCalcBottom =
+                        (pixelCalcTop < (screenVerticalOffset + minimumScreenHeight) && pixelCalcBottom > (screenVerticalOffset + minimumScreenHeight)) ?
                         (screenVerticalOffset + minimumScreenHeight) :
-                        tempPixelCalcBottom;
+                        pixelCalcBottom;
 
                         //Mirroring wrong textures, Calculating RGB variables
                         RGBCalc = (Engine.RayDatas[i, 4] == 1 || Engine.RayDatas[i, 4] == 3) ?
@@ -323,10 +345,13 @@ public class GraphicWindow
 
                         //Drawing pixel
                         GL.Color3(r, g, b);
-                        GL.Vertex2(i * WallWidth + screenHorizontalOffset, tempPixelCalcTop);
-                        GL.Vertex2((i + 1) * WallWidth + screenHorizontalOffset, tempPixelCalcTop);
-                        GL.Vertex2((i + 1) * WallWidth + screenHorizontalOffset, tempPixelCalcBottom);
-                        GL.Vertex2(i * WallWidth + screenHorizontalOffset, tempPixelCalcBottom);
+                        GL.Vertex2(i * WallWidth + screenHorizontalOffset, pixelCalcTop);
+                        GL.Vertex2((i + 1) * WallWidth + screenHorizontalOffset, pixelCalcTop);
+                        GL.Vertex2((i + 1) * WallWidth + screenHorizontalOffset, pixelCalcBottom);
+                        GL.Vertex2(i * WallWidth + screenHorizontalOffset, pixelCalcBottom);
+
+                        pixelCalcTop = pixelCalcBottom;
+                        pixelCalcBottom += (WallHeight / path[0][1]);
                     }
                 }
             }
