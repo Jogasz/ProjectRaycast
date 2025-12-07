@@ -73,12 +73,16 @@ public class Engine
 
         //Collision checking
         IsXBlocked =
+                PlayerPosition.X - PlayerRadius + rotatedVector.X * DeltaMovementSpeed <= 0f ||
+                PlayerPosition.X + PlayerRadius + rotatedVector.X * DeltaMovementSpeed >= (MapWalls.GetLength(1) * TileSize) ||
                 MapWalls[(int)((PlayerPosition.Y + PlayerRadius) / TileSize), (int)(((int)(PlayerPosition.X + PlayerRadius + rotatedVector.X * DeltaMovementSpeed)) / TileSize)] > 0 ||
                 MapWalls[(int)((PlayerPosition.Y + PlayerRadius) / TileSize), (int)(((int)(PlayerPosition.X - PlayerRadius + rotatedVector.X * DeltaMovementSpeed)) / TileSize)] > 0 ||
                 MapWalls[(int)((PlayerPosition.Y - PlayerRadius) / TileSize), (int)(((int)(PlayerPosition.X + PlayerRadius + rotatedVector.X * DeltaMovementSpeed)) / TileSize)] > 0 ||
                 MapWalls[(int)((PlayerPosition.Y - PlayerRadius) / TileSize), (int)(((int)(PlayerPosition.X - PlayerRadius + rotatedVector.X * DeltaMovementSpeed)) / TileSize)] > 0;
 
         IsYBlocked =
+                PlayerPosition.Y - PlayerRadius + rotatedVector.Y * DeltaMovementSpeed <= 0f ||
+                PlayerPosition.Y + PlayerRadius + rotatedVector.Y * DeltaMovementSpeed >= (MapWalls.GetLength(0) * TileSize) ||
                 MapWalls[(int)(((int)(PlayerPosition.Y + PlayerRadius + rotatedVector.Y * DeltaMovementSpeed)) / TileSize), (int)((PlayerPosition.X + PlayerRadius) / TileSize)] > 0 ||
                 MapWalls[(int)(((int)(PlayerPosition.Y - PlayerRadius + rotatedVector.Y * DeltaMovementSpeed)) / TileSize), (int)((PlayerPosition.X + PlayerRadius) / TileSize)] > 0 ||
                 MapWalls[(int)(((int)(PlayerPosition.Y + PlayerRadius + rotatedVector.Y * DeltaMovementSpeed)) / TileSize), (int)((PlayerPosition.X - PlayerRadius) / TileSize)] > 0 ||
@@ -147,7 +151,11 @@ public class Engine
             int RenderDistance = Settings.Graphics.RenderDistance;
             int RenderDistanceIterator = 0;
 
-            while (RenderDistanceIterator < RenderDistance && VerticalRayCheckingRow >= 0 && VerticalRayCheckingRow < MapWalls.GetLength(0) && VerticalRayCheckingCol >= 0 && VerticalRayCheckingCol < MapWalls.GetLength(1))
+            while (RenderDistanceIterator < RenderDistance &&
+                VerticalRayCheckingRow >= 0 &&
+                VerticalRayCheckingRow < MapWalls.GetLength(0) &&
+                VerticalRayCheckingCol >= 0 &&
+                VerticalRayCheckingCol < MapWalls.GetLength(1))
             {
                 if (MapWalls[VerticalRayCheckingRow, VerticalRayCheckingCol] > 0)
                 {
@@ -225,13 +233,21 @@ public class Engine
             //RayDatas[i, 5]: Wall type (0 = No wall, 0> = Wall)
             //RayDatas[i, 6]: Ray's angle
 
+            //Length of the ray
             RayDatas[i, 0] = Math.Min(VerticalPythagoras, HorizontalPythagoras);
+
+            //Ray's delta x
             RayDatas[i, 1] = (float)Math.Cos(RayAngle);
+
+            //Ray's delta y
             RayDatas[i, 2] = (float)Math.Sin(RayAngle);
+
+            //If wall is a vertical wall
             if (RayDatas[i, 0] == VerticalPythagoras && VerticalWallFound)
             {
+                //Ray's end's position relative to the tile
                 RayDatas[i, 3] = VerticalRayHitY % TileSize;
-                //If wall is vertical
+
                 //If wall side is left
                 if (RayAngle > MathX.Quadrant1 && RayAngle < MathX.Quadrant3) {
                     RayDatas[i, 4] = 1;
@@ -241,12 +257,18 @@ public class Engine
                 {
                     RayDatas[i, 4] = 2;
                 }
+
+                //What type of wall did the ray hit (if out of bounds, 0)
                 RayDatas[i, 5] = MapWalls[VerticalRayCheckingRow, VerticalRayCheckingCol];
+
             }
+
+            //If wall is a horizontal wall
             else if (RayDatas[i, 0] == HorizontalPythagoras && HorizontalWallFound)
             {
+                //Ray's end's position relative to the tile
                 RayDatas[i, 3] = HorizontalRayHitX % TileSize;
-                //If wall is horizontal
+
                 //If wall side is top
                 if (RayAngle > 0 && RayAngle < MathX.PI)
                 {
@@ -257,16 +279,22 @@ public class Engine
                 {
                     RayDatas[i, 4] = 4;
                 }
+
+                //What type of wall did the ray hit (if out of bounds, 0)
                 RayDatas[i, 5] = MapWalls[HorizontalRayCheckingRow, HorizontalRayCheckingCol];
             }
+
+            //If there was no wall hit (maybe because of render distance)
             else
             {
                 RayDatas[i, 5] = 0;
             }
-            RayDatas[i, 6] = RayAngle;
 
-            RayAngle += RadBetweenRays;
-            RayAngle = (RayAngle % MathX.Quadrant4 + MathX.Quadrant4) % MathX.Quadrant4;
+            //The current ray's angle
+            RayDatas[i, 6] = RayAngle;
+            
+            //Incrementing the value of the ray's angle for the next ray in FOV
+            RayAngle = ((RayAngle + RadBetweenRays) % MathX.Quadrant4 + MathX.Quadrant4) % MathX.Quadrant4;
         }
         //================================================================
     }

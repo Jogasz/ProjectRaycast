@@ -24,6 +24,7 @@
     <None Remove="assets\textures\mossy_bricks.txt" />
     <None Remove="assets\textures\mossy_planks.txt" />
     <None Remove="assets\textures\mossy_stonebricks.txt" />
+    <None Remove="assets\textures\oob.txt" />
     <None Remove="assets\textures\painting_a_mossy_stonebricks.txt" />
     <None Remove="assets\textures\painting_a_stonebricks.txt" />
     <None Remove="assets\textures\painting_b_mossy_stonebricks.txt" />
@@ -50,6 +51,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="assets\textures\mossy_stonebricks.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\textures\oob.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="assets\textures\painting_a_mossy_stonebricks.txt">

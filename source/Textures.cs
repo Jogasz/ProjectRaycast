@@ -24,6 +24,9 @@ public static class Textures {
 
     //Test textures
     public static int[][] floorTestTexture { get; private set; }
+
+    //Out of Bounds
+    public static int[][] outOfBoundsTexture { get; private set; }
     public static void Load() {
         //Default textures
         planksTexture = Read("assets/textures/planks.txt");
@@ -47,6 +50,9 @@ public static class Textures {
 
         //Test textures
         floorTestTexture = Read("assets/textures/floorTest.txt");
+
+        //Out of Bounds
+        outOfBoundsTexture = Read("assets/textures/oob.txt");
     }
     public static int[][] Read(string path) {
         if (File.Exists(path))
