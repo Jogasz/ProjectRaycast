@@ -2,7 +2,7 @@
 using System.IO;
 using Newtonsoft.Json;
 
-public static class Settings
+internal class Settings
 {
     public static PlayerSettings Player;
     public static GraphicsSettings Graphics;
@@ -11,13 +11,13 @@ public static class Settings
     //Handles loading and storing all game settings from settings.json
     public static void Load()
     {
-        string jsonText = File.ReadAllText("settings.json");
+        string rawText = File.ReadAllText("settings.json");
 
-        var data = JsonConvert.DeserializeObject<SettingsData>(jsonText);
+        var convertedData = JsonConvert.DeserializeObject<SettingsData>(rawText);
 
-        Player = data.Player;
-        Graphics = data.Graphics;
-        Gameplay = data.Gameplay;
+        Player = convertedData.Player;
+        Graphics = convertedData.Graphics;
+        Gameplay = convertedData.Gameplay;
     }
 
     //Represents the structure of the JSON data for deserialization
@@ -31,49 +31,47 @@ public static class Settings
     //Stores player-related settings like speed and mouse sensitivity
     public class PlayerSettings
     {
-        public int Health { get; private set; }
-        public int Armor { get; private set; }
-        public int Stamina { get; private set; }
-        public float MovementSpeed { get; private set; }
-        public float MouseSensitivity { get; private set; }
+        public int health { get; private set; }
+        public int armor { get; private set; }
+        public int stamina { get; private set; }
+        public float movementSpeed { get; private set; }
+        public float mouseSensitivity { get; private set; }
 
 
         [JsonConstructor]
-        public PlayerSettings(int health, int armor, int stamina, float movementSpeed, float mouseSensitivity)
+        public PlayerSettings(int Health, int Armor, int Stamina, float MovementSpeed, float MouseSensitivity)
         {
-            Health = health;
-            Armor = armor;
-            Stamina = stamina;
-            MovementSpeed = movementSpeed * 10;
-            MouseSensitivity = mouseSensitivity / 50;
+            health = Health;
+            armor = Armor;
+            stamina = Stamina;
+            movementSpeed = MovementSpeed * 10;
+            mouseSensitivity = MouseSensitivity / 50;
         }
     }
 
     public class GraphicsSettings
     {
         public int FOV { get; private set; }
-        public int RayCount { get; private set; }
-        public int RenderDistance { get; private set; }
-        public float DistanceShade { get; private set; }
+        public int rayCount { get; private set; }
+        public int renderDistance { get; private set; }
+        public float distanceShade { get; private set; }
 
         [JsonConstructor]
-        public GraphicsSettings(int fov, int rayCount, int renderDistance, float distanceShade) {
+        public GraphicsSettings(int fov, int RayCount, int RenderDistance, float DistanceShade) {
             FOV = fov;
-            RayCount = rayCount;
-            RenderDistance = renderDistance;
-            DistanceShade = (distanceShade / 10);
+            rayCount = RayCount;
+            renderDistance = RenderDistance;
+            distanceShade = (DistanceShade / 10);
         }
     }
 
     public class GameplaySettings
     {
-        public int TileSize { get; private set; }
-        public bool ShowDebug { get; private set; }
+        public int tileSize { get; private set; }
 
         [JsonConstructor]
-        public GameplaySettings(int tileSize, bool showDebug) {
-            TileSize = tileSize;
-            ShowDebug = showDebug;
+        public GameplaySettings(int TileSize) {
+            tileSize = TileSize;
         }
     }
 }

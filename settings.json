@@ -22,12 +22,12 @@
   ],
   "Graphics": {
     "FOV": 55,
-    "RayCount": 100,
-    "RenderDistance": 13,
-    "DistanceShade": 2
+    "RayCount": 500,
+    "renderDistance": 10,
+    "DistanceShade": 1
   },
   "Gameplay": {
-    "TileSize": 50,
+    "tileSize": 50,
     "DifficultyLevel": "Normal",
     "ShowDebug": true
   }

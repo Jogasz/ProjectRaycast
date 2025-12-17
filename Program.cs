@@ -5,30 +5,22 @@ public class Program
 {
     static void Main()
     {
-        Settings.Load();
+        try
+        {
+            Settings.Load();
+            Textures.Load();
+            Level map = new Level();
+            map.Load();
+            Console.WriteLine("Assets successfully loaded!");
+        }
+        catch
+        {
+            Console.WriteLine("Something went wrong when loading assets...");
+        }
 
-        Textures.Load();
+        Engine engine = new Engine(800, 800, "ProjectRaycast");
+        engine.Run();
 
-        Level map = new Level();
-        map.Load();
-
-        Engine.Start();
-
-        GraphicWindow.Run();
-
-        //Thread debugThread = new Thread(() =>
-        //{
-        //    DebugWindow debugWindow = new DebugWindow();
-        //    debugWindow.Run();
-        //});
-
-        //Thread graphicThread = new Thread(() =>
-        //{
-        //    GraphicWindow graphicWindow = new GraphicWindow();
-        //    graphicWindow.Run();
-        //});
-
-        //debugThread.Start();
-        //graphicThread.Start();
+        //GraphicWindow.Run();
     }
 }
