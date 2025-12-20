@@ -22,6 +22,7 @@ internal class Engine : GameWindow
     int[,] mapFloor = Level.mapFloor;
     int[,] mapWalls = Level.mapWalls;
     float playerMovementSpeed = Settings.Player.movementSpeed;
+    float mouseSensitivity = Settings.Player.mouseSensitivity;
         //DeltaTime
     float deltaTime { get; set; }
     float lastTime { get; set; }
@@ -29,6 +30,7 @@ internal class Engine : GameWindow
     Vector2 playerPosition { get; set; } = new Vector2(75, 75);
     float playerAngle { get; set; } = 0f;
     const float playerCollisionRadius = 10f;
+    float pitch { get; set; } = 0f;
         //Engine variables
     Stopwatch stopwatch { get; set; } = new Stopwatch();
     float FOVStart { get; set; }
@@ -71,14 +73,19 @@ internal class Engine : GameWindow
      */
     private List<float> vertexAttributesList { get; set; } = new List<float>();
     //=============================================================================================
-    //---
     public Engine(int width, int height, string title) : base(GameWindowSettings.Default, new NativeWindowSettings()
     {
         ClientSize = (width, height),
         Title = title,
+
+        WindowState = WindowState.Normal,
+        WindowBorder = WindowBorder.Resizable,
         //VSync = VSyncMode.Off
     })
-    {}
+    {
+        CursorState = CursorState.Grabbed;
+        //CursorState = CursorState.Hidden;
+    }
     //=============================================================================================
     //Viewport method
     public void ViewportSetUp(int width, int height)
@@ -96,6 +103,38 @@ internal class Engine : GameWindow
         GL.Clear(ClearBufferMask.ColorBufferBit);
     }
     //=============================================================================================
+
+    //Normalizer for angle variables to make them stay between 0 and 2PI
+    float NormalizeAngle(float angle)
+    {
+        if (angle > MathX.Quadrant4)
+        {
+            angle -= MathX.Quadrant4;
+        }
+
+        else if (angle < 0)
+        {
+            angle += MathX.Quadrant4;
+        }
+
+        return angle;
+    }
+
+    //Shared vertex attribute list loader for every graphic
+    void VertexLoader(float X1, float X2, float Y1, float Y2, float R, float G, float B)
+    {
+        vertexAttributesList.AddRange(new float[]
+        {
+            X1,
+            X2,
+            Y1,
+            Y2,
+            R,
+            G,
+            B
+        });
+    }
+
     //Gets called when window first loads
     protected override void OnLoad()
     {
@@ -154,133 +193,163 @@ internal class Engine : GameWindow
         base.OnUpdateFrame(e);
 
         //DeltaTime
-        //=============================================================================================
         float currentTime = (float)stopwatch.Elapsed.TotalSeconds;
         deltaTime = currentTime - lastTime;
         lastTime = currentTime;
-        //=============================================================================================
-
+        
         //FPS Counter
-        //=============================================================================================
         FPSList.Add((int)Math.Floor(1 / deltaTime));
-        //Console.WriteLine(Math.Floor(1 / deltaTime) + "FPS");
-        //=============================================================================================
 
         //Keybinds, controls and collision
         //=============================================================================================
-        var keyboard = KeyboardState;
-        //Escape
-        if (keyboard.IsKeyDown(Keys.Escape))
-        {
-            Console.WriteLine("Escape was pressed!");
-            Close();
-        }
+        Controls(KeyboardState, MouseState);
 
-            //Not binded
-        if
-        (
-            keyboard.IsKeyDown(Keys.Space) ||
-            keyboard.IsKeyDown(Keys.Tab) ||
-            keyboard.IsKeyDown(Keys.E)
-        )
+        void Controls(KeyboardState keyboard, MouseState mouse)
         {
-            Console.WriteLine("- Key is not yet binded!");
-        }
+            //Checking if mouse was moved
+            bool IsMouseMoving = mouse.X != mouse.PreviousX || mouse.Y != mouse.PreviousY;
 
-        if (keyboard.IsKeyDown(Keys.Right))
-        {
-            playerAngle += 1f * deltaTime;
-            if (playerAngle > MathX.Quadrant4)
+            //If there's no keyboard input, stop
+            if (!keyboard.IsAnyKeyDown && !IsMouseMoving)
             {
-                playerAngle -= (MathX.Quadrant4);
+                return;
+            }
+
+            //Closing program
+            if (keyboard.IsKeyDown(Keys.Escape))
+            {
+                Console.WriteLine("Exiting program...");
+                Close();
+            }
+
+            //Movement and collison handler
+            if(keyboard.IsKeyDown(Keys.W) ||
+               keyboard.IsKeyDown(Keys.A) ||
+               keyboard.IsKeyDown(Keys.S) ||
+               keyboard.IsKeyDown(Keys.D))
+            {
+                HandleMovement(keyboard);
+            }
+
+            //Jump handler
+            if (keyboard.IsKeyPressed(Keys.Space))
+            {
+                HandleJump();
+            }
+
+            //Fullscreen handler
+            if (keyboard.IsKeyPressed(Keys.F11))
+            {
+                HandleFullscreen();
+            }
+
+            //Mouse handler
+            if (IsMouseMoving)
+            {
+                HandleMouse(mouse);
             }
         }
-        if (keyboard.IsKeyDown(Keys.Left))
-        {
-            playerAngle -= 1f * deltaTime;
-            if (playerAngle < 0)
-            {
-                playerAngle += (MathX.Quadrant4);
-            }
-        }
 
-        //Movement and collision
-        float playerDeltaMovementSpeed = playerMovementSpeed * deltaTime;
-        var _PlayerPosition = playerPosition;
-        Vector2 movementVector;
-        Vector2 rotatedVector;
-        bool IsXBlocked = false;
-        bool IsYBlocked = false;
+        //Movement and collison
+        void HandleMovement(KeyboardState keyboard)
+        {
+            float playerDeltaMovementSpeed = playerMovementSpeed * deltaTime;
+            var _PlayerPosition = playerPosition;
+            Vector2 movementVector;
+            Vector2 rotatedVector;
+            bool IsXBlocked = false;
+            bool IsYBlocked = false;
 
             //Checking the movement input
-        movementVector.X = (keyboard.IsKeyDown(Keys.A) ? 1f : 0f) + (keyboard.IsKeyDown(Keys.D) ? -1f : 0f);
-        movementVector.Y = (keyboard.IsKeyDown(Keys.W) ? 1f : 0f) + (keyboard.IsKeyDown(Keys.S) ? -1f : 0f);
+            movementVector.X = (keyboard.IsKeyDown(Keys.A) ? 1f : 0f) + (keyboard.IsKeyDown(Keys.D) ? -1f : 0f);
+            movementVector.Y = (keyboard.IsKeyDown(Keys.W) ? 1f : 0f) + (keyboard.IsKeyDown(Keys.S) ? -1f : 0f);
 
             //Checking if the movement vector's magnitude is higher than 1
-        if (MathX.Hypotenuse(movementVector.X, movementVector.Y) > 1f)
-        {
-            movementVector.Normalize();
-        }
+            if (MathX.Hypotenuse(movementVector.X, movementVector.Y) > 1f)
+            {
+                movementVector.Normalize();
+            }
 
             //Rotating the movement vector to the angle of the player
-        rotatedVector.X = (float)(movementVector.X * Math.Cos(playerAngle - MathX.Quadrant1)) - (float)(movementVector.Y * Math.Sin(playerAngle - MathX.Quadrant1));
-        rotatedVector.Y = (float)(movementVector.X * Math.Sin(playerAngle - MathX.Quadrant1)) + (float)(movementVector.Y * Math.Cos(playerAngle - MathX.Quadrant1));
+            rotatedVector.X = (float)(movementVector.X * Math.Cos(playerAngle - MathX.Quadrant1)) - (float)(movementVector.Y * Math.Sin(playerAngle - MathX.Quadrant1));
+            rotatedVector.Y = (float)(movementVector.X * Math.Sin(playerAngle - MathX.Quadrant1)) + (float)(movementVector.Y * Math.Cos(playerAngle - MathX.Quadrant1));
 
             //Sprint
-        if (keyboard.IsKeyDown(Keys.W) && keyboard.IsKeyDown(Keys.LeftShift))
-        {
-            playerDeltaMovementSpeed = playerAngle * playerMovementSpeed * 1.7f;
-            FOV = (int)(Settings.Graphics.FOV / 1.05f);
-        }
-        else
-        {
-            playerDeltaMovementSpeed = deltaTime * playerMovementSpeed;
-            FOV = Settings.Graphics.FOV;
-        }
+            if (keyboard.IsKeyDown(Keys.W) && keyboard.IsKeyDown(Keys.LeftShift))
+            {
+                playerDeltaMovementSpeed = deltaTime * playerMovementSpeed * 1.7f;
+                FOV = (int)(Settings.Graphics.FOV / 1.05f);
+            }
+            else
+            {
+                playerDeltaMovementSpeed = deltaTime * playerMovementSpeed;
+                FOV = Settings.Graphics.FOV;
+            }
 
             //Temporary variables to reduce calculations
             //XBlocked
-        int tempXBlocked_Y_P = (int)((_PlayerPosition.Y + playerCollisionRadius) / tileSize);
-        int tempXBlocked_Y_M = (int)((_PlayerPosition.Y - playerCollisionRadius) / tileSize);
-        int tempXBlocked_X_P = (int)(((int)(_PlayerPosition.X + playerCollisionRadius + rotatedVector.X * playerDeltaMovementSpeed)) / tileSize);
-        int tempXBlocked_X_M = (int)(((int)(_PlayerPosition.X - playerCollisionRadius + rotatedVector.X * playerDeltaMovementSpeed)) / tileSize);
+            int tempXBlocked_Y_P = (int)((_PlayerPosition.Y + playerCollisionRadius) / tileSize);
+            int tempXBlocked_Y_M = (int)((_PlayerPosition.Y - playerCollisionRadius) / tileSize);
+            int tempXBlocked_X_P = (int)(((int)(_PlayerPosition.X + playerCollisionRadius + rotatedVector.X * playerDeltaMovementSpeed)) / tileSize);
+            int tempXBlocked_X_M = (int)(((int)(_PlayerPosition.X - playerCollisionRadius + rotatedVector.X * playerDeltaMovementSpeed)) / tileSize);
             //YBlocked
-        int tempYBlocked_Y_P = (int)(((int)(_PlayerPosition.Y + playerCollisionRadius + rotatedVector.Y * playerDeltaMovementSpeed)) / tileSize);
-        int tempYBlocked_Y_M = (int)(((int)(_PlayerPosition.Y - playerCollisionRadius + rotatedVector.Y * playerDeltaMovementSpeed)) / tileSize);
-        int tempYBlocked_X_P = (int)((_PlayerPosition.X + playerCollisionRadius) / tileSize);
-        int tempYBlocked_X_M = (int)((_PlayerPosition.X - playerCollisionRadius) / tileSize);
+            int tempYBlocked_Y_P = (int)(((int)(_PlayerPosition.Y + playerCollisionRadius + rotatedVector.Y * playerDeltaMovementSpeed)) / tileSize);
+            int tempYBlocked_Y_M = (int)(((int)(_PlayerPosition.Y - playerCollisionRadius + rotatedVector.Y * playerDeltaMovementSpeed)) / tileSize);
+            int tempYBlocked_X_P = (int)((_PlayerPosition.X + playerCollisionRadius) / tileSize);
+            int tempYBlocked_X_M = (int)((_PlayerPosition.X - playerCollisionRadius) / tileSize);
 
             //Collision checking
-        IsXBlocked =
-                _PlayerPosition.X - playerCollisionRadius + rotatedVector.X * playerDeltaMovementSpeed <= 0f ||
-                _PlayerPosition.X + playerCollisionRadius + rotatedVector.X * playerDeltaMovementSpeed >= (mapWalls.GetLength(1) * tileSize) ||
-                mapWalls[tempXBlocked_Y_P, tempXBlocked_X_P] > 0 ||
-                mapWalls[tempXBlocked_Y_P, tempXBlocked_X_M] > 0 ||
-                mapWalls[tempXBlocked_Y_M, tempXBlocked_X_P] > 0 ||
-                mapWalls[tempXBlocked_Y_M, tempXBlocked_X_M] > 0;
+            IsXBlocked =
+                    _PlayerPosition.X - playerCollisionRadius + rotatedVector.X * playerDeltaMovementSpeed <= 0f ||
+                    _PlayerPosition.X + playerCollisionRadius + rotatedVector.X * playerDeltaMovementSpeed >= (mapWalls.GetLength(1) * tileSize) ||
+                    mapWalls[tempXBlocked_Y_P, tempXBlocked_X_P] > 0 ||
+                    mapWalls[tempXBlocked_Y_P, tempXBlocked_X_M] > 0 ||
+                    mapWalls[tempXBlocked_Y_M, tempXBlocked_X_P] > 0 ||
+                    mapWalls[tempXBlocked_Y_M, tempXBlocked_X_M] > 0;
 
-        IsYBlocked =
-                _PlayerPosition.Y - playerCollisionRadius + rotatedVector.Y * playerDeltaMovementSpeed <= 0f ||
-                _PlayerPosition.Y + playerCollisionRadius + rotatedVector.Y * playerDeltaMovementSpeed >= (mapWalls.GetLength(0) * tileSize) ||
-                mapWalls[tempYBlocked_Y_P, tempYBlocked_X_P] > 0 ||
-                mapWalls[tempYBlocked_Y_M, tempYBlocked_X_P] > 0 ||
-                mapWalls[tempYBlocked_Y_P, tempYBlocked_X_M] > 0 ||
-                mapWalls[tempYBlocked_Y_M, tempYBlocked_X_M] > 0;
+            IsYBlocked =
+                    _PlayerPosition.Y - playerCollisionRadius + rotatedVector.Y * playerDeltaMovementSpeed <= 0f ||
+                    _PlayerPosition.Y + playerCollisionRadius + rotatedVector.Y * playerDeltaMovementSpeed >= (mapWalls.GetLength(0) * tileSize) ||
+                    mapWalls[tempYBlocked_Y_P, tempYBlocked_X_P] > 0 ||
+                    mapWalls[tempYBlocked_Y_M, tempYBlocked_X_P] > 0 ||
+                    mapWalls[tempYBlocked_Y_P, tempYBlocked_X_M] > 0 ||
+                    mapWalls[tempYBlocked_Y_M, tempYBlocked_X_M] > 0;
 
             //Allowing player to move if the collision checker gave permission
-        if (!IsXBlocked)
-        {
-            _PlayerPosition.X += rotatedVector.X * playerDeltaMovementSpeed;
-        }
-        if (!IsYBlocked)
-        {
-            _PlayerPosition.Y += rotatedVector.Y * playerDeltaMovementSpeed;
+            if (!IsXBlocked)
+            {
+                _PlayerPosition.X += rotatedVector.X * playerDeltaMovementSpeed;
+            }
+            if (!IsYBlocked)
+            {
+                _PlayerPosition.Y += rotatedVector.Y * playerDeltaMovementSpeed;
+            }
+
+            playerPosition = _PlayerPosition;
         }
 
-        playerPosition = _PlayerPosition;
+        //Jump
+        void HandleJump()
+        {
+            Console.WriteLine(" - Jump!");
+        }
+
+        void HandleFullscreen()
+        {
+            WindowState = WindowState == WindowState.Normal ? WindowState.Fullscreen : WindowState.Normal;
+        }
+
+        //Mouse
+        void HandleMouse(MouseState mouse)
+        {
+            //Rotating X
+            playerAngle = NormalizeAngle(playerAngle + (mouseSensitivity / 30f) * deltaTime * (mouse.X - mouse.PreviousX));
+            
+            pitch -= ((mouseSensitivity /50f) * 1000) * deltaTime * (mouse.Y - mouse.PreviousY);
+        }
         //=============================================================================================
 
-        //Allowed screen
+        //Allowed screen (Square game)
         //=============================================================================================
         //Using the minimum of the screen's dimensions to keep a square aspect ratio
         minimumScreenHeight = ClientSize.Y > ClientSize.X ? ClientSize.X : ClientSize.Y;
@@ -292,7 +361,7 @@ internal class Engine : GameWindow
 
         //Raycount limiter
         //=============================================================================================
-        rayCount = Math.Min(rayCount, (int)(minimumScreenWidth / 4f));
+        //rayCount = Math.Min(rayCount, (int)(minimumScreenWidth / 4f));
         //=============================================================================================
 
         //FOV calculation
@@ -303,7 +372,7 @@ internal class Engine : GameWindow
 
         //Variables for raycasting and graphic calculations
         //=============================================================================================
-        float rayAngle = playerAngle + FOVStart;
+        float rayAngle = NormalizeAngle(playerAngle + FOVStart);
             //Wall width
         float wallWidth = (float)minimumScreenWidth / rayCount;
         int RGBCalc;
@@ -312,47 +381,24 @@ internal class Engine : GameWindow
         float cameraZ = minimumScreenHeight / 2f;
         //=============================================================================================
 
-        //Background for the game
+        //Background for the allowed screen (game)
         //=============================================================================================
-        //Declaring temporary drawing parameter holder
-        //float[] tempGameBackgroundVerticies = new float[7];
-
-        //Wall array translator
-        //newLine[0] = x1,4
-        //newLine[1] = x2,3
-        //newLine[2] = y1,2
-        //newLine[3] = y3,4
-        //newLine[4] = r
-        //newLine[5] = g
-        //newLine[6] = b
-        vertexAttributesList.AddRange(new float[] 
-        {
+        VertexLoader(
             screenHorizontalOffset,
             screenHorizontalOffset + minimumScreenWidth,
             screenVerticalOffset,
             screenVerticalOffset + minimumScreenHeight,
-            0f,
-            0f,
-            1f
-        });
-
-        //tempGameBackgroundVerticies[0] = screenHorizontalOffset;
-        //tempGameBackgroundVerticies[1] = screenHorizontalOffset + minimumScreenWidth;
-        //tempGameBackgroundVerticies[2] = screenVerticalOffset;
-        //tempGameBackgroundVerticies[3] = screenVerticalOffset + minimumScreenHeight;
-        //tempGameBackgroundVerticies[4] = 0f;
-        //tempGameBackgroundVerticies[5] = 0f;
-        //tempGameBackgroundVerticies[6] = 0f;
-
-        ////Adding temporary array the the wall list of arrays
-        //vertexAttributesList.Add(tempGameBackgroundVerticies);
+            0.3f,
+            0.3f,
+            0.8f
+        );
         //=============================================================================================
 
         //Raycasting | Ceiling, floor and wall rendering calculations
         //=============================================================================================
         for (int i = 0; i < rayCount; i++)
         {
-            rayAngle = (rayAngle % MathX.Quadrant4 + MathX.Quadrant4) % MathX.Quadrant4;
+            rayAngle = NormalizeAngle((rayAngle % MathX.Quadrant4 + MathX.Quadrant4) % MathX.Quadrant4);
 
             //Vertical wall check variables
             float offsetX = 0f,
@@ -375,14 +421,14 @@ internal class Engine : GameWindow
                     (
                         (float)Math.Floor(playerPosition.X / tileSize) * tileSize + tileSize,
                         0,
-                        (float)(mapWalls.GetLength(1) * tileSize - 0.0001)
+                        (float)(mapWalls.GetLength(1) * tileSize - 0.0001f)
                     );
                 verticalRayHitY =
                     MathX.Clamp
                     (
                         playerPosition.Y - ((tileSize - (playerPosition.X % tileSize)) * (float)Math.Tan(MathX.Quadrant4 - rayAngle)),
                         0,
-                        (float)(mapWalls.GetLength(0) * tileSize - 0.0001)
+                        (float)(mapWalls.GetLength(0) * tileSize - 0.0001f)
                     );
                 offsetX = tileSize;
                 offsetY = -(offsetX * (float)Math.Tan(MathX.Quadrant4 - rayAngle));
@@ -395,14 +441,14 @@ internal class Engine : GameWindow
                     (
                         (float)Math.Floor(playerPosition.X / tileSize) * tileSize - 0.0001f,
                         0,
-                        (float)(mapWalls.GetLength(1) * tileSize - 0.0001)
+                        (float)(mapWalls.GetLength(1) * tileSize - 0.0001f)
                     );
                 verticalRayHitY =
                     MathX.Clamp
                     (
                         playerPosition.Y - ((playerPosition.X % tileSize) * (float)Math.Tan(rayAngle)),
                         0,
-                        (float)(mapWalls.GetLength(0) * tileSize - 0.0001)
+                        (float)(mapWalls.GetLength(0) * tileSize - 0.0001f)
                     );
                 offsetX = -tileSize;
                 offsetY = offsetX * (float)Math.Tan(rayAngle);
@@ -440,14 +486,14 @@ internal class Engine : GameWindow
                         (
                             verticalRayHitX + offsetX,
                             0,
-                            (float)(mapWalls.GetLength(1) * tileSize - 0.0001)
+                            (float)(mapWalls.GetLength(1) * tileSize - 0.0001f)
                         );
                     verticalRayHitY =
                         MathX.Clamp
                         (
                             verticalRayHitY + offsetY,
                             0,
-                            (float)(mapWalls.GetLength(0) * tileSize - 0.0001)
+                            (float)(mapWalls.GetLength(0) * tileSize - 0.0001f)
                         );
                     renderDistanceIterator++;
                     verticalRayCheckingCol = (int)(verticalRayHitX / tileSize);
@@ -477,14 +523,14 @@ internal class Engine : GameWindow
                     (
                         (float)Math.Floor(playerPosition.Y / tileSize) * tileSize - 0.0001f,
                         0,
-                        (float)(mapWalls.GetLength(0) * tileSize - 0.0001)
+                        (float)(mapWalls.GetLength(0) * tileSize - 0.0001f)
                     );
                 horizontalRayHitX =
                     MathX.Clamp
                     (
                         playerPosition.X + (playerPosition.Y % tileSize) / (float)Math.Tan(MathX.Quadrant4 - rayAngle),
                         0,
-                        (float)(mapWalls.GetLength(1) * tileSize - 0.0001)
+                        (float)(mapWalls.GetLength(1) * tileSize - 0.0001f)
                     );
                 offsetY = -tileSize;
                 offsetX = tileSize / (float)Math.Tan(MathX.Quadrant4 - rayAngle);
@@ -497,14 +543,14 @@ internal class Engine : GameWindow
                     (
                         (float)Math.Floor(playerPosition.Y / tileSize) * tileSize + tileSize,
                         0,
-                        (float)(mapWalls.GetLength(0) * tileSize - 0.0001)
+                        (float)(mapWalls.GetLength(0) * tileSize - 0.0001f)
                     );
                 horizontalRayHitX =
                     MathX.Clamp
                     (
                         playerPosition.X - (tileSize - (playerPosition.Y % tileSize)) / (float)Math.Tan(MathX.Quadrant4 - rayAngle),
                         0,
-                        (float)(mapWalls.GetLength(1) * tileSize - 0.0001)
+                        (float)(mapWalls.GetLength(1) * tileSize - 0.0001f)
                     );
                 offsetY = tileSize;
                 offsetX = -offsetY / (float)Math.Tan(MathX.Quadrant4 - rayAngle);
@@ -542,14 +588,14 @@ internal class Engine : GameWindow
                         (
                             horizontalRayHitY + offsetY,
                             0,
-                            (float)(mapWalls.GetLength(0) * tileSize - 0.0001)
+                            (float)(mapWalls.GetLength(0) * tileSize - 0.0001f)
                         );
                     horizontalRayHitX =
                         MathX.Clamp
                         (
                             horizontalRayHitX + offsetX,
                             0,
-                            (float)(mapWalls.GetLength(1) * tileSize - 0.0001)
+                            (float)(mapWalls.GetLength(1) * tileSize - 0.0001f)
                         );
                     renderDistanceIterator++;
                     horizontalRayCheckingCol = (int)(horizontalRayHitX / tileSize);
@@ -615,111 +661,110 @@ internal class Engine : GameWindow
                 (playerAngle + FOVStart + i * RadBetweenRays))));
 
             int[][] path = null;
-            int pitch = 0;
 
             //Ceiling calculation
             //=============================================================================================
-            float ceilingFloorPixelDistance,
-                  ceilingPixelXWorldPosition,
-                  ceilingPixelYWorldPosition,
-                  floorPixelXWorldPosition,
-                  floorPixelYWorldPosition;
+            //float ceilingFloorPixelDistance,
+            //      ceilingPixelXWorldPosition,
+            //      ceilingPixelYWorldPosition,
+            //      floorPixelXWorldPosition,
+            //      floorPixelYWorldPosition;
 
-            //Floor and ceiling X position variables
-            float floorCeilingPixelXLeft = i * wallWidth + screenHorizontalOffset;
-            float floorCeilingPixelXRight = (i + 1) * wallWidth + screenHorizontalOffset;
+            ////Floor and ceiling X position variables
+            //float floorCeilingPixelXLeft = i * wallWidth + screenHorizontalOffset;
+            //float floorCeilingPixelXRight = (i + 1) * wallWidth + screenHorizontalOffset;
 
-            float ceilingStep = Math.Max(4f, wallWidth);
+            //float ceilingStep = Math.Max(4f, wallWidth);
 
-            //Ceiling Y position variables
-            float ceilingPixelYTop = screenVerticalOffset;
-            float ceilingPixelYBottom = screenVerticalOffset + ceilingStep;
+            ////Ceiling Y position variables
+            //float ceilingPixelYTop = screenVerticalOffset;
+            //float ceilingPixelYBottom = screenVerticalOffset + ceilingStep;
 
-            while (ceilingPixelYTop < (screenVerticalOffset + ((minimumScreenHeight - wallHeight) / 2)) + pitch)
-            {
-                /* 
-                * If the pixel's top position is in the correct screen, but the bottom position is in the wall,
-                * the bottom position's Y value may be equal to the wall's top value.
-                */
+            //while (ceilingPixelYTop < (screenVerticalOffset + ((minimumScreenHeight - wallHeight) / 2)) + pitch)
+            //{
+            //    /* 
+            //    * If the pixel's top position is in the correct screen, but the bottom position is in the wall,
+            //    * the bottom position's Y value may be equal to the wall's top value.
+            //    */
 
-                ceilingPixelYBottom =
-                (ceilingPixelYBottom > (screenVerticalOffset + ((minimumScreenHeight - wallHeight) / 2)) + pitch) ?
-                (screenVerticalOffset + ((minimumScreenHeight - wallHeight) / 2)) + pitch :
-                ceilingPixelYBottom;
+            //    ceilingPixelYBottom =
+            //    (ceilingPixelYBottom > (screenVerticalOffset + ((minimumScreenHeight - wallHeight) / 2)) + pitch) ?
+            //    (screenVerticalOffset + ((minimumScreenHeight - wallHeight) / 2)) + pitch :
+            //    ceilingPixelYBottom;
 
-                //Y of the current pixel on the screen
-                rowY = (ClientSize.Y / 2) - (ceilingPixelYTop + ((ceilingPixelYBottom - ceilingPixelYTop) / 2)) + pitch;
+            //    //Y of the current pixel on the screen
+            //    rowY = (ClientSize.Y / 2) - (ceilingPixelYTop + ((ceilingPixelYBottom - ceilingPixelYTop) / 2)) + pitch;
 
-                //Distance of the pixel from the player
-                ceilingFloorPixelDistance = ((cameraZ / rowY) * tileSize) / (float)Math.Cos(playerAngle - rayAngle);
+            //    //Distance of the pixel from the player
+            //    ceilingFloorPixelDistance = ((cameraZ / rowY) * tileSize) / (float)Math.Cos(playerAngle - rayAngle);
 
-                //World X position of the pixel
-                ceilingPixelXWorldPosition = playerPosition.X + ((float)Math.Cos(rayAngle) * ceilingFloorPixelDistance);
+            //    //World X position of the pixel
+            //    ceilingPixelXWorldPosition = playerPosition.X + ((float)Math.Cos(rayAngle) * ceilingFloorPixelDistance);
 
-                //World Y position of the pixel
-                ceilingPixelYWorldPosition = playerPosition.Y + ((float)Math.Sin(rayAngle) * ceilingFloorPixelDistance);
+            //    //World Y position of the pixel
+            //    ceilingPixelYWorldPosition = playerPosition.Y + ((float)Math.Sin(rayAngle) * ceilingFloorPixelDistance);
 
-                //Textures
-                path =
-                (ceilingPixelXWorldPosition >= mapCeiling.GetLength(1) * tileSize ||
-                ceilingPixelXWorldPosition < 0f ||
-                ceilingPixelYWorldPosition >= mapCeiling.GetLength(0) * tileSize ||
-                ceilingPixelYWorldPosition < 0f) ?
-                    null :
-                    TextureTranslator((int)mapCeiling[(int)Math.Floor(ceilingPixelYWorldPosition / tileSize), (int)Math.Floor(ceilingPixelXWorldPosition / tileSize)]);
+            //    //Textures
+            //    path =
+            //    (ceilingPixelXWorldPosition >= mapCeiling.GetLength(1) * tileSize ||
+            //    ceilingPixelXWorldPosition < 0f ||
+            //    ceilingPixelYWorldPosition >= mapCeiling.GetLength(0) * tileSize ||
+            //    ceilingPixelYWorldPosition < 0f) ?
+            //        null :
+            //        TextureTranslator((int)mapCeiling[(int)Math.Floor(ceilingPixelYWorldPosition / tileSize), (int)Math.Floor(ceilingPixelXWorldPosition / tileSize)]);
 
-                if (path == null)
-                {
-                    ceilingPixelYTop = ceilingPixelYBottom;
-                    ceilingPixelYBottom += ceilingStep;
-                    continue;
-                }
+            //    if (path == null)
+            //    {
+            //        ceilingPixelYTop = ceilingPixelYBottom;
+            //        ceilingPixelYBottom += ceilingStep;
+            //        continue;
+            //    }
 
-                //Calculating RGB variables
-                RGBCalc = ((int)Math.Floor(path[0][1] / (tileSize / (ceilingPixelYWorldPosition % tileSize))) * path[0][1] * 3) +
-                          ((int)Math.Floor(path[0][0] / (tileSize / (ceilingPixelXWorldPosition % tileSize))) * 3);
+            //    //Calculating RGB variables
+            //    RGBCalc = ((int)Math.Floor(path[0][1] / (tileSize / (ceilingPixelYWorldPosition % tileSize))) * path[0][1] * 3) +
+            //              ((int)Math.Floor(path[0][0] / (tileSize / (ceilingPixelXWorldPosition % tileSize))) * 3);
 
-                //Calculating shading and lighting with distance
-                shadeCalc = ceilingFloorPixelDistance * distanceShade;
+            //    //Calculating shading and lighting with distance
+            //    shadeCalc = ceilingFloorPixelDistance * distanceShade;
 
-                //Declaring temporary drawing parameter holder
-                //float[] tempCeilingVertices = new float[7];
+            //    //Declaring temporary drawing parameter holder
+            //    //float[] tempCeilingVertices = new float[7];
 
-                //Wall array translator
-                //newLine[0] = x1,4
-                //newLine[1] = x2,3
-                //newLine[2] = y1,2
-                //newLine[3] = y3,4
-                //newLine[4] = r
-                //newLine[5] = g
-                //newLine[6] = b
+            //    //Wall array translator
+            //    //newLine[0] = x1,4
+            //    //newLine[1] = x2,3
+            //    //newLine[2] = y1,2
+            //    //newLine[3] = y3,4
+            //    //newLine[4] = r
+            //    //newLine[5] = g
+            //    //newLine[6] = b
 
-                vertexAttributesList.AddRange(new float[]
-                {
-                    floorCeilingPixelXLeft,
-                    floorCeilingPixelXRight,
-                    ceilingPixelYTop,
-                    ceilingPixelYBottom,
-                    (path[1][RGBCalc] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc] - shadeCalc) / 255f,
-                    (path[1][RGBCalc + 1] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 1] - shadeCalc) / 255f,
-                    (path[1][RGBCalc + 2] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 2] - shadeCalc) / 255f
-                });
+            //    vertexAttributesList.AddRange(new float[]
+            //    {
+            //        floorCeilingPixelXLeft,
+            //        floorCeilingPixelXRight,
+            //        ceilingPixelYTop,
+            //        ceilingPixelYBottom,
+            //        (path[1][RGBCalc] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc] - shadeCalc) / 255f,
+            //        (path[1][RGBCalc + 1] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 1] - shadeCalc) / 255f,
+            //        (path[1][RGBCalc + 2] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 2] - shadeCalc) / 255f
+            //    });
 
-                //tempCeilingVertices[0] = floorCeilingPixelXLeft;
-                //tempCeilingVertices[1] = floorCeilingPixelXRight;
-                //tempCeilingVertices[2] = ceilingPixelYTop;
-                //tempCeilingVertices[3] = ceilingPixelYBottom;
-                //tempCeilingVertices[4] = (path[1][RGBCalc] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc] - shadeCalc) / 255f;
-                //tempCeilingVertices[5] = (path[1][RGBCalc + 1] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 1] - shadeCalc) / 255f;
-                //tempCeilingVertices[6] = (path[1][RGBCalc + 2] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 2] - shadeCalc) / 255f;
+            //    //tempCeilingVertices[0] = floorCeilingPixelXLeft;
+            //    //tempCeilingVertices[1] = floorCeilingPixelXRight;
+            //    //tempCeilingVertices[2] = ceilingPixelYTop;
+            //    //tempCeilingVertices[3] = ceilingPixelYBottom;
+            //    //tempCeilingVertices[4] = (path[1][RGBCalc] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc] - shadeCalc) / 255f;
+            //    //tempCeilingVertices[5] = (path[1][RGBCalc + 1] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 1] - shadeCalc) / 255f;
+            //    //tempCeilingVertices[6] = (path[1][RGBCalc + 2] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 2] - shadeCalc) / 255f;
 
-                //Adding temporary array the the wall list of arrays
-                //vertexAttributesList.Add(tempCeilingVertices);
+            //    //Adding temporary array the the wall list of arrays
+            //    //vertexAttributesList.Add(tempCeilingVertices);
 
-                //Incremental increasing of the top and bottom values of the pixel
-                ceilingPixelYTop = ceilingPixelYBottom;
-                ceilingPixelYBottom += ceilingStep;
-            }
+            //    //Incremental increasing of the top and bottom values of the pixel
+            //    ceilingPixelYTop = ceilingPixelYBottom;
+            //    ceilingPixelYBottom += ceilingStep;
+            //}
 
             //=============================================================================================
 
@@ -735,28 +780,15 @@ internal class Engine : GameWindow
             //Shading and lighting with distance
             shadeCalc = rayLength * distanceShade;
 
-            //Optimizing with shade (if the shade would have been strong enaougn to make everything black, just paint the line black)
-            int shadeOptimizationLimit = 255;
+            //Optimizing with shade (if the shade would have been strong enough to make everything black, just paint the line black)
+            int shadeLimit = 255;
 
-            if (shadeCalc >= shadeOptimizationLimit)
+            if (shadeCalc >= shadeLimit)
             {
                 float lineCalcTop = (ClientSize.Y / 2) - (wallHeight / 2) + pitch;
                 float lineCalcBottom = (ClientSize.Y / 2) - (wallHeight / 2) + (path[0][1] * (wallHeight / path[0][1])) + pitch;
 
-                //Declaring temporary drawing parameter holder
-                //float[] tempWallVerticies = new float[7];
-
-                //Wall array translator
-                //newLine[0] = x1,4
-                //newLine[1] = x2,3
-                //newLine[2] = y1,2
-                //newLine[3] = y3,4
-                //newLine[4] = r
-                //newLine[5] = g
-                //newLine[6] = b
-
-                vertexAttributesList.AddRange(new float[]
-                {
+                VertexLoader(
                     i * wallWidth + screenHorizontalOffset,
                     (i + 1) * wallWidth + screenHorizontalOffset,
                     lineCalcTop,
@@ -764,107 +796,161 @@ internal class Engine : GameWindow
                     0f,
                     0f,
                     0f
-                });
-
-                //tempWallVerticies[0] = i * wallWidth + screenHorizontalOffset;
-                //tempWallVerticies[1] = (i + 1) * wallWidth + screenHorizontalOffset;
-                //tempWallVerticies[2] = lineCalcTop;
-                //tempWallVerticies[3] = lineCalcBottom;
-                //tempWallVerticies[4] = 1f;
-                //tempWallVerticies[5] = 0f;
-                //tempWallVerticies[6] = 0f;
-
-                ////Adding temporary array the the wall list of arrays
-                //vertexAttributesList.Add(tempWallVerticies);
-
-                continue;
+                );
             }
-
-            float pixelCalcTop = (ClientSize.Y / 2) - (wallHeight / 2) + pitch;
-            float pixelCalcBottom = (ClientSize.Y / 2) - (wallHeight / 2) + (wallHeight / path[0][1]) + pitch;
-
-            //Drawing pixels in lines from up to down (walls)
-            for (int k = 0; k < path[0][1]; k++)
+            else
             {
-                //Ensuring that the graphical image stays within the interpolated screen size
-                if (pixelCalcBottom < screenVerticalOffset || pixelCalcTop > (screenVerticalOffset + minimumScreenHeight))
+                float pixelCalcTop = (ClientSize.Y / 2) - (wallHeight / 2) + pitch;
+                float pixelCalcBottom = (ClientSize.Y / 2) - (wallHeight / 2) + (wallHeight / path[0][1]) + pitch;
+
+                //Drawing pixels in lines from up to down (walls)
+                for (int k = 0; k < path[0][1]; k++)
                 {
-                    pixelCalcTop = pixelCalcBottom;
-                    pixelCalcBottom += (wallHeight / path[0][1]);
-
-                    continue;
-                }
-                else
-                {
-                    /* 
-                     * If the pixel's bottom position is inside the correct screen, but the top position sticks out,
-                     * the top position's Y value may be equal to the allowed screen's top value.
-                    */
-                    pixelCalcTop =
-                    (pixelCalcTop < screenVerticalOffset && pixelCalcBottom > screenVerticalOffset) ?
-                    screenVerticalOffset :
-                    pixelCalcTop;
-
-                    /* 
-                     * If the pixel's top position is inside the correct screen, but the bottom position sticks out,
-                     * the bottom position's Y value may be equal to the allowed screen's bottom value.
-                    */
-                    pixelCalcBottom =
-                    (pixelCalcTop < (screenVerticalOffset + minimumScreenHeight) && pixelCalcBottom > (screenVerticalOffset + minimumScreenHeight)) ?
-                    (screenVerticalOffset + minimumScreenHeight) :
-                    pixelCalcBottom;
-
-                    //Mirroring wrong textures, Calculating RGB variables
-                    RGBCalc = (wallSide == 1 || wallSide == 3) ?
-                        ((int)Math.Floor((tileSize - rayTilePosition) / (tileSize / (float)path[0][0])) * 3) + k * (path[0][0] * 3) :
-                        ((int)Math.Floor(rayTilePosition / (tileSize / (float)path[0][0])) * 3) + k * (path[0][0] * 3);
-
-                    RGBCalc = (RGBCalc == 3888) ?
-                        3885 :
-                        RGBCalc;
-
-                    //Declaring temporary drawing parameter holder
-                    //float[] tempWallVerticies = new float[7];
-
-                    //Wall array translator
-                    //newLine[0] = x1,4
-                    //newLine[1] = x2,3
-                    //newLine[2] = y1,2
-                    //newLine[3] = y3,4
-                    //newLine[4] = r
-                    //newLine[5] = g
-                    //newLine[6] = b
-
-                    vertexAttributesList.AddRange(new float[]
+                    //Ensuring that the graphical image stays within the interpolated screen size
+                    if (pixelCalcBottom < screenVerticalOffset || pixelCalcTop > (screenVerticalOffset + minimumScreenHeight))
                     {
-                        i * wallWidth + screenHorizontalOffset,
-                        (i + 1) * wallWidth + screenHorizontalOffset,
-                        pixelCalcTop,
-                        pixelCalcBottom,
-                        (path[1][RGBCalc] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc] - shadeCalc) / 255f,
-                        (path[1][RGBCalc + 1] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 1] - shadeCalc) / 255f,
-                        (path[1][RGBCalc + 2] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 2] - shadeCalc) / 255f
-                    });
+                        pixelCalcTop = pixelCalcBottom;
+                        pixelCalcBottom += (wallHeight / path[0][1]);
 
-                    //tempWallVerticies[0] = i * wallWidth + screenHorizontalOffset;
-                    //tempWallVerticies[1] = (i + 1) * wallWidth + screenHorizontalOffset;
-                    //tempWallVerticies[2] = pixelCalcTop;
-                    //tempWallVerticies[3] = pixelCalcBottom;
-                    //tempWallVerticies[4] = (path[1][RGBCalc] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc] - shadeCalc) / 255f;
-                    //tempWallVerticies[5] = (path[1][RGBCalc + 1] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 1] - shadeCalc) / 255f;
-                    //tempWallVerticies[6] = (path[1][RGBCalc + 2] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 2] - shadeCalc) / 255f;
+                        continue;
+                    }
+                    else
+                    {
+                        /* 
+                         * If the pixel's bottom position is inside the correct screen, but the top position sticks out,
+                         * the top position's Y value may be equal to the allowed screen's top value.
+                        */
+                        pixelCalcTop =
+                        (pixelCalcTop < screenVerticalOffset && pixelCalcBottom > screenVerticalOffset) ?
+                        screenVerticalOffset :
+                        pixelCalcTop;
 
-                    ////Adding temporary array the the wall list of arrays
-                    //vertexAttributesList.Add(tempWallVerticies);
+                        /* 
+                         * If the pixel's top position is inside the correct screen, but the bottom position sticks out,
+                         * the bottom position's Y value may be equal to the allowed screen's bottom value.
+                        */
+                        pixelCalcBottom =
+                        (pixelCalcTop < (screenVerticalOffset + minimumScreenHeight) && pixelCalcBottom > (screenVerticalOffset + minimumScreenHeight)) ?
+                        (screenVerticalOffset + minimumScreenHeight) :
+                        pixelCalcBottom;
 
-                    pixelCalcTop = pixelCalcBottom;
-                    pixelCalcBottom += (wallHeight / path[0][1]);
+                        //Mirroring wrong textures, Calculating RGB variables
+                        RGBCalc = (wallSide == 1 || wallSide == 3) ?
+                            ((int)Math.Floor((tileSize - rayTilePosition) / (tileSize / (float)path[0][0])) * 3) + k * (path[0][0] * 3) :
+                            ((int)Math.Floor(rayTilePosition / (tileSize / (float)path[0][0])) * 3) + k * (path[0][0] * 3);
+
+                        RGBCalc = (RGBCalc == 3888) ?
+                            3885 :
+                            RGBCalc;
+
+                        //============================================================
+                        //!!! DEBUGOLNI KELL GECI !!! VALAMIÉRT OUT OF BOUND ARRAY !!!
+                        //============================================================
+
+                        VertexLoader(
+                            i * wallWidth + screenHorizontalOffset,
+                            (i + 1) * wallWidth + screenHorizontalOffset,
+                            pixelCalcTop,
+                            pixelCalcBottom,
+                            (path[1][RGBCalc] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc] - shadeCalc) / 255f,
+                            (path[1][RGBCalc + 1] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 1] - shadeCalc) / 255f,
+                            (path[1][RGBCalc + 2] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 2] - shadeCalc) / 255f
+                        );
+
+                        pixelCalcTop = pixelCalcBottom;
+                        pixelCalcBottom += (wallHeight / path[0][1]);
+                    }
                 }
             }
 
             //Incrementing rayAngle for next ray
-            rayAngle = ((rayAngle + RadBetweenRays) % MathX.Quadrant4 + MathX.Quadrant4) % MathX.Quadrant4;
+
+            rayAngle = NormalizeAngle(((rayAngle + RadBetweenRays) % MathX.Quadrant4 + MathX.Quadrant4) % MathX.Quadrant4);
         }
+        //=============================================================================================
+
+        //Minimap
+        //=============================================================================================
+        float minimapSize = minimumScreenWidth / 5f;
+        float minimapTileSize = minimapSize / Math.Max(mapWalls.GetLength(0), mapWalls.GetLength(1));
+
+        //Default minimap background filler
+        VertexLoader(
+            screenHorizontalOffset + minimumScreenWidth - minimapSize,//X1
+            screenHorizontalOffset + minimumScreenWidth,//X2
+            screenVerticalOffset, //Y1
+            screenVerticalOffset + minimapSize,//Y2
+            0f,//r
+            1f,//g
+            0f //b
+        );
+
+        //Tiles in minimap
+        for (int x = 0; x < mapWalls.GetLength(1); x++)
+        {
+            for (int y = 0; y < mapWalls.GetLength(0); y++)
+            {
+                float r, g, b;
+                if (mapWalls[y, x] == 0)
+                {
+                    r = 1f;
+                    g = 1f;
+                    b = 1f;
+                }
+                else
+                {
+                    r = 0f;
+                    g = 0f;
+                    b = 0f;
+                }
+                vertexAttributesList.AddRange(new float[]
+                {
+                    (screenHorizontalOffset + minimumScreenWidth - minimapSize) + (x * minimapTileSize),//X1
+                    (screenHorizontalOffset + minimumScreenWidth - minimapSize) + (x * minimapTileSize) + minimapTileSize,//X2
+                    screenVerticalOffset + (y * minimapTileSize), //Y1
+                    screenVerticalOffset + (y * minimapTileSize) + minimapTileSize,//Y2
+                    r,
+                    g,
+                    b
+                });
+            }
+        }
+
+        float minimapPlayerPositionX1 = minimapSize / ((mapWalls.GetLength(1) * tileSize) / playerPosition.X);
+        float minimapPlayerPositionX2 = minimapSize / ((mapWalls.GetLength(1) * tileSize) / playerPosition.X);
+        float minimapPlayerPositionY1 = minimapSize / ((mapWalls.GetLength(0) * tileSize) / playerPosition.Y);
+        float minimapPlayerPositionY2 = minimapSize / ((mapWalls.GetLength(0) * tileSize) / playerPosition.Y);
+
+        vertexAttributesList.AddRange(new float[]
+        {
+            (screenHorizontalOffset + minimumScreenWidth - minimapSize) + minimapPlayerPositionX1 - 2f,
+            (screenHorizontalOffset + minimumScreenWidth - minimapSize) + minimapPlayerPositionX2 + 2f,
+            screenVerticalOffset + minimapPlayerPositionY1 - 2f,
+            screenVerticalOffset + minimapPlayerPositionY2 + 2f,
+            1f,
+            0f,
+            0f
+        });
+
+        //vertexAttributesList.AddRange(new float[]
+        //{
+        //    (screenHorizontalOffset + minimumScreenWidth - minimapSize) + minimapPlayerPositionX1,
+        //    (screenHorizontalOffset + minimumScreenWidth - minimapSize) + minimapPlayerPositionX2,
+        //    screenVerticalOffset + minimapPlayerPositionY1,
+        //    screenVerticalOffset + minimapPlayerPositionY2,
+        //    1f,
+        //    0f,
+        //    0f
+        //});
+
+        ////Drawing direction ray
+        //GL.LineWidth(6f);
+        //GL.Begin(PrimitiveType.Lines);
+        //GL.Color3(0f, 1f, 1f);
+        //GL.Vertex2(playerPosition.X, playerPosition.Y);
+        //GL.Vertex2(playerPosition.X + Math.Cos(playerAngle) * 30, playerPosition.Y + Math.Sin(playerAngle) * 30);
+        //GL.End();
+
         //=============================================================================================
 
         shaderVertices = vertexAttributesList.ToArray();
