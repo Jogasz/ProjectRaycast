@@ -25,9 +25,9 @@ void main()
     vec2 pos;
 
         //Contructing 4 vertex points from the datas
-    if (gl_VertexID == 0)      pos = vec2(aPos.x, aPos.z); // x1,y1
-    else if (gl_VertexID == 1) pos = vec2(aPos.y, aPos.z); // x2,y1
-    else if (gl_VertexID == 2) pos = vec2(aPos.x, aPos.w); // x1,y2
+    if (corner == 0)      pos = vec2(aPos.x, aPos.z); // x1,y1
+    else if (corner == 1) pos = vec2(aPos.y, aPos.z); // x2,y1
+    else if (corner == 2) pos = vec2(aPos.x, aPos.w); // x1,y2
     else                       pos = vec2(aPos.y, aPos.w); // x2,y2
 
     gl_Position = uProjection * vec4(pos.xy, 0.0, 1.0);

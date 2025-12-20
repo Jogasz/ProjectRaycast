@@ -17,8 +17,8 @@ public class Program
         {
             Console.WriteLine("Something went wrong when loading assets...");
         }
-
-        Engine engine = new Engine(800, 800, "ProjectRaycast");
+        
+        Engine.Engine engine = new Engine.Engine(800, 800, "ProjectRaycast");
         engine.Run();
 
         //GraphicWindow.Run();
