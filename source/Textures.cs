@@ -1,85 +1,88 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
-public static class Textures {
-    //Default textures
-    public static int[][] planksTexture { get; private set; }
-    public static int[][] mossyPlanksTexture { get; private set; }
-    public static int[][] stoneBricksTexture { get; private set; }
-    public static int[][] mossyStoneBricksTexture { get; private set; }
+public static class Textures
+{
+    //Texture datas
+    //Structure:
+    // Index   data
+    //  [1]     [0]
+    //Datas:
+    // [0] = width
+    // [1] = height
+    // [2] = R
+    // [3] = G
+    // [4] = B
+    // [5] = R
+    // [6] = G
+    // [7] = B...
+    public static int[][] datas { get; private set; }
 
-    //Door textures
-    public static int[][] doorStoneBricksTexture { get; private set; }
-    public static int[][] doorMossyStoneBricksTexture { get; private set; }
+    //Loading PNG's and populating datas[][]
+    public static void Load()
+    {
+        // Candidate folders to look for PNGs (project root or inside assets)
+        string[] candidates = new[] { Path.Combine("textures"), Path.Combine("assets", "textures") };
 
-    //Window textures
-    public static int[][] windowStoneBricksTexture { get; private set; }
-    public static int[][] windowMossyStoneBricksTexture { get; private set; }
-
-    //Painting textures
-    public static int[][] painting_a_stoneBricksTexture { get; private set; }
-    public static int[][] painting_b_stoneBricksTexture { get; private set; }
-    public static int[][] painting_a_mossyStoneBricksTexture { get; private set; }
-    public static int[][] painting_b_mossyStoneBricksTexture { get; private set; }
-
-    //Test textures
-    public static int[][] floorTestTexture { get; private set; }
-
-    //Out of Bounds
-    public static int[][] outOfBoundsTexture { get; private set; }
-    public static void Load() {
-        //Default textures
-        planksTexture = Read("assets/textures/planks.txt");
-        mossyPlanksTexture = Read("assets/textures/mossy_planks.txt");
-        stoneBricksTexture = Read("assets/textures/stonebricks.txt");
-        mossyStoneBricksTexture = Read("assets/textures/mossy_stonebricks.txt");
-
-        //Door textures
-        doorStoneBricksTexture = Read("assets/textures/door_stonebricks.txt");
-        doorMossyStoneBricksTexture = Read("assets/textures/door_mossy_stonebricks.txt");
-
-        //Window textures
-        windowStoneBricksTexture = Read("assets/textures/window_stonebricks.txt");
-        windowMossyStoneBricksTexture = Read("assets/textures/window_mossy_stonebricks.txt");
-
-        //Painting textures
-        painting_a_stoneBricksTexture = Read("assets/textures/painting_a_stonebricks.txt");
-        painting_b_stoneBricksTexture = Read("assets/textures/painting_b_stonebricks.txt");
-        painting_a_mossyStoneBricksTexture = Read("assets/textures/painting_a_mossy_stonebricks.txt");
-        painting_b_mossyStoneBricksTexture = Read("assets/textures/painting_b_mossy_stonebricks.txt");
-
-        //Test textures
-        floorTestTexture = Read("assets/textures/floorTest.txt");
-
-        //Out of Bounds
-        outOfBoundsTexture = Read("assets/textures/oob.txt");
-    }
-    public static int[][] Read(string path) {
-        if (File.Exists(path))
+        string foundDir = candidates.FirstOrDefault(Directory.Exists);
+        if (foundDir == null)
         {
-            string[] lines = File.ReadAllLines(path);
-            int[][] texture = new int[2][];
-            texture[0] = new int[2];
-            texture[1] = new int[lines.Length - 3];
-            for (int i = 0; i < lines.Length; i++) {
-                if (i == 0 || i == 2)
-                {
-                    continue;
-                }
-                else if (i == 1) {
-                    string[] parts = lines[1].Split(' ');
-                    texture[0][0] = int.Parse(parts[0]);
-                    texture[0][1] = int.Parse(parts[1]);
-                }
-                else {
-                    texture[1][i - 3] = int.Parse(lines[i]);
-                }
-            };
-            return texture;
+            Console.WriteLine("No 'textures' directory found. Searched: " + string.Join(", ", candidates));
+            // Ensure datas has the required empty zeroth row
+            datas = new int[1][] { new int[0] };
+            return;
         }
-        else {
-            Console.WriteLine("The file: '" + path + "' does not exist!");
-            return new int[0][];
+
+        // Get png files (alphabetical)
+        var pngFiles = Directory.GetFiles(foundDir, "*.png").OrderBy(p => p).ToArray();
+        if (pngFiles.Length == 0)
+        {
+            Console.WriteLine($"No PNG files found in '{foundDir}'");
+            datas = new int[1][] { new int[0] };
+            return;
         }
+
+        datas = new int[1 + pngFiles.Length][];
+        datas[0] = new int[0];
+
+        for (int i = 0; i < pngFiles.Length; i++)
+        {
+            string path = pngFiles[i];
+            try
+            {
+                datas[i + 1] = ReadPngMerged(path);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to load texture '{path}': {ex.Message}");
+                datas[i + 1] = new int[0];
+            }
+        }
+    }
+
+    // Read a PNG into merged format [w,h,R,G,B,...]
+    private static int[] ReadPngMerged(string path)
+    {
+        using Image<Rgba32> img = Image.Load<Rgba32>(path);
+        int w = img.Width;
+        int h = img.Height;
+        int[] merged = new int[2 + w * h * 3];
+        merged[0] = w;
+        merged[1] = h;
+        int idx = 2;
+        for (int y = 0; y < h; y++)
+        {
+            for (int x = 0; x < w; x++)
+            {
+                Rgba32 p = img[x, y];
+                merged[idx++] = p.R;
+                merged[idx++] = p.G;
+                merged[idx++] = p.B;
+            }
+        }
+        return merged;
     }
 }

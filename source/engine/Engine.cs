@@ -9,6 +9,10 @@ namespace Engine;
 
 internal partial class Engine : GameWindow
 {
+    //Debug
+    //Border for quads to showcase placement
+    const float debugBorder = 0f;
+
     //Avarage FPS tester
     List<int> FPSList = new List<int>();
 
@@ -37,7 +41,7 @@ internal partial class Engine : GameWindow
     //Engine
     Stopwatch stopwatch { get; set; } = new Stopwatch();
     float FOVStart { get; set; }
-    float RadBetweenRays { get; set; }
+    float radBetweenRays { get; set; }
     float wallWidth { get; set; }
     int minimumScreenWidth { get; set; }
     int minimumScreenHeight { get; set; }
@@ -60,17 +64,18 @@ internal partial class Engine : GameWindow
 
         WindowState = WindowState.Normal,
         WindowBorder = WindowBorder.Resizable,
-        //VSync = VSyncMode.Off
     })
     {
         CursorState = CursorState.Grabbed;
-        VSync = VSyncMode.On;
-        //CursorState = CursorState.Hidden;
+        VSync = VSyncMode.Off;
     }
 
     protected override void OnLoad()
     {
         base.OnLoad();
+
+        //Render distance limiter
+        renderDistance = Math.Min(renderDistance, Math.Max(mapWalls.GetLength(0), mapWalls.GetLength(1)));
 
         Console.WriteLine("Starting program...");
 
@@ -114,7 +119,7 @@ internal partial class Engine : GameWindow
     {
         base.OnFramebufferResize(e);
     }
-    
+
     protected override void OnUpdateFrame(FrameEventArgs e)
     {
         base.OnUpdateFrame(e);
@@ -128,6 +133,7 @@ internal partial class Engine : GameWindow
 
         //FPS Counter
         FPSList.Add((int)Math.Floor(1 / deltaTime));
+        Console.WriteLine((int)Math.Floor(1 / deltaTime));
         //=========================================================================================
 
         //Keybinds, controls and collision
@@ -171,22 +177,22 @@ internal partial class Engine : GameWindow
 
         //FOV calculation
         FOVStart = -((float)(FOV * (Math.PI / 180f)) / 2);
-        RadBetweenRays = ((float)(FOV * (Math.PI / 180f)) / (rayCount - 1));
+        radBetweenRays = ((float)(FOV * (Math.PI / 180f)) / (rayCount - 1));
         wallWidth = (float)minimumScreenWidth / rayCount;
         //=============================================================================================
-
+        
         //Raycasting:
         // 1. RayCast
         RayCast();
-
+        
         //Graphic's position adn color calculator's (Inside Logic):
         // 2. Ceiling
         // 3. Floor
         // 4. Walls
         //=============================================================================================
 
-        //Minimap
-        Minimap();
+        //Hud
+        DrawHUD();
         //=============================================================================================
 
         //Vertex loader

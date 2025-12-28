@@ -8,30 +8,42 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="assets\testTextures\**" />
     <Compile Remove="assets\textures\wall\**" />
+    <EmbeddedResource Remove="assets\testTextures\**" />
     <EmbeddedResource Remove="assets\textures\wall\**" />
+    <None Remove="assets\testTextures\**" />
     <None Remove="assets\textures\wall\**" />
   </ItemGroup>
 
   <ItemGroup>
     <None Remove="assets\maps\map01.json" />
     <None Remove="assets\textures\bricks.txt" />
+    <None Remove="assets\textures\door_mossy_stonebricks.png" />
     <None Remove="assets\textures\door_mossy_stonebricks.txt" />
+    <None Remove="assets\textures\door_stonebricks.png" />
     <None Remove="assets\textures\door_stonebricks.txt" />
     <None Remove="assets\textures\floorTest.txt" />
     <None Remove="assets\textures\missing.txt" />
     <None Remove="assets\textures\mossy_bricks.txt" />
+    <None Remove="assets\textures\mossy_planks.png" />
     <None Remove="assets\textures\mossy_planks.txt" />
+    <None Remove="assets\textures\mossy_stonebricks.png" />
     <None Remove="assets\textures\mossy_stonebricks.txt" />
     <None Remove="assets\textures\oob.txt" />
     <None Remove="assets\textures\painting_a_mossy_stonebricks.txt" />
     <None Remove="assets\textures\painting_a_stonebricks.txt" />
     <None Remove="assets\textures\painting_b_mossy_stonebricks.txt" />
     <None Remove="assets\textures\painting_b_stonebricks.txt" />
+    <None Remove="assets\textures\planks.png" />
     <None Remove="assets\textures\planks.txt" />
+    <None Remove="assets\textures\stonebricks.png" />
     <None Remove="assets\textures\stonebricks.txt" />
+    <None Remove="assets\textures\test.png" />
     <None Remove="assets\textures\test.txt" />
+    <None Remove="assets\textures\window_mossy_stonebricks.png" />
     <None Remove="assets\textures\window_mossy_stonebricks.txt" />
+    <None Remove="assets\textures\window_stonebricks.png" />
     <None Remove="assets\textures\window_stonebricks.txt" />
     <None Remove="settings.json" />
     <None Remove="source\shader\shader.frag" />
@@ -39,46 +51,28 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="assets\textures\door_mossy_stonebricks.txt">
+    <Content Include="assets\textures\door_mossy_stonebricks.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="assets\textures\door_stonebricks.txt">
+    <Content Include="assets\textures\door_stonebricks.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="assets\textures\floorTest.txt">
+    <Content Include="assets\textures\mossy_planks.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="assets\textures\mossy_planks.txt">
+    <Content Include="assets\textures\mossy_stonebricks.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="assets\textures\mossy_stonebricks.txt">
+    <Content Include="assets\textures\planks.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="assets\textures\oob.txt">
+    <Content Include="assets\textures\stonebricks.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="assets\textures\painting_a_mossy_stonebricks.txt">
+    <Content Include="assets\textures\window_mossy_stonebricks.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="assets\textures\painting_a_stonebricks.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\textures\painting_b_mossy_stonebricks.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\textures\painting_b_stonebricks.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\textures\planks.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\textures\stonebricks.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\textures\window_mossy_stonebricks.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\textures\window_stonebricks.txt">
+    <Content Include="assets\textures\window_stonebricks.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="settings.json">
@@ -95,6 +89,7 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="OpenTK" Version="4.9.4" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
   </ItemGroup>
 
   <ItemGroup>

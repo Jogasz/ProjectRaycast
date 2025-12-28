@@ -1,103 +1,256 @@
-﻿//Ceiling calculation
-//=============================================================================================
-//float ceilingFloorPixelDistance,
-//      ceilingPixelXWorldPosition,
-//      ceilingPixelYWorldPosition,
-//      floorPixelXWorldPosition,
-//      floorPixelYWorldPosition;
-
-////Floor and ceiling X position variables
-//float floorCeilingPixelXLeft = i * wallWidth + screenHorizontalOffset;
-//float floorCeilingPixelXRight = (i + 1) * wallWidth + screenHorizontalOffset;
-
-//float ceilingStep = Math.Max(4f, wallWidth);
-
-////Ceiling Y position variables
-//float ceilingPixelYTop = screenVerticalOffset;
-//float ceilingPixelYBottom = screenVerticalOffset + ceilingStep;
-
-//while (ceilingPixelYTop < (screenVerticalOffset + ((minimumScreenHeight - wallHeight) / 2)) + pitch)
+﻿//v1
+//void CeilingCast(int i, float wallHeight, float rayAngle)
 //{
-//    /* 
-//    * If the pixel's top position is in the correct screen, but the bottom position is in the wall,
-//    * the bottom position's Y value may be equal to the wall's top value.
-//    */
+//    float quadX1 = screenHorizontalOffset + (i * wallWidth);
+//    float quadX2 = screenHorizontalOffset + ((i + 1) * wallWidth);
 
-//    ceilingPixelYBottom =
-//    (ceilingPixelYBottom > (screenVerticalOffset + ((minimumScreenHeight - wallHeight) / 2)) + pitch) ?
-//    (screenVerticalOffset + ((minimumScreenHeight - wallHeight) / 2)) + pitch :
-//    ceilingPixelYBottom;
+//    float yStep = wallWidth;
 
-//    //Y of the current pixel on the screen
-//    rowY = (ClientSize.Y / 2) - (ceilingPixelYTop + ((ceilingPixelYBottom - ceilingPixelYTop) / 2)) + pitch;
+//    float quadY1 = screenVerticalOffset;
+//    float quadY2 = screenVerticalOffset + yStep;
 
-//    //Distance of the pixel from the player
-//    ceilingFloorPixelDistance = ((cameraZ / rowY) * tileSize) / (float)Math.Cos(playerAngle - rayAngle);
+//    //Height of the player
+//    float cameraZ = ClientSize.Y / 2;
 
-//    //World X position of the pixel
-//    ceilingPixelXWorldPosition = playerPosition.X + ((float)Math.Cos(rayAngle) * ceilingFloorPixelDistance);
+//    int[][] path;
 
-//    //World Y position of the pixel
-//    ceilingPixelYWorldPosition = playerPosition.Y + ((float)Math.Sin(rayAngle) * ceilingFloorPixelDistance);
-
-//    //Textures
-//    path =
-//    (ceilingPixelXWorldPosition >= mapCeiling.GetLength(1) * tileSize ||
-//    ceilingPixelXWorldPosition < 0f ||
-//    ceilingPixelYWorldPosition >= mapCeiling.GetLength(0) * tileSize ||
-//    ceilingPixelYWorldPosition < 0f) ?
-//        null :
-//        TextureTranslator((int)mapCeiling[(int)Math.Floor(ceilingPixelYWorldPosition / tileSize), (int)Math.Floor(ceilingPixelXWorldPosition / tileSize)]);
-
-//    if (path == null)
+//    while (quadY1 < (screenVerticalOffset + ((minimumScreenHeight - wallHeight) / 2)) + pitch)
 //    {
-//        ceilingPixelYTop = ceilingPixelYBottom;
-//        ceilingPixelYBottom += ceilingStep;
-//        continue;
+//        /* 
+//        * If the quad's top position is in the correct screen, but the bottom position is in the wall,
+//        * the bottom position's Y value may be equal to the wall's top value.
+//        */
+//        if (quadY2 > (screenVerticalOffset + ((minimumScreenHeight - wallHeight) / 2)) + pitch)
+//        {
+//            quadY2 = screenVerticalOffset + ((minimumScreenHeight - wallHeight) / 2) + pitch;
+//        }
+
+//        //Y of the current quad on the screen
+//        float rowY = (ClientSize.Y / 2) - (quadY1 + ((quadY2 - quadY1) / 2)) + pitch;
+
+//        //Distance of the pixel from the player
+//        float ceilingPixelDistance = ((cameraZ / rowY) * tileSize) / (float)Math.Cos(playerAngle - rayAngle);
+
+//        //World X position of the pixel
+//        float ceilingPixelX = playerPosition.X + ((float)Math.Cos(rayAngle) * ceilingPixelDistance);
+
+//        //World Y position of the pixel
+//        float ceilingPixelY = playerPosition.Y + ((float)Math.Sin(rayAngle) * ceilingPixelDistance);
+
+//        //Texture
+//        if
+//        (
+//            ceilingPixelX >= mapCeiling.GetLength(1) * tileSize ||
+//            ceilingPixelX < 0f ||
+//            ceilingPixelY >= mapCeiling.GetLength(0) * tileSize ||
+//            ceilingPixelY < 0f
+//        )
+//        {
+//            quadY1 = quadY2;
+//            quadY2 += yStep;
+//            continue;
+//        }
+
+//        path = TextureTranslator((int)mapCeiling[(int)Math.Floor(ceilingPixelY / tileSize), (int)Math.Floor(ceilingPixelX / tileSize)]);
+
+//        if (path is null)
+//        {
+//            quadY1 = quadY2;
+//            quadY2 += yStep;
+//            continue;
+//        }
+
+//        //Calculating RGB variables
+//        int RGBCalc = ((int)Math.Floor(path[0][1] / (tileSize / (ceilingPixelX % tileSize))) * path[0][1] * 3) +
+//                  ((int)Math.Floor(path[0][0] / (tileSize / (ceilingPixelY % tileSize))) * 3);
+
+//        //Calculating shading and lighting with distance
+//        float shadeCalc = ceilingPixelDistance * distanceShade;
+
+//        float debugBorder = 0.5f;
+
+//        vertexAttributesList.AddRange(new float[]
+//        {
+//                            quadX1 + debugBorder,
+//                            quadX2 - debugBorder,
+//                            quadY1 + debugBorder,
+//                            quadY2 - debugBorder,
+//                            (path[1][RGBCalc] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc] - shadeCalc) / 255f,
+//                            (path[1][RGBCalc + 1] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 1] - shadeCalc) / 255f,
+//                            (path[1][RGBCalc + 2] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 2] - shadeCalc) / 255f
+//        });
+
+//        //Incremental increasing of the top and bottom values of the pixel
+//        quadY1 = quadY2;
+//        quadY2 += yStep;
 //    }
+//}
 
-//    //Calculating RGB variables
-//    RGBCalc = ((int)Math.Floor(path[0][1] / (tileSize / (ceilingPixelYWorldPosition % tileSize))) * path[0][1] * 3) +
-//              ((int)Math.Floor(path[0][0] / (tileSize / (ceilingPixelXWorldPosition % tileSize))) * 3);
+//==============================================================================================================7
 
-//    //Calculating shading and lighting with distance
-//    shadeCalc = ceilingFloorPixelDistance * distanceShade;
+//v2
+//void CeilingCast()
+//{
+//    //Y mentén lévő lépegetés mértéke
+//    float yStep = (float)minimumScreenWidth / (float)rayCount;
 
-//    //Declaring temporary drawing parameter holder
-//    //float[] tempCeilingVertices = new float[7];
+//    //Quad's Y1 and Y2
+//    float quadY1 = screenVerticalOffset;
+//    float quadY2 = screenVerticalOffset + yStep;
 
-//    //Wall array translator
-//    //newLine[0] = x1,4
-//    //newLine[1] = x2,3
-//    //newLine[2] = y1,2
-//    //newLine[3] = y3,4
-//    //newLine[4] = r
-//    //newLine[5] = g
-//    //newLine[6] = b
+//    //Height of the player (Middle of the screen)
+//    int cameraZ = ClientSize.Y / 2;
 
-//    vertexAttributesList.AddRange(new float[]
+//    //!!!TESZT!!!
+//    //Unique raycount for each row depending on the distance
+//    //====================================================
+//    float aFirstRay = NormalizeAngle(playerAngle + FOVStart);
+//    float aLastRay = NormalizeAngle(playerAngle - FOVStart);
+//    //====================================================
+
+//    //Sorokon megy végig
+//    for (int i = 0; i < rayCount; i++)
 //    {
-//        floorCeilingPixelXLeft,
-//        floorCeilingPixelXRight,
-//        ceilingPixelYTop,
-//        ceilingPixelYBottom,
-//        (path[1][RGBCalc] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc] - shadeCalc) / 255f,
-//        (path[1][RGBCalc + 1] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 1] - shadeCalc) / 255f,
-//        (path[1][RGBCalc + 2] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 2] - shadeCalc) / 255f
-//    });
+//        //Jelenlegi sor Y-ja a képernyőn
+//        float rowY = (ClientSize.Y / 2) - (quadY1 + ((quadY2 - quadY1) / 2)) + pitch;
 
-//    //tempCeilingVertices[0] = floorCeilingPixelXLeft;
-//    //tempCeilingVertices[1] = floorCeilingPixelXRight;
-//    //tempCeilingVertices[2] = ceilingPixelYTop;
-//    //tempCeilingVertices[3] = ceilingPixelYBottom;
-//    //tempCeilingVertices[4] = (path[1][RGBCalc] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc] - shadeCalc) / 255f;
-//    //tempCeilingVertices[5] = (path[1][RGBCalc + 1] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 1] - shadeCalc) / 255f;
-//    //tempCeilingVertices[6] = (path[1][RGBCalc + 2] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 2] - shadeCalc) / 255f;
+//        //Distance between first and last ray's position on the map
+//        //===================================================================================================
+//        //First ray
+//        //=========
+//        //Distance between player and first ray world hit point
+//        float dFirstRay = ((cameraZ / rowY) * tileSize) / (float)Math.Cos(playerAngle - aFirstRay);
+//        //World position X
+//        float firstRayPosX = playerPosition.X + ((float)Math.Cos(aFirstRay) * dFirstRay);
+//        //World position Y
+//        float firstRayPosY = playerPosition.Y + ((float)Math.Sin(aFirstRay) * dFirstRay);
 
-//    //Adding temporary array the the wall list of arrays
-//    //vertexAttributesList.Add(tempCeilingVertices);
+//        //Last ray
+//        //========
+//        //Distance between player and last ray world hit point
+//        float dLastRay = ((cameraZ / rowY) * tileSize) / (float)Math.Cos(playerAngle - aLastRay);
+//        //World position X
+//        float lastRayPosX = playerPosition.X + ((float)Math.Cos(aLastRay) * dLastRay);
+//        //World position Y
+//        float lastRayPosY = playerPosition.Y + ((float)Math.Sin(aLastRay) * dLastRay);
 
-//    //Incremental increasing of the top and bottom values of the pixel
-//    ceilingPixelYTop = ceilingPixelYBottom;
-//    ceilingPixelYBottom += ceilingStep;
+//        //Distance between the two rays
+//        float dX = lastRayPosX - firstRayPosX;
+//        float dY = lastRayPosY - firstRayPosY;
+//        float rowD = (float)Math.Sqrt(dX * dX + dY * dY);
+//        //===================================================================================================
+
+//        float xStep = Math.Max(yStep, minimumScreenWidth / ((rowD / tileSize) * 36f));
+
+//        float quadOffset = ((1 - ((rowD / tileSize * 36f) - (float)Math.Floor(rowD / tileSize * 36f))) / 2f) * xStep;
+
+//        //Quad's X1 and X2
+//        float quadX1 = screenHorizontalOffset - quadOffset;
+//        float quadX2 = screenHorizontalOffset - quadOffset + xStep;
+
+//        //Rad between rays based on final calculations of how many pixels will there be in a row
+//        float tempRadBetweenRays = ((float)(FOV * (Math.PI / 180f)) / (minimumScreenWidth / xStep));
+
+//        //Incrementing ray angle for the quads in a row
+//        float incRayAngle = aFirstRay;
+
+//        int incr = 0;
+//        //A sorok pixelein megy végig
+//        while (quadX1 < (screenHorizontalOffset + minimumScreenWidth))
+//        {
+//            quadX1 = quadX1 < screenHorizontalOffset ?
+//                screenHorizontalOffset :
+//                quadX1;
+
+//            quadX2 = quadX2 > (screenHorizontalOffset + minimumScreenWidth) ?
+//                (screenHorizontalOffset + minimumScreenWidth) :
+//                quadX2;
+
+//            //Distance of the floor pixel we are looking at
+//            float ceilingPixelDistance = ((cameraZ / rowY) * tileSize) / (float)Math.Cos(playerAngle - incRayAngle);
+
+//            //World X position of the pixel
+//            float ceilingPixelX = playerPosition.X + ((float)Math.Cos(incRayAngle) * ceilingPixelDistance);
+
+//            //World Y position of the pixel
+//            float ceilingPixelY = playerPosition.Y + ((float)Math.Sin(incRayAngle) * ceilingPixelDistance);
+
+//            //If it's outside of the map
+//            //=========================================
+//            if
+//            (
+//                ceilingPixelX >= mapCeiling.GetLength(1) * tileSize ||
+//                ceilingPixelX < 0f ||
+//                ceilingPixelY >= mapCeiling.GetLength(0) * tileSize ||
+//                ceilingPixelY < 0f
+//            )
+//            {
+//                quadX1 = quadX2;
+//                quadX2 += xStep;
+//                incRayAngle = NormalizeAngle(incRayAngle + tempRadBetweenRays);
+//                continue;
+//            }
+//            //=========================================
+
+//            //If it's inside the map, but index is zero
+//            //=========================================
+//            int[][] path = null;
+//            path = TextureTranslator((int)mapCeiling[(int)Math.Floor(ceilingPixelY / tileSize), (int)Math.Floor(ceilingPixelX / tileSize)]);
+
+//            if (path == null)
+//            {
+//                quadX1 = quadX2;
+//                quadX2 += xStep;
+//                incr++;
+//                incRayAngle = NormalizeAngle(incRayAngle + tempRadBetweenRays);
+//                continue;
+//            }
+//            //=========================================
+
+//            //If inside the map and not zero:
+//            //=========================================
+//            //Calculating RGB variables
+//            int RGBCalc = ((int)Math.Floor(path[0][1] / (tileSize / (ceilingPixelY % tileSize))) * path[0][1] * 3) +
+//                      ((int)Math.Floor(path[0][0] / (tileSize / (ceilingPixelX % tileSize))) * 3);
+
+//            //Calculating shading and lighting with distance
+//            float shadeCalc = ceilingPixelDistance * distanceShade;
+
+//            float debugOffset = 0.5f;
+
+//            vertexAttributesList.AddRange(new float[]
+//            {
+//                            quadX1 + debugOffset,
+//                            quadX2 - debugOffset,
+//                            quadY1 + debugOffset,
+//                            quadY2 - debugOffset,
+//                            (path[1][RGBCalc] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc] - shadeCalc) / 255f,
+//                            (path[1][RGBCalc + 1] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 1] - shadeCalc) / 255f,
+//                            (path[1][RGBCalc + 2] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 2] - shadeCalc) / 255f
+//            });
+
+//            //X inkrementálás
+//            quadX1 = quadX2;
+//            quadX2 += xStep;
+//            incr++;
+
+//            //Incrementing ray angle for next quad
+//            incRayAngle = NormalizeAngle(incRayAngle + tempRadBetweenRays);
+//            //=========================================
+//        }
+
+//        //If there was no pixel inside the map, break the drawing completely
+//        if (incr == 0)
+//        {
+//            break;
+//        }
+
+//        //Incrementing Y
+//        quadY1 = quadY2;
+//        quadY2 += yStep;
+
+//        //Resetting X
+//        //quadX1 = screenHorizontalOffset;
+//        //quadX2 = screenHorizontalOffset + yStep;
+//    }
 //}

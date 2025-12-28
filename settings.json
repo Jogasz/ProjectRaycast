@@ -4,7 +4,7 @@
     "Armor": 50,
     "Stamina": 100,
     "MovementSpeed": 10,
-    "MouseSensitivity": 8
+    "MouseSensitivity": 2
   },
   "Entites": [
     {
@@ -21,9 +21,9 @@
     }
   ],
   "Graphics": {
-    "FOV": 70,
-    "RayCount": 10000,
-    "renderDistance": 5,
+    "FOV": 55,
+    "RayCount": 100,
+    "renderDistance": 10,
     "DistanceShade": 2
   },
   "Gameplay": {

@@ -45,7 +45,7 @@ internal class Settings
             armor = Armor;
             stamina = Stamina;
             movementSpeed = MovementSpeed * 10;
-            mouseSensitivity = MouseSensitivity;
+            mouseSensitivity = MouseSensitivity / 10;
         }
     }
 

@@ -1,6 +1,7 @@
 ﻿using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using System.Threading.Tasks;
 
 namespace Engine;
 
@@ -36,7 +37,7 @@ internal partial class Engine
             }
 
             //Mouse
-            if (IsMouseMoving)
+            if (IsMouseMoving && CursorState == CursorState.Grabbed)
             {
                 HandleMouse(mouse);
             }
@@ -58,10 +59,10 @@ internal partial class Engine
 
             //Cursor grab
             //F1
-            //if (keyboard.IsKeyPressed(Keys.F11))
-            //{
-            //    HandleCursorGrab();
-            //}
+            if (keyboard.IsKeyPressed(Keys.F1))
+            {
+                HandleCursorGrab();
+            }
         }
     }
 
@@ -154,11 +155,21 @@ internal partial class Engine
 
     void HandleMouse(MouseState mouse)
     {
-        float deltaMouseSensitivity = mouseSensitivity * deltaTime;
+        //==============================================
+        //!!! Delta rotation is still not consistent !!!
+        //==============================================
+        float deltaMouseSensitivityX = (mouseSensitivity * (mouse.X - mouse.PreviousX)) * deltaTime;
+        //float deltaMouseSensitivityY = (mouseSensitivity * ((mouse.Y - mouse.PreviousY) * 1000)) * deltaTime;
 
         //Rotating X
-        playerAngle = NormalizeAngle(playerAngle + (deltaMouseSensitivity / 30f) * (mouse.X - mouse.PreviousX));
+        playerAngle = NormalizeAngle(playerAngle + deltaMouseSensitivityX);
 
-        pitch -= ((deltaMouseSensitivity / 50f) * 1000) * (mouse.Y - mouse.PreviousY);
+        //Pitch/yaw (Y)
+        //pitch = Math.Clamp(pitch - deltaMouseSensitivityY, -2500, 2500);
+    }
+
+    void HandleCursorGrab()
+    {
+        CursorState = CursorState == CursorState.Normal ? CursorState.Grabbed : CursorState.Normal;
     }
 }
