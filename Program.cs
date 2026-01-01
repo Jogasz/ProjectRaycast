@@ -8,7 +8,6 @@ public class Program
         try
         {
             Settings.Load();
-            Textures.Load();
             Level map = new Level();
             map.Load();
             Console.WriteLine("Assets successfully loaded!");

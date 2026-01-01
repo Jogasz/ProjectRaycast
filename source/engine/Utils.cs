@@ -1,26 +1,18 @@
-﻿using OpenTK.Graphics.OpenGL;
-using OpenTK.Mathematics;
+﻿using OpenTK.Mathematics;
+using OpenTK.Graphics.OpenGL;
 
 namespace Engine;
 
-internal partial class Engine
+internal class Utils
 {
-    public void ViewportSetUp(int width, int height)
+    public static Matrix4 SetViewportAndProjection(int width, int height)
     {
         GL.Viewport(0, 0, width, height);
-        projection = Matrix4.CreateOrthographicOffCenter(0f, width, height, 0f, -1f, 1f);
-        if (shader != null)
-        {
-            shader.Use();
-            shader.SetMatrix4("uProjection", projection);
-        }
 
-        //Window's default color
-        GL.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-        GL.Clear(ClearBufferMask.ColorBufferBit);
+        return Matrix4.CreateOrthographicOffCenter(0f, width, 0f, height, -1f, 1f);
     }
 
-    float NormalizeAngle(float angle)
+    public static float NormalizeAngle(float angle)
     {
         if (angle > MathX.Quadrant4)
         {
@@ -33,46 +25,5 @@ internal partial class Engine
         }
 
         return angle;
-    }
-
-    void VertexLoader(float X1, float X2, float Y1, float Y2, float R, float G, float B)
-    {
-
-        /*
-         *Translator for shaderVerticies:
-         *
-         * 0: X1
-         * 1: X2
-         * 2: Y1
-         * 3: Y2
-         * 4: R
-         * 5: G
-         * 6: B
-         * 
-         * (x2, y1) ┌──────┐ (x1, y1)
-         *          │      │
-         *          │      │
-         * (x2, y2) └──────┘ (x1, y2)
-         * 
-         * 0 -> (x1, y1)  (top-right)
-         * 1 -> (x2, y1)  (top-left)
-         * 2 -> (x1, y2)  (bottom-right)
-         * 3 -> (x2, y2)  (bottom-left)
-         * 
-         * first triangle: 0-1-2
-         * second triangle: 2-1-3
-         * 
-         */
-
-        vertexAttributesList.AddRange(new float[]
-        {
-            X1,
-            X2,
-            Y1,
-            Y2,
-            R,
-            G,
-            B
-        });
     }
 }

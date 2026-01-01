@@ -162,7 +162,7 @@ internal partial class Engine
         //float deltaMouseSensitivityY = (mouseSensitivity * ((mouse.Y - mouse.PreviousY) * 1000)) * deltaTime;
 
         //Rotating X
-        playerAngle = NormalizeAngle(playerAngle + deltaMouseSensitivityX);
+        playerAngle = Utils.NormalizeAngle(playerAngle + deltaMouseSensitivityX);
 
         //Pitch/yaw (Y)
         //pitch = Math.Clamp(pitch - deltaMouseSensitivityY, -2500, 2500);

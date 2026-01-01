@@ -1,18 +1,13 @@
-﻿using OpenTK.Graphics.OpenGL;
+﻿using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
-using ProjectRaycast.source.shader;
 using System.Diagnostics;
 
 namespace Engine;
 
 internal partial class Engine : GameWindow
 {
-    //Debug
-    //Border for quads to showcase placement
-    const float debugBorder = 0f;
-
     //Avarage FPS tester
     List<int> FPSList = new List<int>();
 
@@ -48,14 +43,38 @@ internal partial class Engine : GameWindow
     int screenVerticalOffset { get; set; }
     int screenHorizontalOffset { get; set; }
 
-    //Shader
+    //Textures
+    //Paths
+    readonly string[] texPaths = {
+        "assets/textures/testTexture.png"
+    };
+
+    //PNG's
+    List<Texture> textures { get; set; } = new();
+
+    //SHADER
+    //Shaders
+    Shader defShader { get; set; }
+    Shader ceilingShader { get; set; }
+
+    //VAO's, VBO's
+    //Default
+    int defVAO { get; set; }
+    int defVBO { get; set; }
+    internal static List<float> defVertexAttributesList { get; set; } = new List<float>();
+    float[] defVerticesArray { get; set; }
+
+    //Ceiling
+    int ceilingVAO { get; set; }
+    int ceilingVBO { get; set; }
+    internal static List<float> ceilingVertexAttributesList { get; set; } = new List<float>();
+    float[] ceilingVerticesArray { get; set; }
+
     Matrix4 projection { get; set; }
-    int VertexBufferObject { get; set; }
-    int VertexArrayObject { get; set; }
-    Shader shader { get; set; }
-    float[] shaderVertices { get; set; } = Array.Empty<float>();
-    bool verticesReady { get; set; } = false;
-    private List<float> vertexAttributesList { get; set; } = new List<float>();
+
+    //Ceiling Vertex Attributes
+    internal static List<float> ceilingAttributes { get; set; } = new List<float>();
+
     //=============================================================================================
     public Engine(int width, int height, string title) : base(GameWindowSettings.Default, new NativeWindowSettings()
     {
@@ -74,42 +93,101 @@ internal partial class Engine : GameWindow
     {
         base.OnLoad();
 
+        //Textures
+        foreach (var path in texPaths)
+        {
+            textures.Add(new Texture(path));
+        }
+
+        //Viewport and projection (bottom-left origin)
+        projection = Utils.SetViewportAndProjection(ClientSize.X, ClientSize.Y);
+
+        //Allowed screen's size (square game aspect ratio)
+        minimumScreenHeight = ClientSize.Y > ClientSize.X ? ClientSize.X : ClientSize.Y;
+        minimumScreenWidth = ClientSize.X > ClientSize.Y ? ClientSize.Y : ClientSize.X;
+
+        //Offsets to center allowed screen
+        screenHorizontalOffset = ClientSize.X > ClientSize.Y ? ((ClientSize.X - minimumScreenWidth) / 2) : 0;
+        screenVerticalOffset = ClientSize.Y > ClientSize.X ? ((ClientSize.Y - minimumScreenHeight) / 2) : 0;
+
         //Render distance limiter
         renderDistance = Math.Min(renderDistance, Math.Max(mapWalls.GetLength(0), mapWalls.GetLength(1)));
 
-        Console.WriteLine("Starting program...");
-
-        //Viewport setup
-        ViewportSetUp(ClientSize.X, ClientSize.Y);
-
-        shader = new Shader("source/shader/shader.vert", "source/shader/shader.frag");
+        //Shaders
+        //Default
+        //============================================================================
+        defShader = new Shader("source/shader/shader.vert", "source/shader/shader.frag");
 
         //VAO, VBO
-        VertexArrayObject = GL.GenVertexArray();
-        VertexBufferObject = GL.GenBuffer();
+        defVAO = GL.GenVertexArray();
+        defVBO = GL.GenBuffer();
 
-        //Instance VBO (vec4 + vec3 = 7 floats per instance)
-        GL.BindVertexArray(VertexArrayObject);
-        GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferObject);
-        
-        //Attribute 0 = vec4 aPosition (x1,x2,y1,y2) -> per-instance
+        //VAO, VBO Binding
+        GL.BindVertexArray(defVAO);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, defVBO);
+
+        //Attribute0
         GL.EnableVertexAttribArray(0);
-        GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, 7 * sizeof(float), 0);
+        GL.VertexAttribPointer(0,4, VertexAttribPointerType.Float, false,7 * sizeof(float),0);
 
-        //Attribute 1 = vec3 aColor -> per-instance
+        //Attribute1
         GL.EnableVertexAttribArray(1);
-        GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 7 * sizeof(float), 4 * sizeof(float));
+        GL.VertexAttribPointer(1,3, VertexAttribPointerType.Float, false,7 * sizeof(float),4 * sizeof(float));
 
-        //Mark these attributes as per-instance (divisor = 1)
-        GL.VertexAttribDivisor(0, 1);
-        GL.VertexAttribDivisor(1, 1);
+        //Divisor
+        GL.VertexAttribDivisor(0,1);
+        GL.VertexAttribDivisor(1,1);
 
         //Disable face culling to avoid accidentally removing one triangle
         GL.Disable(EnableCap.CullFace);
 
         //Unbind for safety
-        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+        GL.BindBuffer(BufferTarget.ArrayBuffer,0);
         GL.BindVertexArray(0);
+        //============================================================================
+
+        //Ceiling
+        //============================================================================
+        ceilingShader = new Shader("source/engine/graphics/geometry/ceiling/ceiling.vert", "source/engine/graphics/geometry/ceiling/ceiling.frag");
+
+        //VAO, VBO
+        ceilingVAO = GL.GenVertexArray();
+        ceilingVBO = GL.GenBuffer();
+
+        //VAO, VBO Binding
+        GL.BindVertexArray(ceilingVAO);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, ceilingVBO);
+
+        //Attribute0
+        GL.EnableVertexAttribArray(0);
+        GL.VertexAttribPointer(0,4, VertexAttribPointerType.Float, false,8 * sizeof(float),0);
+
+        //Attribute1
+        GL.EnableVertexAttribArray(1);
+        GL.VertexAttribPointer(1,3, VertexAttribPointerType.Float, false,8 * sizeof(float),4 * sizeof(float));
+
+        //Attribute2
+        GL.EnableVertexAttribArray(2);
+        GL.VertexAttribPointer(2,1, VertexAttribPointerType.Float, false,8 * sizeof(float),7 * sizeof(float));
+
+        //Divisor
+        GL.VertexAttribDivisor(0,1);
+        GL.VertexAttribDivisor(1,1);
+        GL.VertexAttribDivisor(2,1);
+
+        //Disable face culling to avoid accidentally removing one triangle
+        GL.Disable(EnableCap.CullFace);
+
+        //Unbind for safety
+        GL.BindBuffer(BufferTarget.ArrayBuffer,0);
+        GL.BindVertexArray(0);
+        //============================================================================
+
+        // Set projection uniform for both shaders
+        defShader.Use();
+        defShader.SetMatrix4("uProjection", projection);
+        ceilingShader.Use();
+        ceilingShader.SetMatrix4("uProjMat", projection);
 
         //Starting stopwatch for Delta Time
         stopwatch.Start();
@@ -118,6 +196,23 @@ internal partial class Engine : GameWindow
     protected override void OnFramebufferResize(FramebufferResizeEventArgs e)
     {
         base.OnFramebufferResize(e);
+
+        //Viewport and projection (bottom-left origin)
+        projection = Utils.SetViewportAndProjection(ClientSize.X, ClientSize.Y);
+
+        //Allowed screen's size (square game aspect ratio)
+        minimumScreenHeight = ClientSize.Y > ClientSize.X ? ClientSize.X : ClientSize.Y;
+        minimumScreenWidth = ClientSize.X > ClientSize.Y ? ClientSize.Y : ClientSize.X;
+
+        //Offsets to center allowed screen
+        screenHorizontalOffset = ClientSize.X > ClientSize.Y ? ((ClientSize.X - minimumScreenWidth) / 2) : 0;
+        screenVerticalOffset = ClientSize.Y > ClientSize.X ? ((ClientSize.Y - minimumScreenHeight) / 2) : 0;
+
+        //Update projection uniforms
+        defShader?.Use();
+        defShader?.SetMatrix4("uProjection", projection);
+        ceilingShader?.Use();
+        ceilingShader?.SetMatrix4("uProjMat", projection);
     }
 
     protected override void OnUpdateFrame(FrameEventArgs e)
@@ -133,94 +228,104 @@ internal partial class Engine : GameWindow
 
         //FPS Counter
         FPSList.Add((int)Math.Floor(1 / deltaTime));
-        Console.WriteLine((int)Math.Floor(1 / deltaTime));
+        //Console.WriteLine((int)Math.Floor(1 / deltaTime));
         //=========================================================================================
 
         //Keybinds, controls and collision
-        // 1. Distributor
+        //1. Distributor
         Controls(KeyboardState, MouseState);
 
         //(Inside Distributor):
-        // 2. Movement and collison
-        // 3. Jump
-        // 4. Mouse
-        // 5. Closing program
-        // 6. Fullscreen
-        // 7. Mouse grab
+        //2. Movement and collison
+        //3. Jump
+        //4. Mouse
+        //5. Closing program
+        //6. Fullscreen
+        //7. Mouse grab
         //=========================================================================================
 
-        //Allowed screen
-        // 1. Size
-        //Using the minimum of the screen's dimensions to keep a square aspect ratio
-        minimumScreenHeight = ClientSize.Y > ClientSize.X ? ClientSize.X : ClientSize.Y;
-        minimumScreenWidth = ClientSize.X > ClientSize.Y ? ClientSize.Y : ClientSize.X;
-
-        //Calculating horizontal and vertical screen offset to center the game if needed
-        screenHorizontalOffset = ClientSize.X > ClientSize.Y ? ((ClientSize.X - minimumScreenWidth) / 2) : 0;
-        screenVerticalOffset = ClientSize.Y > ClientSize.X ? ((ClientSize.Y - minimumScreenHeight) / 2) : 0;
-
-        // 2. Color
-        VertexLoader(
+        //Allowed screen's color
+        defVertexAttributesList.AddRange(new float[]
+        {
             screenHorizontalOffset,
             screenHorizontalOffset + minimumScreenWidth,
             screenVerticalOffset,
             screenVerticalOffset + minimumScreenHeight,
-            0.3f,
-            0.3f,
-            0.8f
-        );
+            0f,
+            0f,
+            0f
+        });
         //=========================================================================================
 
         //Raycount limiter
         rayCount = Math.Min(Settings.Graphics.rayCount, minimumScreenWidth);
+        // recompute wallWidth here so Engine and RayCasting use same value
+        wallWidth = (float)minimumScreenWidth / Math.Max(1, rayCount);
         //=============================================================================================
 
-        //FOV calculation
-        FOVStart = -((float)(FOV * (Math.PI / 180f)) / 2);
-        radBetweenRays = ((float)(FOV * (Math.PI / 180f)) / (rayCount - 1));
-        wallWidth = (float)minimumScreenWidth / rayCount;
-        //=============================================================================================
-        
         //Raycasting:
-        // 1. RayCast
-        RayCast();
-        
+        //1. RayCast
+        //RayCast();
+        RayCasting.Run(
+            ClientSize,
+            FOV,
+            rayCount,
+            tileSize,
+            distanceShade,
+            minimumScreenWidth,
+            minimumScreenHeight,
+            screenHorizontalOffset,
+            screenVerticalOffset,
+            playerAngle,
+            playerPosition,
+            pitch,
+            mapWalls,
+            mapFloor,
+            mapCeiling,
+            renderDistance
+        );
         //Graphic's position adn color calculator's (Inside Logic):
-        // 2. Ceiling
-        // 3. Floor
-        // 4. Walls
+        //2. Ceiling
+        //3. Floor
+        //4. Walls
         //=============================================================================================
 
         //Hud
-        DrawHUD();
+        //DrawHUD();
         //=============================================================================================
-
-        //Vertex loader
-        shaderVertices = vertexAttributesList.ToArray();
 
         //Loading buffer
-        if (shaderVertices != null && shaderVertices.Length > 0)
-        {
-            verticesReady = true;
+        //Default
+        //======================================================
+        defVerticesArray = defVertexAttributesList.ToArray();
 
-            GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferObject);
-
-            GL.BufferData(
-                BufferTarget.ArrayBuffer,
-                shaderVertices.Length * sizeof(float),
-                shaderVertices,
-                BufferUsageHint.DynamicDraw);
-
-            GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-        }
-        else
-        {
-            verticesReady = false;
-        }
+        GL.BindBuffer(BufferTarget.ArrayBuffer, defVBO);
+        GL.BufferData(
+            BufferTarget.ArrayBuffer,
+            defVerticesArray.Length * sizeof(float),
+            defVerticesArray,
+            BufferUsageHint.DynamicDraw);
+        GL.BindBuffer(BufferTarget.ArrayBuffer,0);
 
         //CLEARING LIST
-        vertexAttributesList.Clear();
-        //=============================================================================================
+        defVertexAttributesList.Clear();
+        //======================================================
+
+        //Ceiling
+        //======================================================
+        ceilingVerticesArray = ceilingVertexAttributesList.ToArray();
+
+        GL.BindBuffer(BufferTarget.ArrayBuffer, ceilingVBO);
+        GL.BufferData(
+            BufferTarget.ArrayBuffer,
+            ceilingVerticesArray.Length * sizeof(float),
+            ceilingVerticesArray,
+            BufferUsageHint.DynamicDraw);
+        GL.BindBuffer(BufferTarget.ArrayBuffer,0);
+
+        //CLEARING LIST
+        ceilingVertexAttributesList.Clear();
+        //======================================================
     }
     //=============================================================================================
 
@@ -229,29 +334,41 @@ internal partial class Engine : GameWindow
     {
         base.OnRenderFrame(e);
 
-        //Viewport setup
-        ViewportSetUp(ClientSize.X, ClientSize.Y);
+        //Clearing window
+        GL.ClearColor(0.2f,0.2f,0.2f,1.0f);
+        GL.Clear(ClearBufferMask.ColorBufferBit);
 
-        if (!verticesReady || shaderVertices.Length == 0)
+        //Bindig textures
+        textures[0].Use(TextureUnit.Texture0);
+
+        //Drawing default shader
+        //=============================================================================
+        defShader.Use();
+        GL.BindVertexArray(defVAO);
+        int defLen = defVerticesArray?.Length ??0;
+        int instanceCount = defLen /7;
+        if (instanceCount >0)
         {
-            SwapBuffers();
-            return;
+            GL.DrawArraysInstanced(PrimitiveType.TriangleStrip,0,4, instanceCount);
         }
-        else
+        //=============================================================================
+
+        //Ceiling
+        //=============================================================================
+        ceilingShader.Use();
+        ceilingShader.SetFloat("uStepSize", wallWidth);
+        ceilingShader.SetInt("uTexture",0);
+        // texture already bound to Texture0 above
+        GL.BindVertexArray(ceilingVAO);
+        int ceilLen = ceilingVerticesArray?.Length ??0;
+        instanceCount = ceilLen /8;
+        if (instanceCount >0)
         {
-            shader.Use();
-            GL.BindVertexArray(VertexArrayObject);
-
-            int instanceCount = shaderVertices.Length / 7;
-
-            //Drawing graphics in one-go
-            if (instanceCount > 0)
-            {
-                GL.DrawArraysInstanced(PrimitiveType.TriangleStrip, 0, 4, instanceCount);
-            }
-
-            SwapBuffers();
+            GL.DrawArraysInstanced(PrimitiveType.TriangleStrip,0,4, instanceCount);
         }
+        //=============================================================================
+
+        SwapBuffers();
     }
     
     protected override void OnUnload()
@@ -259,7 +376,7 @@ internal partial class Engine : GameWindow
         base.OnUnload();
 
         //Avarage fps
-        int avarageFPS = 0;
+        int avarageFPS =0;
 
         foreach (int FPS in FPSList)
         {
@@ -268,5 +385,9 @@ internal partial class Engine : GameWindow
 
         avarageFPS /= FPSList.Count;
         Console.WriteLine($"The avarage FPS was: {avarageFPS}");
+
+        // Dispose shaders
+        defShader?.Dispose();
+        ceilingShader?.Dispose();
     }
 }

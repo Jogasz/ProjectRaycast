@@ -1,24 +1,21 @@
 ﻿using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
-namespace ProjectRaycast.source.shader;
+namespace Engine;
 
-//This is a Shader class that compiles the shaders and wraps several functions when the program begins
 internal class Shader
 {
-    //Represents the final location of our shader program after it's finished being compiled
     public int Handle;
 
     public Shader(string vertexPath, string fragmentPath)
     {
-        //The handlers for the induvidual shaders
-        //Handler for Vertex Shader
+        //Handlers for the induvidual shaders
+            //Vertex Shader
         int VertexShader;
-
-        //Handler for Fragment Shader
+            //Fragment Shader
         int FragmentShader;
 
-        //Loading the source code from the induvidual shader files
+        //Loading shader files
         string VertexShaderSource = File.ReadAllText(vertexPath);
         string FragmentShaderSource = File.ReadAllText(fragmentPath);
 
@@ -29,7 +26,9 @@ internal class Shader
         FragmentShader = GL.CreateShader(ShaderType.FragmentShader);
         GL.ShaderSource(FragmentShader, FragmentShaderSource);
 
-        Console.WriteLine("Compiling shaders...");
+        Console.WriteLine($"==============================================================");
+        Console.WriteLine($"Compiling:\n - {vertexPath}\n - {fragmentPath}");
+
         //Compiling the Vertex Shader and checking for errors
         GL.CompileShader(VertexShader);
 
@@ -61,11 +60,6 @@ internal class Shader
             Console.WriteLine(infoLog);
         }
 
-        if (VertexCompileSucces + FragmentCompileSucces == 2)
-        {
-            Console.WriteLine("Vertex and Fragment shader is succesfully compiled!!");
-        }
-
         //Linking shaders into a program that can be run on the GPU
         Handle = GL.CreateProgram();
 
@@ -91,6 +85,7 @@ internal class Shader
         GL.DetachShader(Handle, FragmentShader);
         GL.DeleteShader(FragmentShader);
         GL.DeleteShader(VertexShader);
+        Console.WriteLine($"==============================================================");
     }
     //Method to be able to use the Shader handler program
     public void Use()
@@ -122,9 +117,25 @@ internal class Shader
     public void SetMatrix4(string name, Matrix4 matrix)
     {
         int location = GL.GetUniformLocation(Handle, name);
-        if (location == -1) return; // uniform not found / optimized out
-                                    // upload column-major matrix; `false` means do not transpose
+        if (location == -1) return;
+        
         GL.UniformMatrix4(location, false, ref matrix);
+    }
+
+    //Float uniform setter
+    public void SetFloat(string name, float value)
+    {
+        int location = GL.GetUniformLocation(Handle, name);
+        if (location == -1) return;
+        GL.Uniform1(location, value);
+    }
+
+    //Int uniform setter
+    public void SetInt(string name, int value)
+    {
+        int location = GL.GetUniformLocation(Handle, name);
+        if (location == -1) return;
+        GL.Uniform1(location, value);
     }
 
     public void Dispose()
