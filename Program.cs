@@ -8,18 +8,25 @@ public class Program
         try
         {
             Settings.Load();
+            Console.WriteLine(" - SETTINGS have been loaded!");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($" - Something went wrong while loading SETTINGS...\n{ex}");
+        }
+
+        try
+        {
             Level map = new Level();
             map.Load();
-            Console.WriteLine("Assets successfully loaded!");
+            Console.WriteLine(" - MAP has been loaded!");
         }
-        catch
+        catch (Exception ex)
         {
-            Console.WriteLine("Something went wrong when loading assets...");
+            Console.WriteLine($" - Something went wrong while loading MAP...\n{ex}");
         }
         
-        Engine.Engine engine = new Engine.Engine(1000, 800, "ProjectRaycast");
+        Engine.Engine engine = new Engine.Engine(800, 800, "ProjectRaycast");
         engine.Run();
-
-        //GraphicWindow.Run();
     }
 }

@@ -309,6 +309,7 @@ internal partial class RayCasting
                 screenHorizontalOffset,
                 screenVerticalOffset,
                 i,
+                rayAngle,
                 wallHeight,
                 wallWidth,
                 pitch,

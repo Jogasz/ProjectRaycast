@@ -15,6 +15,7 @@ internal partial class RayCasting
         int screenHorizontalOffset,
         int screenVerticalOffset,
         int i,
+        float rayAngle,
         float wallHeight,
         float wallWidth,
         float pitch,
@@ -42,10 +43,7 @@ internal partial class RayCasting
                 quadX2 - debugBorder,
                 quadY1 + debugBorder,
                 quadY2 - debugBorder,
-                r,
-                g,
-                b,
-                i
+                rayAngle
             });
         }
     }

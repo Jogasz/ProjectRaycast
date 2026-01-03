@@ -45,7 +45,7 @@ internal class Shader
         if (VertexCompileSucces == 0)
         {
             string infoLog = GL.GetShaderInfoLog(VertexShader);
-            Console.WriteLine("Compiling has failed!");
+            Console.WriteLine($"Compiling vertex shader has failed!\n - {vertexPath}");
             Console.WriteLine(infoLog);
         }
 
@@ -56,9 +56,11 @@ internal class Shader
         if (FragmentCompileSucces == 0)
         {
             string infoLog = GL.GetShaderInfoLog(FragmentShader);
-            Console.WriteLine("Compiling has failed!");
+            Console.WriteLine($"Compiling fragment shader has failed!\n - {fragmentPath}");
             Console.WriteLine(infoLog);
         }
+
+        if (VertexCompileSucces != 0 && FragmentCompileSucces != 0) Console.WriteLine("Compiling was succesful!\n");
 
         //Linking shaders into a program that can be run on the GPU
         Handle = GL.CreateProgram();
@@ -68,17 +70,19 @@ internal class Shader
 
         GL.LinkProgram(Handle);
 
+        Console.WriteLine($"Linking:\n - {vertexPath}\n - {fragmentPath}");
+
         //Writing out error if there is one
         GL.GetProgram(Handle, GetProgramParameterName.LinkStatus, out int success);
         if (success == 0)
         {
             string infoLog = GL.GetProgramInfoLog(Handle);
-            Console.WriteLine("Linking has failed!");
+            Console.WriteLine("Linking has failed!\n");
             Console.WriteLine(infoLog);
         }
         else
         {
-            Console.WriteLine("Linking was succesful!");
+            Console.WriteLine("Linking was succesful!\n");
         }
 
         GL.DetachShader(Handle, VertexShader);
@@ -136,6 +140,30 @@ internal class Shader
         int location = GL.GetUniformLocation(Handle, name);
         if (location == -1) return;
         GL.Uniform1(location, value);
+    }
+
+    //Vec2 uniform setter
+    public void SetVector2(string name, Vector2 value)
+    {
+        int location = GL.GetUniformLocation(Handle, name);
+        if (location == -1) return;
+        GL.Uniform2(location, value);
+    }
+
+    //Vec3 uniform setter
+    public void SetVector3(string name, Vector3 value)
+    {
+        int location = GL.GetUniformLocation(Handle, name);
+        if (location == -1) return;
+        GL.Uniform3(location, value);
+    }
+
+    //Vec4 uniform setter
+    public void SetVector4(string name, Vector4 value)
+    {
+        int location = GL.GetUniformLocation(Handle, name);
+        if (location == -1) return;
+        GL.Uniform4(location, value);
     }
 
     public void Dispose()

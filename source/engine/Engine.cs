@@ -43,15 +43,6 @@ internal partial class Engine : GameWindow
     int screenVerticalOffset { get; set; }
     int screenHorizontalOffset { get; set; }
 
-    //Textures
-    //Paths
-    readonly string[] texPaths = {
-        "assets/textures/testTexture.png"
-    };
-
-    //PNG's
-    List<Texture> textures { get; set; } = new();
-
     //SHADER
     //Shaders
     Shader defShader { get; set; }
@@ -86,18 +77,15 @@ internal partial class Engine : GameWindow
     })
     {
         CursorState = CursorState.Grabbed;
-        VSync = VSyncMode.Off;
+        VSync = VSyncMode.On;
     }
 
     protected override void OnLoad()
     {
         base.OnLoad();
 
-        //Textures
-        foreach (var path in texPaths)
-        {
-            textures.Add(new Texture(path));
-        }
+        //Loading textures
+        Texture.LoadAll(mapWalls, mapCeiling, mapFloor);
 
         //Viewport and projection (bottom-left origin)
         projection = Utils.SetViewportAndProjection(ClientSize.X, ClientSize.Y);
@@ -114,6 +102,7 @@ internal partial class Engine : GameWindow
         renderDistance = Math.Min(renderDistance, Math.Max(mapWalls.GetLength(0), mapWalls.GetLength(1)));
 
         //Shaders
+        Console.WriteLine("Loading shaders...");
         //Default
         //============================================================================
         defShader = new Shader("source/shader/shader.vert", "source/shader/shader.frag");
@@ -144,6 +133,10 @@ internal partial class Engine : GameWindow
         //Unbind for safety
         GL.BindBuffer(BufferTarget.ArrayBuffer,0);
         GL.BindVertexArray(0);
+
+        //Projection matrix uniform
+        defShader.Use();
+        defShader.SetMatrix4("uProjection", projection);
         //============================================================================
 
         //Ceiling
@@ -160,20 +153,15 @@ internal partial class Engine : GameWindow
 
         //Attribute0
         GL.EnableVertexAttribArray(0);
-        GL.VertexAttribPointer(0,4, VertexAttribPointerType.Float, false,8 * sizeof(float),0);
+        GL.VertexAttribPointer(0,4, VertexAttribPointerType.Float, false,5 * sizeof(float),0);
 
         //Attribute1
         GL.EnableVertexAttribArray(1);
-        GL.VertexAttribPointer(1,3, VertexAttribPointerType.Float, false,8 * sizeof(float),4 * sizeof(float));
-
-        //Attribute2
-        GL.EnableVertexAttribArray(2);
-        GL.VertexAttribPointer(2,1, VertexAttribPointerType.Float, false,8 * sizeof(float),7 * sizeof(float));
+        GL.VertexAttribPointer(1,1, VertexAttribPointerType.Float, false,5 * sizeof(float),4 * sizeof(float));
 
         //Divisor
         GL.VertexAttribDivisor(0,1);
         GL.VertexAttribDivisor(1,1);
-        GL.VertexAttribDivisor(2,1);
 
         //Disable face culling to avoid accidentally removing one triangle
         GL.Disable(EnableCap.CullFace);
@@ -181,13 +169,15 @@ internal partial class Engine : GameWindow
         //Unbind for safety
         GL.BindBuffer(BufferTarget.ArrayBuffer,0);
         GL.BindVertexArray(0);
-        //============================================================================
 
-        // Set projection uniform for both shaders
-        defShader.Use();
-        defShader.SetMatrix4("uProjection", projection);
+        //Projection matrix uniform
         ceilingShader.Use();
         ceilingShader.SetMatrix4("uProjMat", projection);
+
+        ceilingShader.SetVector2("uClientSize", new Vector2(ClientSize.X, ClientSize.Y));
+        ceilingShader.SetFloat("uTileSize", tileSize);
+        //mapCeiling
+        //============================================================================
 
         //Starting stopwatch for Delta Time
         stopwatch.Start();
@@ -213,6 +203,8 @@ internal partial class Engine : GameWindow
         defShader?.SetMatrix4("uProjection", projection);
         ceilingShader?.Use();
         ceilingShader?.SetMatrix4("uProjMat", projection);
+        ceilingShader?.SetFloat("uStepSize", wallWidth);
+        ceilingShader?.SetVector2("uClientSize", new Vector2(ClientSize.X, ClientSize.Y));
     }
 
     protected override void OnUpdateFrame(FrameEventArgs e)
@@ -251,7 +243,7 @@ internal partial class Engine : GameWindow
             screenHorizontalOffset + minimumScreenWidth,
             screenVerticalOffset,
             screenVerticalOffset + minimumScreenHeight,
-            0f,
+            1f,
             0f,
             0f
         });
@@ -339,7 +331,21 @@ internal partial class Engine : GameWindow
         GL.Clear(ClearBufferMask.ColorBufferBit);
 
         //Bindig textures
-        textures[0].Use(TextureUnit.Texture0);
+        //Map arrays
+        GL.ActiveTexture(TextureUnit.Texture0);
+        GL.BindTexture(TextureTarget.Texture2D, Texture.mapWallsTex);
+
+        GL.ActiveTexture(TextureUnit.Texture1);
+        GL.BindTexture(TextureTarget.Texture2D, Texture.mapFloorTex);
+
+        GL.ActiveTexture(TextureUnit.Texture2);
+        GL.BindTexture(TextureTarget.Texture2D, Texture.mapCeilingTex);
+
+        //Images
+        for (int i = 0; i < Texture.textures.Count; i++)
+        {
+            Texture.Bind(i, TextureUnit.Texture3 + i);
+        }
 
         //Drawing default shader
         //=============================================================================
@@ -356,12 +362,28 @@ internal partial class Engine : GameWindow
         //Ceiling
         //=============================================================================
         ceilingShader.Use();
+
+        //Creating texture array uniform
+        for (int i = 0; i < Texture.textures.Count; i++)
+        {
+            ceilingShader.SetInt($"uTextures[{i}]", 3 + i);
+        }
+
+        //Map arrays
+        //ceilingShader.SetInt("uMapWalls", 0);
+        //ceilingShader.SetInt("uMapFloor", 1);
+        ceilingShader.SetInt("uMapCeiling", 2);
+        ceilingShader.SetVector2("uMapSize", new Vector2(mapCeiling.GetLength(1), mapCeiling.GetLength(0)));
+
         ceilingShader.SetFloat("uStepSize", wallWidth);
-        ceilingShader.SetInt("uTexture",0);
-        // texture already bound to Texture0 above
+        ceilingShader.SetVector2("uPlayerPos", new Vector2(playerPosition.X, playerPosition.Y));
+        ceilingShader.SetFloat("uPlayerAngle", playerAngle);
+        ceilingShader.SetFloat("uPitch", pitch);
+        
+
         GL.BindVertexArray(ceilingVAO);
         int ceilLen = ceilingVerticesArray?.Length ??0;
-        instanceCount = ceilLen /8;
+        instanceCount = ceilLen /5;
         if (instanceCount >0)
         {
             GL.DrawArraysInstanced(PrimitiveType.TriangleStrip,0,4, instanceCount);

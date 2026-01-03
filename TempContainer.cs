@@ -86,171 +86,42 @@
 //    }
 //}
 
-//==============================================================================================================7
 
-//v2
-//void CeilingCast()
-//{
-//    //Y mentén lévő lépegetés mértéke
-//    float yStep = (float)minimumScreenWidth / (float)rayCount;
 
-//    //Quad's Y1 and Y2
-//    float quadY1 = screenVerticalOffset;
-//    float quadY2 = screenVerticalOffset + yStep;
 
-//    //Height of the player (Middle of the screen)
-//    int cameraZ = ClientSize.Y / 2;
 
-//    //!!!TESZT!!!
-//    //Unique raycount for each row depending on the distance
-//    //====================================================
-//    float aFirstRay = NormalizeAngle(playerAngle + FOVStart);
-//    float aLastRay = NormalizeAngle(playerAngle - FOVStart);
-//    //====================================================
 
-//    //Sorokon megy végig
-//    for (int i = 0; i < rayCount; i++)
-//    {
-//        //Jelenlegi sor Y-ja a képernyőn
-//        float rowY = (ClientSize.Y / 2) - (quadY1 + ((quadY2 - quadY1) / 2)) + pitch;
 
-//        //Distance between first and last ray's position on the map
-//        //===================================================================================================
-//        //First ray
-//        //=========
-//        //Distance between player and first ray world hit point
-//        float dFirstRay = ((cameraZ / rowY) * tileSize) / (float)Math.Cos(playerAngle - aFirstRay);
-//        //World position X
-//        float firstRayPosX = playerPosition.X + ((float)Math.Cos(aFirstRay) * dFirstRay);
-//        //World position Y
-//        float firstRayPosY = playerPosition.Y + ((float)Math.Sin(aFirstRay) * dFirstRay);
 
-//        //Last ray
-//        //========
-//        //Distance between player and last ray world hit point
-//        float dLastRay = ((cameraZ / rowY) * tileSize) / (float)Math.Cos(playerAngle - aLastRay);
-//        //World position X
-//        float lastRayPosX = playerPosition.X + ((float)Math.Cos(aLastRay) * dLastRay);
-//        //World position Y
-//        float lastRayPosY = playerPosition.Y + ((float)Math.Sin(aLastRay) * dLastRay);
 
-//        //Distance between the two rays
-//        float dX = lastRayPosX - firstRayPosX;
-//        float dY = lastRayPosY - firstRayPosY;
-//        float rowD = (float)Math.Sqrt(dX * dX + dY * dY);
-//        //===================================================================================================
 
-//        float xStep = Math.Max(yStep, minimumScreenWidth / ((rowD / tileSize) * 36f));
 
-//        float quadOffset = ((1 - ((rowD / tileSize * 36f) - (float)Math.Floor(rowD / tileSize * 36f))) / 2f) * xStep;
 
-//        //Quad's X1 and X2
-//        float quadX1 = screenHorizontalOffset - quadOffset;
-//        float quadX2 = screenHorizontalOffset - quadOffset + xStep;
 
-//        //Rad between rays based on final calculations of how many pixels will there be in a row
-//        float tempRadBetweenRays = ((float)(FOV * (Math.PI / 180f)) / (minimumScreenWidth / xStep));
-
-//        //Incrementing ray angle for the quads in a row
-//        float incRayAngle = aFirstRay;
-
-//        int incr = 0;
-//        //A sorok pixelein megy végig
-//        while (quadX1 < (screenHorizontalOffset + minimumScreenWidth))
-//        {
-//            quadX1 = quadX1 < screenHorizontalOffset ?
-//                screenHorizontalOffset :
-//                quadX1;
-
-//            quadX2 = quadX2 > (screenHorizontalOffset + minimumScreenWidth) ?
-//                (screenHorizontalOffset + minimumScreenWidth) :
-//                quadX2;
-
-//            //Distance of the floor pixel we are looking at
-//            float ceilingPixelDistance = ((cameraZ / rowY) * tileSize) / (float)Math.Cos(playerAngle - incRayAngle);
-
-//            //World X position of the pixel
-//            float ceilingPixelX = playerPosition.X + ((float)Math.Cos(incRayAngle) * ceilingPixelDistance);
-
-//            //World Y position of the pixel
-//            float ceilingPixelY = playerPosition.Y + ((float)Math.Sin(incRayAngle) * ceilingPixelDistance);
-
-//            //If it's outside of the map
-//            //=========================================
-//            if
-//            (
-//                ceilingPixelX >= mapCeiling.GetLength(1) * tileSize ||
-//                ceilingPixelX < 0f ||
-//                ceilingPixelY >= mapCeiling.GetLength(0) * tileSize ||
-//                ceilingPixelY < 0f
-//            )
-//            {
-//                quadX1 = quadX2;
-//                quadX2 += xStep;
-//                incRayAngle = NormalizeAngle(incRayAngle + tempRadBetweenRays);
-//                continue;
-//            }
-//            //=========================================
-
-//            //If it's inside the map, but index is zero
-//            //=========================================
-//            int[][] path = null;
-//            path = TextureTranslator((int)mapCeiling[(int)Math.Floor(ceilingPixelY / tileSize), (int)Math.Floor(ceilingPixelX / tileSize)]);
-
-//            if (path == null)
-//            {
-//                quadX1 = quadX2;
-//                quadX2 += xStep;
-//                incr++;
-//                incRayAngle = NormalizeAngle(incRayAngle + tempRadBetweenRays);
-//                continue;
-//            }
-//            //=========================================
-
-//            //If inside the map and not zero:
-//            //=========================================
-//            //Calculating RGB variables
-//            int RGBCalc = ((int)Math.Floor(path[0][1] / (tileSize / (ceilingPixelY % tileSize))) * path[0][1] * 3) +
-//                      ((int)Math.Floor(path[0][0] / (tileSize / (ceilingPixelX % tileSize))) * 3);
-
-//            //Calculating shading and lighting with distance
-//            float shadeCalc = ceilingPixelDistance * distanceShade;
-
-//            float debugOffset = 0.5f;
-
-//            vertexAttributesList.AddRange(new float[]
-//            {
-//                            quadX1 + debugOffset,
-//                            quadX2 - debugOffset,
-//                            quadY1 + debugOffset,
-//                            quadY2 - debugOffset,
-//                            (path[1][RGBCalc] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc] - shadeCalc) / 255f,
-//                            (path[1][RGBCalc + 1] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 1] - shadeCalc) / 255f,
-//                            (path[1][RGBCalc + 2] - shadeCalc) < 0 ? 0f : (path[1][RGBCalc + 2] - shadeCalc) / 255f
-//            });
-
-//            //X inkrementálás
-//            quadX1 = quadX2;
-//            quadX2 += xStep;
-//            incr++;
-
-//            //Incrementing ray angle for next quad
-//            incRayAngle = NormalizeAngle(incRayAngle + tempRadBetweenRays);
-//            //=========================================
-//        }
-
-//        //If there was no pixel inside the map, break the drawing completely
-//        if (incr == 0)
-//        {
-//            break;
-//        }
-
-//        //Incrementing Y
-//        quadY1 = quadY2;
-//        quadY2 += yStep;
-
-//        //Resetting X
-//        //quadX1 = screenHorizontalOffset;
-//        //quadX2 = screenHorizontalOffset + yStep;
-//    }
-//}
+//Shading by stepping
+//    //Current pixel's Y divided by uStepSize gives the amount of shading the pixel needs
+//    //max(uStepSize,1e-6):
+//    //1e-6 is a scientific term for1 *10^-6 =0.000001, so uStepSize can't be smaller than or equal, only very close to zero
+//    float YStepIndex = floor(pixelYInStrip / max(uStepSize,1e-6));
+//
+//    float shade = YStepIndex * 0.02;
+//
+//    // normalize current fragment position into 0..1 inside the quad
+//    float u = (gl_FragCoord.x - stripX1) / max(1.0, (stripX2 - stripX1));
+//    float v = (gl_FragCoord.y - stripY2) / max(1.0, (stripY1 - stripY2));
+//
+//    vec2 uv = clamp(vec2(u, v), 0.0, 1.0);
+//
+//    // always draw the first texture
+//    vec4 tex = texture(uTextures[1], uv);
+//
+//    vec3 fClr = vec3(
+//        tex.r - shade,
+//        tex.g - shade,
+//        tex.b - shade
+//    );
+//
+//    FragColor = vec4(fClr, tex.a);
+//
+//    // Final outgoing color = texture * tint + step shading
+//    //FragColor = vec4(clr, 1.0);

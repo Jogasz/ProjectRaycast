@@ -7,60 +7,91 @@
 
 //Incoming and outgoing variables, uniforms
 //==============================================================
-    //Strip quad rect (in)
-    // x: X1
-    // y: X2
-    // z: Y1
-    // w: Y2
-in vec4 vStripQuadRect;
-    //Strip quad color (in)
-in vec3 aStripQuadClr;
-    //Ray iteration value (in)
-in float nthLine;
+    //Strip quad Y1, Y2 (in)
+    // x: Y1
+    // y: Y2
+in vec2 vStripQuadY;
+    //Ray's angle (in)
+in float rayAngle;
 
-    //Final outgoing RGBA of the quad
+    //Final outgoing RGBA of the quad (out)
 out vec4 FragColor;
 
-    //Y step value for quads in strip quad
+//OnRenderFrame uniforms
+//======================
+    //Textures array (uIn)
+uniform sampler2D uTextures[8];
+    //Map Ceiling array
+uniform isampler2D uMapCeiling;
+    //Map's size
+uniform vec2 uMapSize;
+    //Y step value for quads in strip quad (uIn)
 uniform float uStepSize;
-    //Textures
-uniform sampler2D uTexture;
+    //Player's position
+uniform vec2 uPlayerPos;
+    //Player's angle
+uniform float uPlayerAngle;
+    //Player's pitch
+uniform float uPitch;
+
+//OnLoad / OnFramebufferResize uniforms
+//=====================================
+    //Window's size
+uniform vec2 uClientSize;
+    //TileSize
+uniform float uTileSize;
+    //Distance shade value !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+uniform float uDistanceShade;
 //==============================================================
 
 //Entry point
 //==============================================================
 void main()
 {
-     //Strip quad vertexes
-        //X1 - left
-     float stripX1 = vStripQuadRect.x;
-        //X2 - right
-     float stripX2 = vStripQuadRect.y;
-        //Y1 - top
-     float stripY1 = vStripQuadRect.z;
-        //Y2 - bottom
-     float stripY2 = vStripQuadRect.w;
+    //Screen positions
+    //====================================================================================
+        //Strip quad Y1 - top
+    float stripY1 = vStripQuadY.x;
+        //Strip quad Y2 - bottom
+    float stripY2 = vStripQuadY.y;
+        //Strip quad's height
+    float stripQuadHeight = max(0.0, stripY1 - stripY2);
+        //Current pixel's Y from strip quad's top (Clamp to avoid weird values on borders)
+    float pixelYInStrip = clamp(stripY1 - gl_FragCoord.y,0.0, stripQuadHeight);
+        //Nth mini quad from the top in strip quad (starting from zero)
+    float YStepIndex = floor(pixelYInStrip / uStepSize);
+    //====================================================================================
 
-     //Strip quad's height
-     float stripQuadHeight = max(0.0, stripY1 - stripY2);
+    //World positions
+    //=======================================================================================================================
+        //Height of the player
+    float cameraZ = uClientSize.y / 2;
+        //Y of the miniQuad's middle
+    float rowY = cameraZ - (uStepSize / 2 + YStepIndex * uStepSize) + uPitch;
+        //Distance of the miniQuad from the player
+    float ceilingPixelDistance = ((cameraZ / rowY) * uTileSize) / cos(uPlayerAngle - rayAngle);
+        //World X position of the pixel
+    float ceilingPixelX = clamp(uPlayerPos.x + (cos(rayAngle) * ceilingPixelDistance), 0.0, uMapSize.x * uTileSize - 0.0001);
+        //World Y position of the pixel
+    float ceilingPixelY = clamp(uPlayerPos.y + (sin(rayAngle) * ceilingPixelDistance), 0.0, uMapSize.y * uTileSize - 0.0001);
+    //=======================================================================================================================
 
-     //Current pixel's Y from strip quad's top (Clamp to avoid weird values on borders)
-     float pixelYInStrip = clamp(stripY1 - gl_FragCoord.y,0.0, stripQuadHeight);
-
-     //Shading by stepping
-     //Current pixel's Y divided by uStepSize gives the amount of shading the pixel needs
-     //max(uStepSize,1e-6):
-     //1e-6 is a scientific term for1 *10^-6 =0.000001, so uStepSize can't be smaller than or equal, only very close to zero
-     float YStepIndex = floor(pixelYInStrip / max(uStepSize,1e-6));
-
-     float shade = YStepIndex * 0.02;
-
-     vec3 clr = vec3(
-     0.0 + shade * 2,
-     0.0 + shade * 2,
-     1.0) - shade;
-
-     // Final outgoing color = texture * tint + step shading
-     FragColor = vec4(clr, 1.0);
- }
+    //Coloring
+    //=====================================================================================================================
+        //Strength of shading by distance
+    float distanceShade = 0;
+        //Current miniQuad's shade value based on it's distance from the player
+    float shade = ceilingPixelDistance * distanceShade;
+        //Selecting texture based on map array
+    int texIndex = texelFetch(uMapCeiling, ivec2(floor(ceilingPixelX / uTileSize), floor(ceilingPixelY / uTileSize)), 0).r;
+        //If index is zero, empty tile
+    if (texIndex == 0) discard;
+        //Corresponding color's position in the selected texture
+    vec2 uv = fract(vec2(ceilingPixelX, ceilingPixelY) / uTileSize);
+        //Taking out the color from the selected texture
+    vec4 tex = texture(uTextures[texIndex], uv);
+        //Returning the correct color
+    FragColor = vec4(tex.rgb - shade, tex.a);
+    //=====================================================================================================================
+}
 //==============================================================
