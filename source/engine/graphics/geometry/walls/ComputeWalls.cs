@@ -41,13 +41,13 @@ internal partial class RayCasting
         float shadeCalc = rayLength * distanceShade;
 
         //Optimizing with shade (if the shade is strong enough to make everything black, just paint the line black)
-        int shadeLimit = 255;
+        //int shadeLimit = 255;
 
         float r = (30f - shadeCalc) / 255f;
         float g = (70f - shadeCalc) / 255f;
         float b = (80f - shadeCalc) / 255f;
 
-        Engine.defVertexAttributesList.AddRange(new float[]
+        Shader.defVertexAttribList.AddRange(new float[]
         {
             quadX1 + debugBorder,
             quadX2 - debugBorder,

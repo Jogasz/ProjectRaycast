@@ -162,7 +162,7 @@ internal partial class Engine
         playerAngle = Utils.NormalizeAngle(playerAngle + offsetX);
 
         //Pitch/yaw (Y)
-        pitch = Math.Clamp(pitch - offsetY, -2000, 2000);
+        pitch = Math.Clamp(pitch - offsetY, -1000, 1000);
     }
 
     void HandleCursorGrab()

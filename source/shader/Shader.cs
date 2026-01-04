@@ -6,6 +6,7 @@ namespace Engine;
 internal class Shader
 {
     public int Handle;
+
     public Shader(string vertexPath, string fragmentPath)
     {
         //Handlers for the induvidual shaders
@@ -169,5 +170,236 @@ internal class Shader
     {
         Dispose(true);
         GC.SuppressFinalize(this);
+    }
+
+    static Matrix4 projection { get; set; }
+
+    //DefShader
+    //====================================================================================
+        //Instance
+    public static Shader? defShader { get; set; }
+        //VBO, VAO
+    static int defVAO { get; set; }
+    static int defVBO { get; set; }
+        //Containers
+    public static List<float> defVertexAttribList { get; set; } = new List<float>();
+    static float[]? defVertices { get; set; }
+    //====================================================================================
+
+    //CeilingShader
+    //====================================================================================
+        //Instance
+    public static Shader? ceilingShader { get; set; }
+        //VBO, VAO
+    static int ceilingVAO { get; set; }
+    static int ceilingVBO { get; set; }
+        //Containers
+    public static List<float> ceilingVertexAttribList { get; set; } = new List<float>();
+    static float[]? ceilingVertices { get; set; }
+    //====================================================================================
+
+    //OnLoad
+    public static void LoadAll(Vector2i ClientSize, Vector2 minimumScreen)
+    {
+        //Viewport and projection (bottom-left origin)
+        projection = Matrix4.CreateOrthographicOffCenter(0f, ClientSize.X, 0f, ClientSize.Y, -1f, 1f);
+
+        LoadDefShader(
+            "source/shader/shader.vert",
+            "source/shader/shader.frag",
+            projection);
+
+        LoadCeilingShader(
+            "source/engine/graphics/geometry/ceiling/ceiling.vert",
+            "source/engine/graphics/geometry/ceiling/ceiling.frag",
+            projection,
+            minimumScreen);
+    }
+
+    static void LoadDefShader(
+        string vertexPath,
+        string fragmentPath,
+        Matrix4 projection)
+    {
+        defShader = new Shader(vertexPath, fragmentPath);
+            //VAO, VBO Creating
+        defVAO = GL.GenVertexArray();
+        defVBO = GL.GenBuffer();
+            //VAO, VBO Binding
+        GL.BindVertexArray(defVAO);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, defVBO);
+            //Attribute0
+        GL.EnableVertexAttribArray(0);
+        GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, 7 * sizeof(float), 0);
+            //Attribute1
+        GL.EnableVertexAttribArray(1);
+        GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 7 * sizeof(float), 4 * sizeof(float));
+            //Divisor
+        GL.VertexAttribDivisor(0, 1);
+        GL.VertexAttribDivisor(1, 1);
+            //Disable face culling to avoid accidentally removing one triangle
+        GL.Disable(EnableCap.CullFace);
+            //Unbind for safety
+        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+        GL.BindVertexArray(0);
+            //Uniforms
+        defShader.Use();
+        defShader.SetMatrix4("uProjection", projection);
+    }
+
+    static void LoadCeilingShader(
+        string vertexPath,
+        string fragmentPath,
+        Matrix4 projection,
+        Vector2 minimumScreen)
+    {
+        ceilingShader = new Shader(vertexPath, fragmentPath);
+            //VAO, VBO
+        ceilingVAO = GL.GenVertexArray();
+        ceilingVBO = GL.GenBuffer();
+            //VAO, VBO Binding
+        GL.BindVertexArray(ceilingVAO);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, ceilingVBO);
+            //Attribute0
+        GL.EnableVertexAttribArray(0);
+        GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
+            //Attribute1
+        GL.EnableVertexAttribArray(1);
+        GL.VertexAttribPointer(1, 1, VertexAttribPointerType.Float, false, 5 * sizeof(float), 4 * sizeof(float));
+            //Divisor
+        GL.VertexAttribDivisor(0, 1);
+        GL.VertexAttribDivisor(1, 1);
+            //Disable face culling to avoid accidentally removing one triangle
+        GL.Disable(EnableCap.CullFace);
+            //Unbind for safety
+        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+        GL.BindVertexArray(0);
+            //Uniforms
+        ceilingShader.Use();
+        ceilingShader.SetMatrix4("uProjMat", projection);
+        ceilingShader.SetVector2("uMinimumScreen", new Vector2(minimumScreen.X, minimumScreen.Y));
+        ceilingShader.SetFloat("uTileSize", Settings.Gameplay.tileSize);
+        ceilingShader.SetFloat("uDistanceShade", Settings.Graphics.distanceShade);
+    }
+
+    //OnFramebufferResize
+    public static void UpdateUniforms(Vector2i ClientSize, Vector2 minimumScreen)
+    {
+        projection = Matrix4.CreateOrthographicOffCenter(0f, ClientSize.X, 0f, ClientSize.Y, -1f, 1f);
+
+        //Uniforms
+            //DefShader
+        defShader?.Use();
+        defShader?.SetMatrix4("uProjection", projection);
+            //CeilingShader
+        ceilingShader?.Use();
+        ceilingShader?.SetMatrix4("uProjMat", projection);
+        ceilingShader?.SetVector2("uMinimumScreen", new Vector2(minimumScreen.X, minimumScreen.Y));
+    }
+
+    //OnUpdateFrame
+    public static void LoadBufferAndClear()
+    {
+        //DefShader
+        //==============================================
+            //Making array
+        defVertices = defVertexAttribList.ToArray();
+            //Loading buffer
+        GL.BindBuffer(BufferTarget.ArrayBuffer, defVBO);
+        GL.BufferData(
+            BufferTarget.ArrayBuffer,
+            defVertices.Length * sizeof(float),
+            defVertices,
+            BufferUsageHint.DynamicDraw);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            //CLEARING LIST
+        defVertexAttribList.Clear();
+        //==============================================
+
+        //DefShader
+        //==============================================
+            //Making array
+        ceilingVertices = ceilingVertexAttribList.ToArray();
+            //Loading buffer
+        GL.BindBuffer(BufferTarget.ArrayBuffer, ceilingVBO);
+        GL.BufferData(
+            BufferTarget.ArrayBuffer,
+            ceilingVertices.Length * sizeof(float),
+            ceilingVertices,
+            BufferUsageHint.DynamicDraw);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            //CLEARING LIST
+        ceilingVertexAttribList.Clear();
+        //==============================================
+    }
+
+    //OnRenderFrame
+    public static void Draw(
+        float wallWidth,
+        Vector2 playerPosition,
+        float playerAngle,
+        float pitch)
+    {
+        //Bindig textures
+        //===========================================================================
+            //Map arrays
+        GL.ActiveTexture(TextureUnit.Texture0);
+        GL.BindTexture(TextureTarget.Texture2D, Texture.mapWallsTex);
+        GL.ActiveTexture(TextureUnit.Texture1);
+        GL.BindTexture(TextureTarget.Texture2D, Texture.mapFloorTex);
+        GL.ActiveTexture(TextureUnit.Texture2);
+        GL.BindTexture(TextureTarget.Texture2D, Texture.mapCeilingTex);
+            //Images
+        for (int i = 0; i < Texture.textures.Count; i++)
+        {
+            Texture.Bind(i, TextureUnit.Texture3 + i);
+        }
+        //===========================================================================
+
+        //DefShader
+        //===========================================================================
+        defShader?.Use();
+            //Binding and drawing
+        GL.BindVertexArray(defVAO);
+        int defLen = defVertices?.Length ?? 0;
+        int instanceCount = defLen / 7;
+        if (instanceCount > 0)
+        {
+            GL.DrawArraysInstanced(PrimitiveType.TriangleStrip, 0, 4, instanceCount);
+        }
+        //===========================================================================
+
+        //CeilingShader
+        //===========================================================================
+        ceilingShader?.Use();
+            //Creating texture array uniform
+        for (int i = 0; i < Texture.textures.Count; i++)
+        {
+            ceilingShader?.SetInt($"uTextures[{i}]", 3 + i);
+        }
+            //Uniforms
+        ceilingShader?.SetInt("uMapCeiling", 2);
+        ceilingShader?.SetVector2("uMapSize", new Vector2(Level.mapCeiling.GetLength(1), Level.mapCeiling.GetLength(0)));
+        ceilingShader?.SetFloat("uStepSize", wallWidth);
+        ceilingShader?.SetVector2("uPlayerPos", new Vector2(playerPosition.X, playerPosition.Y));
+        ceilingShader?.SetFloat("uPlayerAngle", playerAngle);
+        ceilingShader?.SetFloat("uPitch", pitch);
+            //Binding and drawing
+        GL.BindVertexArray(ceilingVAO);
+        int ceilLen = ceilingVertices?.Length ?? 0;
+        instanceCount = ceilLen / 5;
+        if (instanceCount > 0)
+        {
+            GL.DrawArraysInstanced(PrimitiveType.TriangleStrip, 0, 4, instanceCount);
+        }
+        //===========================================================================
+    }
+
+    //OnUnload
+    public static void DisposeAll()
+    {
+        //Dispose shaders
+        defShader?.Dispose();
+        ceilingShader?.Dispose();
     }
 }

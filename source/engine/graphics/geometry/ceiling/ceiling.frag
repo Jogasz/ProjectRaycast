@@ -37,7 +37,7 @@ uniform float uPitch;
 //OnLoad / OnFramebufferResize uniforms
 //=====================================
     //Window's size
-uniform vec2 uClientSize;
+uniform vec2 uMinimumScreen;
     //TileSize
 uniform float uTileSize;
     //Distance shade value !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -65,15 +65,15 @@ void main()
     //World positions
     //=======================================================================================================================
         //Height of the player
-    float cameraZ = uClientSize.y / 2;
+    float cameraZ = uMinimumScreen.y / 2;
         //Y of the miniQuad's middle
     float rowY = cameraZ - (uStepSize / 2 + YStepIndex * uStepSize) + uPitch;
         //Distance of the miniQuad from the player
     float ceilingPixelDistance = ((cameraZ / rowY) * uTileSize) / cos(uPlayerAngle - rayAngle);
         //World X position of the pixel
-    float ceilingPixelX = clamp(uPlayerPos.x + (cos(rayAngle) * ceilingPixelDistance), 0.0, uMapSize.x * uTileSize - 0.0001);
+    float ceilingPixelX = uPlayerPos.x + (cos(rayAngle) * ceilingPixelDistance);
         //World Y position of the pixel
-    float ceilingPixelY = clamp(uPlayerPos.y + (sin(rayAngle) * ceilingPixelDistance), 0.0, uMapSize.y * uTileSize - 0.0001);
+    float ceilingPixelY = uPlayerPos.y + (sin(rayAngle) * ceilingPixelDistance);
     //=======================================================================================================================
 
     //Coloring

@@ -30,14 +30,10 @@ internal partial class RayCasting
         float quadY1 = screenVerticalOffset + minimumScreenHeight;
         float quadY2 = screenVerticalOffset + (minimumScreenHeight / 2f) + (wallHeight / 2f) - pitch;
 
-        float r = 0f;
-        float g = 0f;
-        float b = 1f;
-
         //No ceiling can be rendered if the wall's top is on the top of the screen
         if (quadY1 > quadY2)
         {
-            Engine.ceilingVertexAttributesList.AddRange(new float[]
+            Shader.ceilingVertexAttribList.AddRange(new float[]
             {
                 quadX1 + debugBorder,
                 quadX2 - debugBorder,
