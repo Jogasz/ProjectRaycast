@@ -43,19 +43,19 @@ internal partial class RayCasting
         //Optimizing with shade (if the shade is strong enough to make everything black, just paint the line black)
         //int shadeLimit = 255;
 
-        float r = (30f - shadeCalc) / 255f;
-        float g = (70f - shadeCalc) / 255f;
-        float b = (80f - shadeCalc) / 255f;
+        
+        // - rayLength
+        // - pitch
+        // - rayTilePos
+        // - distanceShade
+        // - textureIndex
 
-        Shader.defVertexAttribList.AddRange(new float[]
+        Shader.wallVertexAttribList.AddRange(new float[]
         {
             quadX1 + debugBorder,
             quadX2 - debugBorder,
-            quadY1 - pitch + debugBorder,
+            quadY1 - pitch - debugBorder,
             quadY2 - pitch + debugBorder,
-            r,
-            g,
-            b
         });
 
         //if (shadeCalc >= shadeLimit)

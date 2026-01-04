@@ -15,6 +15,13 @@ internal class Shader
             //Fragment Shader
         int FragmentShader;
 
+        //If file is not found
+        if (!File.Exists(vertexPath))
+            throw new FileNotFoundException($"Vertex shader file not found:\n - '{vertexPath}'");
+
+        if (!File.Exists(fragmentPath))
+            throw new FileNotFoundException($"Fragment shader file not found:\n - '{fragmentPath}'");
+
         //Loading shader files
         string VertexShaderSource = File.ReadAllText(vertexPath);
         string FragmentShaderSource = File.ReadAllText(fragmentPath);
@@ -25,9 +32,6 @@ internal class Shader
 
         FragmentShader = GL.CreateShader(ShaderType.FragmentShader);
         GL.ShaderSource(FragmentShader, FragmentShaderSource);
-
-        Console.WriteLine($"==============================================================");
-        Console.WriteLine($"Compiling:\n - {vertexPath}\n - {fragmentPath}");
 
         //Compiling the Vertex Shader and checking for errors
         GL.CompileShader(VertexShader);
@@ -41,26 +45,22 @@ internal class Shader
         //Getting the status of the compiler
         GL.GetShader(VertexShader, ShaderParameter.CompileStatus, out VertexCompileSucces);
 
-        //Writing out error if there is one
+        //Vertex compiling error
         if (VertexCompileSucces == 0)
         {
-            string infoLog = GL.GetShaderInfoLog(VertexShader);
-            Console.WriteLine($"Compiling vertex shader has failed!\n - {vertexPath}");
-            Console.WriteLine(infoLog);
+            string infoLog = string.IsNullOrWhiteSpace(GL.GetShaderInfoLog(VertexShader)) ? "Unknown" : GL.GetShaderInfoLog(VertexShader);
+            throw new InvalidOperationException($"Compiling vertex shader has failed:\n - '{vertexPath}'\n - Reason: '{infoLog}'");
         }
 
         //Getting the status of the compiler
         GL.GetShader(FragmentShader, ShaderParameter.CompileStatus, out FragmentCompileSucces);
 
-        //Writing out error if there is one
+        //Fragment compiling error
         if (FragmentCompileSucces == 0)
         {
-            string infoLog = GL.GetShaderInfoLog(FragmentShader);
-            Console.WriteLine($"Compiling fragment shader has failed!\n - {fragmentPath}");
-            Console.WriteLine(infoLog);
+            string infoLog = string.IsNullOrWhiteSpace(GL.GetShaderInfoLog(FragmentShader)) ? "Unknown" : GL.GetShaderInfoLog(FragmentShader);
+            throw new InvalidOperationException($"Compiling fragment shader has failed:\n - '{fragmentPath}'\n - Reason: '{infoLog}'");
         }
-
-        if (VertexCompileSucces != 0 && FragmentCompileSucces != 0) Console.WriteLine("Compiling was succesful!\n");
 
         //Linking shaders into a program that can be run on the GPU
         Handle = GL.CreateProgram();
@@ -70,26 +70,20 @@ internal class Shader
 
         GL.LinkProgram(Handle);
 
-        Console.WriteLine($"Linking:\n - {vertexPath}\n - {fragmentPath}");
-
         //Writing out error if there is one
-        GL.GetProgram(Handle, GetProgramParameterName.LinkStatus, out int success);
-        if (success == 0)
+        GL.GetProgram(Handle, GetProgramParameterName.LinkStatus, out int linkingSuccess);
+
+        //Program linking error
+        if (linkingSuccess == 0)
         {
-            string infoLog = GL.GetProgramInfoLog(Handle);
-            Console.WriteLine("Linking has failed!\n");
-            Console.WriteLine(infoLog);
-        }
-        else
-        {
-            Console.WriteLine("Linking was succesful!\n");
+            string infoLog = string.IsNullOrWhiteSpace(GL.GetProgramInfoLog(Handle)) ? "Unknown" : GL.GetProgramInfoLog(Handle);
+            throw new InvalidOperationException($"Linking shader program has failed:\n - Vertex: '{vertexPath}'\n - Fragment: '{fragmentPath}'\n - Reason: '{infoLog}'");
         }
 
         GL.DetachShader(Handle, VertexShader);
         GL.DetachShader(Handle, FragmentShader);
         GL.DeleteShader(FragmentShader);
         GL.DeleteShader(VertexShader);
-        Console.WriteLine($"==============================================================");
     }
     //Method to be able to use the Shader handler program
     public void Use()
@@ -198,6 +192,18 @@ internal class Shader
     static float[]? ceilingVertices { get; set; }
     //====================================================================================
 
+    //WallShader
+    //====================================================================================
+    //Instance
+    public static Shader? wallShader { get; set; }
+    //VBO, VAO
+    static int wallVAO { get; set; }
+    static int wallVBO { get; set; }
+    //Containers
+    public static List<float> wallVertexAttribList { get; set; } = new List<float>();
+    static float[]? wallVertices { get; set; }
+    //====================================================================================
+
     //OnLoad
     public static void LoadAll(Vector2i ClientSize, Vector2 minimumScreen)
     {
@@ -214,6 +220,11 @@ internal class Shader
             "source/engine/graphics/geometry/ceiling/ceiling.frag",
             projection,
             minimumScreen);
+
+        LoadWallShader(
+            "source/engine/graphics/geometry/wall/wall.vert",
+            "source/engine/graphics/geometry/wall/wall.frag",
+            projection);
     }
 
     static void LoadDefShader(
@@ -282,6 +293,33 @@ internal class Shader
         ceilingShader.SetFloat("uDistanceShade", Settings.Graphics.distanceShade);
     }
 
+    static void LoadWallShader(
+        string vertexPath,
+        string fragmentPath,
+        Matrix4 projection)
+    {
+        wallShader = new Shader(vertexPath, fragmentPath);
+        //VAO, VBO
+        wallVAO = GL.GenVertexArray();
+        wallVBO = GL.GenBuffer();
+        //VAO, VBO Binding
+        GL.BindVertexArray(wallVAO);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, wallVBO);
+        //Attribute0
+        GL.EnableVertexAttribArray(0);
+        GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, 4 * sizeof(float), 0);
+        //Divisor
+        GL.VertexAttribDivisor(0, 1);
+        //Disable face culling to avoid accidentally removing one triangle
+        GL.Disable(EnableCap.CullFace);
+        //Unbind for safety
+        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+        GL.BindVertexArray(0);
+        //Uniforms
+        wallShader.Use();
+        wallShader.SetMatrix4("uProjMat", projection);
+    }
+
     //OnFramebufferResize
     public static void UpdateUniforms(Vector2i ClientSize, Vector2 minimumScreen)
     {
@@ -295,6 +333,8 @@ internal class Shader
         ceilingShader?.Use();
         ceilingShader?.SetMatrix4("uProjMat", projection);
         ceilingShader?.SetVector2("uMinimumScreen", new Vector2(minimumScreen.X, minimumScreen.Y));
+        wallShader?.Use();
+        wallShader?.SetMatrix4("uProjMat", projection);
     }
 
     //OnUpdateFrame
@@ -330,6 +370,22 @@ internal class Shader
         GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             //CLEARING LIST
         ceilingVertexAttribList.Clear();
+        //==============================================
+
+        //WallShader
+        //==============================================
+        //Making array
+        wallVertices = wallVertexAttribList.ToArray();
+        //Loading buffer
+        GL.BindBuffer(BufferTarget.ArrayBuffer, wallVBO);
+        GL.BufferData(
+            BufferTarget.ArrayBuffer,
+            wallVertices.Length * sizeof(float),
+            wallVertices,
+            BufferUsageHint.DynamicDraw);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+        //CLEARING LIST
+        wallVertexAttribList.Clear();
         //==============================================
     }
 
@@ -393,6 +449,19 @@ internal class Shader
             GL.DrawArraysInstanced(PrimitiveType.TriangleStrip, 0, 4, instanceCount);
         }
         //===========================================================================
+
+        //WallShader
+        //===========================================================================
+        wallShader?.Use();
+        //Binding and drawing
+        GL.BindVertexArray(wallVAO);
+        int wallLen = wallVertices?.Length ?? 0;
+        instanceCount = wallLen / 4;
+        if (instanceCount > 0)
+        {
+            GL.DrawArraysInstanced(PrimitiveType.TriangleStrip, 0, 4, instanceCount);
+        }
+        //===========================================================================
     }
 
     //OnUnload
@@ -401,5 +470,6 @@ internal class Shader
         //Dispose shaders
         defShader?.Dispose();
         ceilingShader?.Dispose();
+        wallShader?.Dispose();
     }
 }

@@ -77,7 +77,24 @@ internal partial class Engine : GameWindow
         //Loading textures
         Texture.LoadAll(mapWalls, mapCeiling, mapFloor);
 
-        Shader.LoadAll(ClientSize, new Vector2(minimumScreenWidth, minimumScreenHeight));
+        //Loading shaders
+        try
+        {
+            Shader.LoadAll(ClientSize, new Vector2(minimumScreenWidth, minimumScreenHeight));
+            Console.WriteLine(" - Shaders have been loaded!");
+        }
+        catch (FileNotFoundException noFileEx)
+        {
+            Console.WriteLine(noFileEx);
+        }
+        catch (InvalidOperationException invOpEx)
+        {
+            Console.WriteLine(invOpEx);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Shader: Something went wrong...\n - {e}");
+        }
 
         stopwatch.Start();
     }
