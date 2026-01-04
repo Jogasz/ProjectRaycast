@@ -155,17 +155,14 @@ internal partial class Engine
 
     void HandleMouse(MouseState mouse)
     {
-        //==============================================
-        //!!! Delta rotation is still not consistent !!!
-        //==============================================
-        float deltaMouseSensitivityX = (mouseSensitivity * (mouse.X - mouse.PreviousX)) * deltaTime;
-        //float deltaMouseSensitivityY = (mouseSensitivity * ((mouse.Y - mouse.PreviousY) * 1000)) * deltaTime;
+        float offsetX = (mouse.X - mouse.PreviousX) * mouseSensitivity;
+        float offsetY = (mouse.Y - mouse.PreviousY) * (mouseSensitivity * 1000);
 
         //Rotating X
-        playerAngle = Utils.NormalizeAngle(playerAngle + deltaMouseSensitivityX);
+        playerAngle = Utils.NormalizeAngle(playerAngle + offsetX);
 
         //Pitch/yaw (Y)
-        //pitch = Math.Clamp(pitch - deltaMouseSensitivityY, -2500, 2500);
+        pitch = Math.Clamp(pitch - offsetY, -2000, 2000);
     }
 
     void HandleCursorGrab()

@@ -28,7 +28,7 @@ internal partial class RayCasting
         float quadX2 = screenHorizontalOffset + ((i + 1) * stepX);
 
         float quadY1 = screenVerticalOffset + minimumScreenHeight;
-        float quadY2 = screenVerticalOffset + (minimumScreenHeight / 2f) + (wallHeight / 2f);
+        float quadY2 = screenVerticalOffset + (minimumScreenHeight / 2f) + (wallHeight / 2f) - pitch;
 
         float r = 0f;
         float g = 0f;

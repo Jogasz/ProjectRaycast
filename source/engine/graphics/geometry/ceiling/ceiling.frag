@@ -79,7 +79,7 @@ void main()
     //Coloring
     //=====================================================================================================================
         //Strength of shading by distance
-    float distanceShade = 0;
+    float distanceShade = uDistanceShade / 255;
         //Current miniQuad's shade value based on it's distance from the player
     float shade = ceilingPixelDistance * distanceShade;
         //Selecting texture based on map array

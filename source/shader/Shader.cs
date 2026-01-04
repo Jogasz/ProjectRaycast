@@ -6,7 +6,6 @@ namespace Engine;
 internal class Shader
 {
     public int Handle;
-
     public Shader(string vertexPath, string fragmentPath)
     {
         //Handlers for the induvidual shaders

@@ -45,26 +45,30 @@ internal partial class Engine : GameWindow
 
     //SHADER
     //Shaders
-    Shader defShader { get; set; }
-    Shader ceilingShader { get; set; }
+    Shader? defShader { get; set; }
+    Shader? ceilingShader { get; set; }
+    Shader? wallShader { get; set; }
 
     //VAO's, VBO's
     //Default
     int defVAO { get; set; }
     int defVBO { get; set; }
     internal static List<float> defVertexAttributesList { get; set; } = new List<float>();
-    float[] defVerticesArray { get; set; }
+    float[]? defVerticesArray { get; set; }
 
     //Ceiling
     int ceilingVAO { get; set; }
     int ceilingVBO { get; set; }
     internal static List<float> ceilingVertexAttributesList { get; set; } = new List<float>();
-    float[] ceilingVerticesArray { get; set; }
+    float[]? ceilingVerticesArray { get; set; }
+
+    //Walls
+    int wallVAO { get; set; }
+    int wallVBO { get; set; }
+    internal static List<float> wallVertexAttributesList { get; set; } = new List<float>();
+    float[]? wallVerticesArray { get; set; }
 
     Matrix4 projection { get; set; }
-
-    //Ceiling Vertex Attributes
-    internal static List<float> ceilingAttributes { get; set; } = new List<float>();
 
     //=============================================================================================
     public Engine(int width, int height, string title) : base(GameWindowSettings.Default, new NativeWindowSettings()
@@ -176,7 +180,47 @@ internal partial class Engine : GameWindow
 
         ceilingShader.SetVector2("uClientSize", new Vector2(ClientSize.X, ClientSize.Y));
         ceilingShader.SetFloat("uTileSize", tileSize);
-        //mapCeiling
+        ceilingShader.SetFloat("uDistanceShade", distanceShade);
+        //============================================================================
+
+        //Wall
+        //============================================================================
+        wallShader = new Shader("source/engine/graphics/geometry/walls/wall.vert", "source/engine/graphics/geometry/walls/wall.frag");
+
+        //VAO, VBO
+        wallVAO = GL.GenVertexArray();
+        wallVBO = GL.GenBuffer();
+
+        //VAO, VBO Binding
+        GL.BindVertexArray(wallVAO);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, wallVBO);
+
+        //Attribute0
+        GL.EnableVertexAttribArray(0);
+        GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
+
+        //Attribute1
+        GL.EnableVertexAttribArray(1);
+        GL.VertexAttribPointer(1, 1, VertexAttribPointerType.Float, false, 5 * sizeof(float), 4 * sizeof(float));
+
+        //Divisor
+        GL.VertexAttribDivisor(0, 1);
+        GL.VertexAttribDivisor(1, 1);
+
+        //Disable face culling to avoid accidentally removing one triangle
+        GL.Disable(EnableCap.CullFace);
+
+        //Unbind for safety
+        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+        GL.BindVertexArray(0);
+
+        //Projection matrix uniform
+        wallShader.Use();
+        wallShader.SetMatrix4("uProjMat", projection);
+
+        wallShader.SetVector2("uClientSize", new Vector2(ClientSize.X, ClientSize.Y));
+        wallShader.SetFloat("uTileSize", tileSize);
+        wallShader.SetFloat("uDistanceShade", distanceShade);
         //============================================================================
 
         //Starting stopwatch for Delta Time
@@ -205,6 +249,8 @@ internal partial class Engine : GameWindow
         ceilingShader?.SetMatrix4("uProjMat", projection);
         ceilingShader?.SetFloat("uStepSize", wallWidth);
         ceilingShader?.SetVector2("uClientSize", new Vector2(ClientSize.X, ClientSize.Y));
+        wallShader?.Use();
+        wallShader?.SetMatrix4("uProjMat", projection);
     }
 
     protected override void OnUpdateFrame(FrameEventArgs e)
