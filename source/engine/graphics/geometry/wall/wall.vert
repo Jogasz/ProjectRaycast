@@ -7,10 +7,27 @@
 
 //Incoming and outgoing variables, uniforms
 //==============================================================
-    //Verticies X1, X2, Y1, Y2, per instance
+    //Verticies X1, X2, Y1, Y2, per instance (in)
 layout (location = 0) in vec4 _aStripQuadPos;
+    //Wall's height (in)
+layout (location = 1) in float _aWallHeight;
+    //Ray's length (in)
+layout (location = 2) in float _aRayLength;
+    //Ray's pos in tile (in)
+layout (location = 3) in float _aRayTilePos;
+    //Texture's index (in)
+layout (location = 4) in float _aTexIndex;
 
+    //Strip quad Y1, Y2 (out)
 out vec2 vStripQuadY;
+    //Wall's height (out)
+out float vWallHeight;
+    //Ray's length (out)
+out float vRayLength;
+    //Ray's pos in tile (out)
+out float vRayTilePos;
+    //Texture's index (out)
+out float vTexIndex;
 
     //Projection matrix
 uniform mat4 uProjMat;
@@ -45,6 +62,18 @@ void main()
     gl_Position = uProjMat * vec4(convStripQuadPos.xy, 0.0, 1.0);
     //===========================================================
 
+     //Sending out variables to fragment shadercallcoherent
+    //==============================
+        //Strip quad Y1, Y2 (out)
     vStripQuadY = _aStripQuadPos.zw;
+         //Wall's height (out)
+    vWallHeight = _aWallHeight;
+        //Ray's length (out)
+    vRayLength = _aRayLength;
+        //Ray's pos in tile (out)
+    vRayTilePos = _aRayTilePos;
+        //Texture's index (out)
+    vTexIndex = _aTexIndex;
+    //==============================
 }
 //==============================================================

@@ -7,7 +7,7 @@
 
 //Incoming and outgoing variables, uniforms
 //==============================================================
-    //Verticies X1, X2, Y1, Y2, per instance
+    //Verticies X1, X2, Y1, Y2, per instance (in)
 layout (location = 0) in vec4 _aStripQuadPos;
     //Ray's angle (in)
 layout (location = 1) in float _rayAngle;

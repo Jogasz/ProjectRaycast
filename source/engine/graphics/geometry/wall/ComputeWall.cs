@@ -56,6 +56,10 @@ internal partial class RayCasting
             quadX2 - debugBorder,
             quadY1 - pitch - debugBorder,
             quadY2 - pitch + debugBorder,
+            wallHeight, //Quantize
+            rayLength, //Shading
+            rayTilePosition, //Horizontal texture stepping
+            textureIndex, //Selecting correct texture
         });
 
         //if (shadeCalc >= shadeLimit)

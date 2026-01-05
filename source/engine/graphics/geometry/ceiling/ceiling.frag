@@ -20,27 +20,27 @@ out vec4 FragColor;
 //OnRenderFrame uniforms
 //======================
     //Textures array (uIn)
-uniform sampler2D uTextures[8];
-    //Map Ceiling array
+uniform sampler2D uTextures[9];
+    //Map Ceiling array (uIn)
 uniform isampler2D uMapCeiling;
-    //Map's size
+    //Map's size (uIn)
 uniform vec2 uMapSize;
     //Y step value for quads in strip quad (uIn)
 uniform float uStepSize;
-    //Player's position
+    //Player's position (uIn)
 uniform vec2 uPlayerPos;
-    //Player's angle
+    //Player's angle (uIn)
 uniform float uPlayerAngle;
-    //Player's pitch
+    //Player's pitch (uIn)
 uniform float uPitch;
 
 //OnLoad / OnFramebufferResize uniforms
 //=====================================
-    //Window's size
+    //Window's size (uIn)
 uniform vec2 uMinimumScreen;
-    //TileSize
+    //TileSize (uIn)
 uniform float uTileSize;
-    //Distance shade value !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    //Distance shade value (uIn)
 uniform float uDistanceShade;
 //==============================================================
 
