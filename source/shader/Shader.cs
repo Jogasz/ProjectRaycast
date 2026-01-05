@@ -307,25 +307,29 @@ internal class Shader
         GL.BindBuffer(BufferTarget.ArrayBuffer, wallVBO);
         //Attribute0 - Vertex
         GL.EnableVertexAttribArray(0);
-        GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, 8 * sizeof(float), 0);
+        GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, 9 * sizeof(float), 0);
         //Attribute1 - wallheight
         GL.EnableVertexAttribArray(1);
-        GL.VertexAttribPointer(1, 1, VertexAttribPointerType.Float, false, 8 * sizeof(float), 4 * sizeof(float));
+        GL.VertexAttribPointer(1, 1, VertexAttribPointerType.Float, false, 9 * sizeof(float), 4 * sizeof(float));
         //Attribute2 - rayLength
         GL.EnableVertexAttribArray(2);
-        GL.VertexAttribPointer(2, 1, VertexAttribPointerType.Float, false, 8 * sizeof(float), 5 * sizeof(float));
+        GL.VertexAttribPointer(2, 1, VertexAttribPointerType.Float, false, 9 * sizeof(float), 5 * sizeof(float));
         //Attribute3 - rayTilePosition
         GL.EnableVertexAttribArray(3);
-        GL.VertexAttribPointer(3, 1, VertexAttribPointerType.Float, false, 8 * sizeof(float), 6 * sizeof(float));
+        GL.VertexAttribPointer(3, 1, VertexAttribPointerType.Float, false, 9 * sizeof(float), 6 * sizeof(float));
         //Attribute4 - textureIndex
         GL.EnableVertexAttribArray(4);
-        GL.VertexAttribPointer(4, 1, VertexAttribPointerType.Float, false, 8 * sizeof(float), 7 * sizeof(float));
+        GL.VertexAttribPointer(4, 1, VertexAttribPointerType.Float, false, 9 * sizeof(float), 7 * sizeof(float));
+        //Attribute5 - wallSide
+        GL.EnableVertexAttribArray(5);
+        GL.VertexAttribPointer(5, 1, VertexAttribPointerType.Float, false, 9 * sizeof(float), 8 * sizeof(float));
         //Divisor
         GL.VertexAttribDivisor(0, 1);
         GL.VertexAttribDivisor(1, 1);
         GL.VertexAttribDivisor(2, 1);
         GL.VertexAttribDivisor(3, 1);
         GL.VertexAttribDivisor(4, 1);
+        GL.VertexAttribDivisor(5, 1);
         //Disable face culling to avoid accidentally removing one triangle
         GL.Disable(EnableCap.CullFace);
         //Unbind for safety
@@ -469,18 +473,18 @@ internal class Shader
         //WallShader
         //===========================================================================
         wallShader?.Use();
-            //Creating texture array uniform
+        //Creating texture array uniform
         for (int i = 0; i < Texture.textures.Count; i++)
         {
             wallShader?.SetInt($"uTextures[{i}]", 3 + i);
         }
-            //Uniforms
+        //Uniforms
         wallShader?.SetInt("uMapWalls", 0);
-        wallShader?.SetVector2("uMapSize", new Vector2(Level.mapCeiling.GetLength(1), Level.mapCeiling.GetLength(0)));
+        wallShader?.SetVector2("uMapSize", new Vector2(Level.mapWalls.GetLength(1), Level.mapWalls.GetLength(0)));
             //Binding and drawing
         GL.BindVertexArray(wallVAO);
         int wallLen = wallVertices?.Length ?? 0;
-        instanceCount = wallLen / 8;
+        instanceCount = wallLen / 9;
         if (instanceCount > 0)
         {
             GL.DrawArraysInstanced(PrimitiveType.TriangleStrip, 0, 4, instanceCount);

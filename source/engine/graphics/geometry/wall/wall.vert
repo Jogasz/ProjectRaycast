@@ -17,6 +17,8 @@ layout (location = 2) in float _aRayLength;
 layout (location = 3) in float _aRayTilePos;
     //Texture's index (in)
 layout (location = 4) in float _aTexIndex;
+    //Wall's side (in)
+layout (location = 5) in float _aWallSide;
 
     //Strip quad Y1, Y2 (out)
 out vec2 vStripQuadY;
@@ -28,6 +30,8 @@ out float vRayLength;
 out float vRayTilePos;
     //Texture's index (out)
 out float vTexIndex;
+    //Wall's side (out)
+out float vWallSide;
 
     //Projection matrix
 uniform mat4 uProjMat;
@@ -74,6 +78,8 @@ void main()
     vRayTilePos = _aRayTilePos;
         //Texture's index (out)
     vTexIndex = _aTexIndex;
+        //Wall's side (out)
+    vWallSide = _aWallSide;
     //==============================
 }
 //==============================================================

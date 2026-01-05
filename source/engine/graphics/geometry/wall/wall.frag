@@ -19,6 +19,8 @@ in float vRayLength;
 in float vRayTilePos;
     //Texture's index (in)
 in float vTexIndex;
+    //Wall's side (in)
+in float vWallSide;
 
     //Final outgoing RGBA of the quad (out)
 out vec4 FragColor;
@@ -44,29 +46,23 @@ void main()
         //Current pixel's Y from strip quad's top (Clamp to avoid weird values on borders)
     float pixelYInStrip = clamp(stripY1 - gl_FragCoord.y, 0.0, stripQuadHeight);
         
-        //Converting to INT
+        //Converting to INT !!!!!
     int texIndex = int(vTexIndex);
-        //Texture's size
-    ivec2 texSize = textureSize(uTextures[texIndex], 0);
-        //Texture's height
-    int texHeight = texSize.y;
-        //Vertical step's size
-    float stepSize = stripQuadHeight / texHeight;
-        //Nth mini quad from the top in strip quad (starting from zero)
-    float YStepIndex = pixelYInStrip / stepSize;
 
     //ToDo
-    //Ha pixel < minimumScreen.y discard
-    //Ha pixel > minimumScreen.y discard
-    //Shading
-    //TileSize uniform
-    //uTextures[n], n = textureNum + 1 (dummy)
-    //Flip wrong textures (loc-5 - wallSide)
+        //UNIFORM float tileSize - Localizing TileSize
+        //UNIFORM vec2 minimumScreenSize - Discarding not needed pixels
+        //UNIFORM float distanceShade - Strength of shading
+        //UNIFORM float texNum - How many textures in array + 0. dummy
 
-        //Horizontal texture pixel position
+    //Horizontal texture pixel position
+        //Right side (no flip)
     float u = clamp(vRayTilePos / 50, 0.0, 1.0);
+        //Wrong side (flip)
+    if (vWallSide == 1 ||
+        vWallSide == 3) u = clamp(1 - (vRayTilePos / 50), 0.0, 1.0);
         //Vertical texture pixel position
-    float v = clamp(1.0 - (YStepIndex / texHeight), 0.0, 1.0);
+    float v = clamp(1 - (pixelYInStrip / stripQuadHeight), 0.0, 1.0);
         //Taking out the color from the selected texture
     vec4 tex = texture(uTextures[texIndex], vec2(u, v));
         //Returning the correct color
