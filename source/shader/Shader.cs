@@ -480,7 +480,7 @@ internal class Shader
             //Binding and drawing
         GL.BindVertexArray(wallVAO);
         int wallLen = wallVertices?.Length ?? 0;
-        instanceCount = wallLen / 4;
+        instanceCount = wallLen / 8;
         if (instanceCount > 0)
         {
             GL.DrawArraysInstanced(PrimitiveType.TriangleStrip, 0, 4, instanceCount);
