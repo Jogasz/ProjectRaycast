@@ -192,6 +192,18 @@ internal class Shader
     static float[]? ceilingVertices { get; set; }
     //====================================================================================
 
+    //FloorShader
+    //====================================================================================
+    //Instance
+    public static Shader? floorShader { get; set; }
+    //VBO, VAO
+    static int floorVAO { get; set; }
+    static int floorVBO { get; set; }
+    //Containers
+    public static List<float> floorVertexAttribList { get; set; } = new List<float>();
+    static float[]? floorVertices { get; set; }
+    //====================================================================================
+
     //WallShader
     //====================================================================================
     //Instance
@@ -205,7 +217,7 @@ internal class Shader
     //====================================================================================
 
     //OnLoad
-    public static void LoadAll(Vector2i ClientSize, Vector2 minimumScreen)
+    public static void LoadAll(Vector2i ClientSize, Vector2 minimumScreen, Vector2 screenOffset)
     {
         //Viewport and projection (bottom-left origin)
         projection = Matrix4.CreateOrthographicOffCenter(0f, ClientSize.X, 0f, ClientSize.Y, -1f, 1f);
@@ -221,10 +233,18 @@ internal class Shader
             projection,
             minimumScreen);
 
+        LoadFloorShader(
+            "source/engine/graphics/geometry/floor/floor.vert",
+            "source/engine/graphics/geometry/floor/floor.frag",
+            projection,
+            minimumScreen);
+
         LoadWallShader(
             "source/engine/graphics/geometry/wall/wall.vert",
             "source/engine/graphics/geometry/wall/wall.frag",
-            projection);
+            projection,
+            minimumScreen,
+            screenOffset);
     }
 
     static void LoadDefShader(
@@ -293,55 +313,99 @@ internal class Shader
         ceilingShader.SetFloat("uDistanceShade", Settings.Graphics.distanceShade);
     }
 
-    static void LoadWallShader(
+    static void LoadFloorShader(
         string vertexPath,
         string fragmentPath,
-        Matrix4 projection)
+        Matrix4 projection,
+        Vector2 minimumScreen)
     {
-        wallShader = new Shader(vertexPath, fragmentPath);
+        floorShader = new Shader(vertexPath, fragmentPath);
         //VAO, VBO
-        wallVAO = GL.GenVertexArray();
-        wallVBO = GL.GenBuffer();
+        floorVAO = GL.GenVertexArray();
+        floorVBO = GL.GenBuffer();
         //VAO, VBO Binding
-        GL.BindVertexArray(wallVAO);
-        GL.BindBuffer(BufferTarget.ArrayBuffer, wallVBO);
-        //Attribute0 - Vertex
+        GL.BindVertexArray(floorVAO);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, floorVBO);
+        //Attribute0
         GL.EnableVertexAttribArray(0);
-        GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, 9 * sizeof(float), 0);
-        //Attribute1 - wallheight
+        GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
+        //Attribute1
         GL.EnableVertexAttribArray(1);
-        GL.VertexAttribPointer(1, 1, VertexAttribPointerType.Float, false, 9 * sizeof(float), 4 * sizeof(float));
-        //Attribute2 - rayLength
-        GL.EnableVertexAttribArray(2);
-        GL.VertexAttribPointer(2, 1, VertexAttribPointerType.Float, false, 9 * sizeof(float), 5 * sizeof(float));
-        //Attribute3 - rayTilePosition
-        GL.EnableVertexAttribArray(3);
-        GL.VertexAttribPointer(3, 1, VertexAttribPointerType.Float, false, 9 * sizeof(float), 6 * sizeof(float));
-        //Attribute4 - textureIndex
-        GL.EnableVertexAttribArray(4);
-        GL.VertexAttribPointer(4, 1, VertexAttribPointerType.Float, false, 9 * sizeof(float), 7 * sizeof(float));
-        //Attribute5 - wallSide
-        GL.EnableVertexAttribArray(5);
-        GL.VertexAttribPointer(5, 1, VertexAttribPointerType.Float, false, 9 * sizeof(float), 8 * sizeof(float));
+        GL.VertexAttribPointer(1, 1, VertexAttribPointerType.Float, false, 5 * sizeof(float), 4 * sizeof(float));
         //Divisor
         GL.VertexAttribDivisor(0, 1);
         GL.VertexAttribDivisor(1, 1);
-        GL.VertexAttribDivisor(2, 1);
-        GL.VertexAttribDivisor(3, 1);
-        GL.VertexAttribDivisor(4, 1);
-        GL.VertexAttribDivisor(5, 1);
         //Disable face culling to avoid accidentally removing one triangle
         GL.Disable(EnableCap.CullFace);
         //Unbind for safety
         GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
         GL.BindVertexArray(0);
         //Uniforms
+        floorShader.Use();
+        floorShader.SetMatrix4("uProjMat", projection);
+        floorShader.SetVector2("uMinimumScreen", new Vector2(minimumScreen.X, minimumScreen.Y));
+        floorShader.SetFloat("uTileSize", Settings.Gameplay.tileSize);
+        floorShader.SetFloat("uDistanceShade", Settings.Graphics.distanceShade);
+    }
+
+    static void LoadWallShader(
+        string vertexPath,
+        string fragmentPath,
+        Matrix4 projection,
+        Vector2 minimumScreen,
+        Vector2 screenOffset)
+    {
+        wallShader = new Shader(vertexPath, fragmentPath);
+            //VAO, VBO
+        wallVAO = GL.GenVertexArray();
+        wallVBO = GL.GenBuffer();
+            //VAO, VBO Binding
+        GL.BindVertexArray(wallVAO);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, wallVBO);
+            //Attribute0 - Vertex
+        GL.EnableVertexAttribArray(0);
+        GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, 9 * sizeof(float), 0);
+            //Attribute1 - wallheight
+        GL.EnableVertexAttribArray(1);
+        GL.VertexAttribPointer(1, 1, VertexAttribPointerType.Float, false, 9 * sizeof(float), 4 * sizeof(float));
+            //Attribute2 - rayLength
+        GL.EnableVertexAttribArray(2);
+        GL.VertexAttribPointer(2, 1, VertexAttribPointerType.Float, false, 9 * sizeof(float), 5 * sizeof(float));
+            //Attribute3 - rayTilePosition
+        GL.EnableVertexAttribArray(3);
+        GL.VertexAttribPointer(3, 1, VertexAttribPointerType.Float, false, 9 * sizeof(float), 6 * sizeof(float));
+            //Attribute4 - textureIndex
+        GL.EnableVertexAttribArray(4);
+        GL.VertexAttribPointer(4, 1, VertexAttribPointerType.Float, false, 9 * sizeof(float), 7 * sizeof(float));
+            //Attribute5 - wallSide
+        GL.EnableVertexAttribArray(5);
+        GL.VertexAttribPointer(5, 1, VertexAttribPointerType.Float, false, 9 * sizeof(float), 8 * sizeof(float));
+            //Divisor
+        GL.VertexAttribDivisor(0, 1);
+        GL.VertexAttribDivisor(1, 1);
+        GL.VertexAttribDivisor(2, 1);
+        GL.VertexAttribDivisor(3, 1);
+        GL.VertexAttribDivisor(4, 1);
+        GL.VertexAttribDivisor(5, 1);
+            //Disable face culling to avoid accidentally removing one triangle
+        GL.Disable(EnableCap.CullFace);
+            //Unbind for safety
+        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+        GL.BindVertexArray(0);
+            //Uniforms
         wallShader.Use();
         wallShader.SetMatrix4("uProjMat", projection);
+        wallShader.SetFloat("uTileSize", Settings.Gameplay.tileSize);
+        wallShader.SetVector2("uMinimumScreen", minimumScreen);
+        wallShader.SetFloat("uDistanceShade", Settings.Graphics.distanceShade);
+        wallShader.SetVector2("uScreenOffset", screenOffset);
     }
 
     //OnFramebufferResize
-    public static void UpdateUniforms(Vector2i ClientSize, Vector2 minimumScreen)
+    public static void UpdateUniforms(
+        Vector2i ClientSize,
+        Vector2 minimumScreen,
+        Vector2 screenOffset)
     {
         projection = Matrix4.CreateOrthographicOffCenter(0f, ClientSize.X, 0f, ClientSize.Y, -1f, 1f);
 
@@ -352,9 +416,16 @@ internal class Shader
             //CeilingShader
         ceilingShader?.Use();
         ceilingShader?.SetMatrix4("uProjMat", projection);
-        ceilingShader?.SetVector2("uMinimumScreen", new Vector2(minimumScreen.X, minimumScreen.Y));
+        ceilingShader?.SetVector2("uMinimumScreen", minimumScreen);
+            //FloorShader
+        floorShader?.Use();
+        floorShader?.SetMatrix4("uProjMat", projection);
+        floorShader?.SetVector2("uMinimumScreen", minimumScreen);
+            //WallShader
         wallShader?.Use();
         wallShader?.SetMatrix4("uProjMat", projection);
+        wallShader?.SetVector2("uMinimumScreen", minimumScreen);
+        wallShader?.SetVector2("uScreenOffset", screenOffset);
     }
 
     //OnUpdateFrame
@@ -376,7 +447,7 @@ internal class Shader
         defVertexAttribList.Clear();
         //==============================================
 
-        //DefShader
+        //CeilingShader
         //==============================================
             //Making array
         ceilingVertices = ceilingVertexAttribList.ToArray();
@@ -392,11 +463,27 @@ internal class Shader
         ceilingVertexAttribList.Clear();
         //==============================================
 
+        //FloorShader
+        //==============================================
+            //Making array
+        floorVertices = floorVertexAttribList.ToArray();
+            //Loading buffer
+        GL.BindBuffer(BufferTarget.ArrayBuffer, floorVBO);
+        GL.BufferData(
+            BufferTarget.ArrayBuffer,
+            floorVertices.Length * sizeof(float),
+            floorVertices,
+            BufferUsageHint.DynamicDraw);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            //CLEARING LIST
+        floorVertexAttribList.Clear();
+        //==============================================
+
         //WallShader
         //==============================================
-        //Making array
+            //Making array
         wallVertices = wallVertexAttribList.ToArray();
-        //Loading buffer
+            //Loading buffer
         GL.BindBuffer(BufferTarget.ArrayBuffer, wallVBO);
         GL.BufferData(
             BufferTarget.ArrayBuffer,
@@ -404,7 +491,7 @@ internal class Shader
             wallVertices,
             BufferUsageHint.DynamicDraw);
         GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-        //CLEARING LIST
+            //CLEARING LIST
         wallVertexAttribList.Clear();
         //==============================================
     }
@@ -470,17 +557,41 @@ internal class Shader
         }
         //===========================================================================
 
+        //FloorShader
+        //===========================================================================
+        floorShader?.Use();
+            //Creating texture array uniform
+        for (int i = 0; i < Texture.textures.Count; i++)
+        {
+            floorShader?.SetInt($"uTextures[{i}]", 3 + i);
+        }
+            //Uniforms
+        floorShader?.SetInt("uMapFloor", 1);
+        floorShader?.SetVector2("uMapSize", new Vector2(Level.mapFloor.GetLength(1), Level.mapFloor.GetLength(0)));
+        floorShader?.SetFloat("uStepSize", wallWidth);
+        floorShader?.SetVector2("uPlayerPos", new Vector2(playerPosition.X, playerPosition.Y));
+        floorShader?.SetFloat("uPlayerAngle", playerAngle);
+        floorShader?.SetFloat("uPitch", pitch);
+            //Binding and drawing
+        GL.BindVertexArray(floorVAO);
+        int floorLen = floorVertices?.Length ?? 0;
+        instanceCount = floorLen / 5;
+        if (instanceCount > 0)
+        {
+            GL.DrawArraysInstanced(PrimitiveType.TriangleStrip, 0, 4, instanceCount);
+        }
+        //===========================================================================
+
         //WallShader
         //===========================================================================
         wallShader?.Use();
-        //Creating texture array uniform
+            //Creating texture array uniform
         for (int i = 0; i < Texture.textures.Count; i++)
         {
             wallShader?.SetInt($"uTextures[{i}]", 3 + i);
         }
-        //Uniforms
-        wallShader?.SetInt("uMapWalls", 0);
-        wallShader?.SetVector2("uMapSize", new Vector2(Level.mapWalls.GetLength(1), Level.mapWalls.GetLength(0)));
+            //Uniforms
+        wallShader?.SetFloat("uPitch", pitch);
             //Binding and drawing
         GL.BindVertexArray(wallVAO);
         int wallLen = wallVertices?.Length ?? 0;
@@ -498,6 +609,7 @@ internal class Shader
         //Dispose shaders
         defShader?.Dispose();
         ceilingShader?.Dispose();
+        floorShader?.Dispose();
         wallShader?.Dispose();
     }
 }

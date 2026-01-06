@@ -31,22 +31,28 @@ internal partial class RayCasting
         float quadX1 = nthRay * wallWidth + screenHorizontalOffset;
         float quadX2 = (nthRay + 1) * wallWidth + screenHorizontalOffset;
 
-        float quadY1 = (ClientSize.Y / 2f) + (wallHeight / 2f) - pitch;
-        float quadY2 = (ClientSize.Y / 2f) - (wallHeight / 2f) - pitch;
+            //Limit to stay inside minimumScreen
+        float screenLimitTop = screenVerticalOffset + minimumScreenHeight;
+        float screenLimitBottom = screenVerticalOffset;
 
-        //if wallside = 1, 3 -> flip
+        float quadY1 = Math.Min((ClientSize.Y / 2f) + (wallHeight / 2f) - pitch, screenLimitTop);
+        float quadY2 = Math.Max((ClientSize.Y / 2f) - (wallHeight / 2f) - pitch, screenLimitBottom);
 
-        Shader.wallVertexAttribList.AddRange(new float[]
+            //If wall is outside of the minimumScreen, dont render
+        if (quadY2 < screenLimitTop && quadY1 > screenLimitBottom)
         {
-            quadX1 + debugBorder,
-            quadX2 - debugBorder,
-            quadY1 - debugBorder,
-            quadY2 + debugBorder,
-            wallHeight, //Quantize
-            rayLength, //Shading
-            rayTilePosition, //Horizontal texture stepping
-            textureIndex, //Selecting correct texture
-            wallSide //Flipping wrong sided textures
-        });
+            Shader.wallVertexAttribList.AddRange(new float[]
+            {
+                quadX1 + debugBorder,
+                quadX2 - debugBorder,
+                quadY1 - debugBorder,
+                quadY2 + debugBorder,
+                wallHeight, //Quantize
+                rayLength, //Shading
+                rayTilePosition, //Horizontal texture stepping
+                textureIndex, //Selecting correct texture
+                wallSide //Flipping wrong sided textures
+            });
+        }
     }
 }

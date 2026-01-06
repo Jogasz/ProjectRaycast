@@ -80,7 +80,10 @@ internal partial class Engine : GameWindow
         //Loading shaders
         try
         {
-            Shader.LoadAll(ClientSize, new Vector2(minimumScreenWidth, minimumScreenHeight));
+            Shader.LoadAll(
+                ClientSize,
+                new Vector2(minimumScreenWidth, minimumScreenHeight),
+                new Vector2(screenHorizontalOffset, screenVerticalOffset));
             Console.WriteLine(" - Shaders have been loaded!");
         }
         catch (FileNotFoundException noFileEx)
@@ -114,7 +117,10 @@ internal partial class Engine : GameWindow
         screenHorizontalOffset = ClientSize.X > ClientSize.Y ? ((ClientSize.X - minimumScreenWidth) / 2) : 0;
         screenVerticalOffset = ClientSize.Y > ClientSize.X ? ((ClientSize.Y - minimumScreenHeight) / 2) : 0;
 
-        Shader.UpdateUniforms(ClientSize, new Vector2(minimumScreenWidth, minimumScreenHeight));
+        Shader.UpdateUniforms(
+            ClientSize,
+            new Vector2(minimumScreenWidth, minimumScreenHeight),
+            new Vector2(screenHorizontalOffset, screenVerticalOffset));
     }
 
     protected override void OnUpdateFrame(FrameEventArgs e)

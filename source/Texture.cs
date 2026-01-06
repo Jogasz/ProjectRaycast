@@ -12,7 +12,7 @@ internal sealed class Texture : IDisposable
     static string[] paths =
     {
         //Defaults
-        "assets/textures/testTexture.png",
+        "assets/textures/planks.png",
         "assets/textures/mossy_planks.png",
         "assets/textures/stonebricks.png",
         "assets/textures/mossy_stonebricks.png",

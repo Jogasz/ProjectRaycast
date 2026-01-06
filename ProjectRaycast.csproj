@@ -49,6 +49,8 @@
     <None Remove="settings.json" />
     <None Remove="source\engine\graphics\geometry\ceiling\ceiling.frag" />
     <None Remove="source\engine\graphics\geometry\ceiling\ceiling.vert" />
+    <None Remove="source\engine\graphics\geometry\floor\floor.frag" />
+    <None Remove="source\engine\graphics\geometry\floor\floor.vert" />
     <None Remove="source\engine\graphics\geometry\wall\wall.frag" />
     <None Remove="source\engine\graphics\geometry\wall\wall.vert" />
     <None Remove="source\shader\shader.frag" />
@@ -90,6 +92,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="source\engine\graphics\geometry\ceiling\ceiling.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="source\engine\graphics\geometry\floor\floor.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="source\engine\graphics\geometry\floor\floor.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="source\engine\graphics\geometry\wall\wall.frag">

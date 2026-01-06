@@ -20,8 +20,6 @@ layout (location = 4) in float _aTexIndex;
     //Wall's side (in)
 layout (location = 5) in float _aWallSide;
 
-    //Strip quad Y1, Y2 (out)
-out vec2 vStripQuadY;
     //Wall's height (out)
 out float vWallHeight;
     //Ray's length (out)
@@ -68,8 +66,6 @@ void main()
 
      //Sending out variables to fragment shadercallcoherent
     //==============================
-        //Strip quad Y1, Y2 (out)
-    vStripQuadY = _aStripQuadPos.zw;
          //Wall's height (out)
     vWallHeight = _aWallHeight;
         //Ray's length (out)

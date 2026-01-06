@@ -316,6 +316,20 @@ internal partial class RayCasting
                 debugBorder
             );
 
+            ComputeFloor(
+                distanceShade,
+                minimumScreenHeight,
+                minimumScreenWidth,
+                screenHorizontalOffset,
+                screenVerticalOffset,
+                i,
+                rayAngle,
+                wallHeight,
+                wallWidth,
+                pitch,
+                debugBorder
+            );
+
             if (wallType != 0)
             {
                 ComputeWalls(

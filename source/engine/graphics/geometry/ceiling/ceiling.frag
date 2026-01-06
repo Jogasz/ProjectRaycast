@@ -36,7 +36,7 @@ uniform float uPitch;
 
 //OnLoad / OnFramebufferResize uniforms
 //=====================================
-    //Window's size (uIn)
+    //Minimum window's size (uIn)
 uniform vec2 uMinimumScreen;
     //TileSize (uIn)
 uniform float uTileSize;
@@ -91,7 +91,7 @@ void main()
         //Taking out the color from the selected texture
     vec4 tex = texture(uTextures[texIndex], uv);
         //Returning the correct color
-    FragColor = vec4(tex.rgb - shade, tex.a);
+    FragColor = vec4(tex - shade);
     //=====================================================================================================================
 }
 //==============================================================

@@ -7,10 +7,6 @@
 
 //Incoming and outgoing variables, uniforms
 //==============================================================
-    //Strip quad Y1, Y2 (in)
-    // x: Y1
-    // y: Y2
-in vec2 vStripQuadY;
     //Wall's height (in)
 in float vWallHeight;
     //Ray's length (in)
@@ -25,47 +21,52 @@ in float vWallSide;
     //Final outgoing RGBA of the quad (out)
 out vec4 FragColor;
 
+//OnRenderFrame uniforms
+//======================
     //Textures array (uIn)
 uniform sampler2D uTextures[9];
-    //Map Ceiling array (uIn)
-uniform isampler2D uMapWalls;
-    //Map's size (uIn)
-uniform vec2 uMapSize;
+    //Player's pitch (uIn)
+uniform float uPitch;
+
+//OnLoad / OnFramebufferResize uniforms
+//=====================================
+    //Minimum window's size (uIn)
+uniform vec2 uMinimumScreen;
+    //Offsets for ,inimum window (uIn)
+uniform vec2 uScreenOffset;
+    //TileSize (uIn)
+uniform float uTileSize;
+    //Distance shade value (uIn)
+uniform float uDistanceShade;
+
 //==============================================================
 
 //Entry point
 //==============================================================
 void main()
 {
-        //Strip quad Y1 - top
-    float stripY1 = vStripQuadY.x;
-        //Strip quad Y2 - bottom
-    float stripY2 = vStripQuadY.y;
         //Strip quad's height
     float stripQuadHeight = max(0.0, vWallHeight);
+        //Wall's true top value
+    float wallRelTop = uScreenOffset.y + (uMinimumScreen.y / 2) + (vWallHeight / 2) - uPitch;
         //Current pixel's Y from strip quad's top (Clamp to avoid weird values on borders)
-    float pixelYInStrip = clamp(stripY1 - gl_FragCoord.y, 0.0, stripQuadHeight);
-        
-        //Converting to INT !!!!!
-    int texIndex = int(vTexIndex);
+    float pixelYInStrip = clamp(wallRelTop - gl_FragCoord.y, 0.0, stripQuadHeight);
+        //Strength of shading by distance
+    float distanceShade = uDistanceShade / 255;
 
-    //ToDo
-        //UNIFORM float tileSize - Localizing TileSize
-        //UNIFORM vec2 minimumScreenSize - Discarding not needed pixels
-        //UNIFORM float distanceShade - Strength of shading
-        //UNIFORM float texNum - How many textures in array + 0. dummy
-
+        //Shade strenght
+    float shade = vRayLength * distanceShade;
     //Horizontal texture pixel position
         //Right side (no flip)
-    float u = clamp(vRayTilePos / 50, 0.0, 1.0);
+    float u = clamp(vRayTilePos / uTileSize, 0.0, 1.0);
         //Wrong side (flip)
     if (vWallSide == 1 ||
         vWallSide == 3) u = clamp(1 - (vRayTilePos / 50), 0.0, 1.0);
         //Vertical texture pixel position
     float v = clamp(1 - (pixelYInStrip / stripQuadHeight), 0.0, 1.0);
         //Taking out the color from the selected texture
-    vec4 tex = texture(uTextures[texIndex], vec2(u, v));
+    vec4 tex = texture(uTextures[int(vTexIndex)], vec2(u, v));
         //Returning the correct color
-    FragColor = tex;
+    FragColor = tex - shade;
 }
 //==============================================================

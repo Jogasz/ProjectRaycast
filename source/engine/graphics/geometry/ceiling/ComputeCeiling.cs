@@ -22,13 +22,13 @@ internal partial class RayCasting
         float debugBorder
     )
     {
-        //Height of the player
         float stepX = wallWidth;
         float quadX1 = screenHorizontalOffset + (i * stepX);
         float quadX2 = screenHorizontalOffset + ((i + 1) * stepX);
 
         float quadY1 = screenVerticalOffset + minimumScreenHeight;
-        float quadY2 = screenVerticalOffset + (minimumScreenHeight / 2f) + (wallHeight / 2f) - pitch;
+            //Limit to stay inside minimumScreen
+        float quadY2 = Math.Max(screenVerticalOffset + (minimumScreenHeight / 2f) + (wallHeight / 2f) - pitch, screenVerticalOffset);
 
         //No ceiling can be rendered if the wall's top is on the top of the screen
         if (quadY1 > quadY2)
