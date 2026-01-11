@@ -328,13 +328,17 @@ internal class Shader
         GL.BindBuffer(BufferTarget.ArrayBuffer, floorVBO);
         //Attribute0
         GL.EnableVertexAttribArray(0);
-        GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
+        GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
         //Attribute1
         GL.EnableVertexAttribArray(1);
-        GL.VertexAttribPointer(1, 1, VertexAttribPointerType.Float, false, 5 * sizeof(float), 4 * sizeof(float));
+        GL.VertexAttribPointer(1, 1, VertexAttribPointerType.Float, false, 6 * sizeof(float), 4 * sizeof(float));
+        //Attribute1
+        GL.EnableVertexAttribArray(2);
+        GL.VertexAttribPointer(2, 1, VertexAttribPointerType.Float, false, 6 * sizeof(float), 5 * sizeof(float));
         //Divisor
         GL.VertexAttribDivisor(0, 1);
         GL.VertexAttribDivisor(1, 1);
+        GL.VertexAttribDivisor(2, 1);
         //Disable face culling to avoid accidentally removing one triangle
         GL.Disable(EnableCap.CullFace);
         //Unbind for safety

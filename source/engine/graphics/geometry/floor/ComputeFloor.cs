@@ -26,7 +26,7 @@ internal partial class RayCasting
         float quadX1 = screenHorizontalOffset + (i * stepX);
         float quadX2 = screenHorizontalOffset + ((i + 1) * stepX);
 
-        float quadY1 = screenVerticalOffset + (minimumScreenHeight / 2f) - (wallHeight / 2f) - pitch;
+        float quadY1 = Math.Clamp(screenVerticalOffset + (minimumScreenHeight / 2f) - (wallHeight / 2f) - pitch, screenVerticalOffset, screenVerticalOffset + minimumScreenHeight);
         float quadY2 = screenVerticalOffset;
 
         //No ceiling can be rendered if the wall's top is on the top of the screen
@@ -38,7 +38,8 @@ internal partial class RayCasting
                 quadX2 - debugBorder,
                 quadY1 + debugBorder,
                 quadY2 - debugBorder,
-                rayAngle
+                rayAngle,
+                wallHeight
             });
         }
     }

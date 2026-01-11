@@ -67,7 +67,7 @@ void main()
         //Height of the player
     float cameraZ = uMinimumScreen.y / 2;
         //Y of the miniQuad's middle
-    float rowY = cameraZ - (uStepSize / 2 + YStepIndex * uStepSize) + uPitch;
+    float rowY = cameraZ - pixelYInStrip + uPitch;
         //Distance of the miniQuad from the player
     float ceilingPixelDistance = ((cameraZ / rowY) * uTileSize) / cos(uPlayerAngle - rayAngle);
         //World X position of the pixel

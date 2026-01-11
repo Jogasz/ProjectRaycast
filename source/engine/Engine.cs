@@ -170,7 +170,7 @@ internal partial class Engine : GameWindow
         // recompute wallWidth here so Engine and RayCasting use same value
         wallWidth = (float)minimumScreenWidth / Math.Max(1, rayCount);
         //=============================================================================================
-
+        
         //Raycasting:
         //1. RayCast
         //RayCast();

@@ -11,11 +11,14 @@
 layout (location = 0) in vec4 _aStripQuadPos;
     //Ray's angle (in)
 layout (location = 1) in float _rayAngle;
+layout (location = 2) in float _wallHeight;
 
     //Strip quad Y1, Y2 (out)
 out vec2 vStripQuadY;
     //Ray's angle (out)
 out float rayAngle;
+    //Wall's height
+out float vWallHeight;
 
     //Projection matrix
 uniform mat4 uProjMat;
@@ -56,6 +59,8 @@ void main()
     vStripQuadY = _aStripQuadPos.zw;
         //Ray's angle (out)
     rayAngle = _rayAngle;
+        //Wall's height
+    vWallHeight = _wallHeight;
     //==============================
 }
 //==============================================================

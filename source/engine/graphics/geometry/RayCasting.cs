@@ -28,7 +28,7 @@ internal partial class RayCasting
         int renderDistance
     )
     {
-        float debugBorder = 0f;
+        float debugBorder = 0.5f;
 
         //FOV calculation
         float FOVStart = -((float)(FOV * (Math.PI / 180f)) / 2);
@@ -330,27 +330,27 @@ internal partial class RayCasting
                 debugBorder
             );
 
-            if (wallType != 0)
-            {
-                ComputeWalls(
-                    ClientSize,
-                    distanceShade,
-                    minimumScreenHeight,
-                    minimumScreenWidth,
-                    screenHorizontalOffset,
-                    screenVerticalOffset,
-                    tileSize,
-                    i,
-                    rayLength,
-                    rayTilePosition,
-                    wallHeight,
-                    wallWidth,
-                    wallSide,
-                    wallType,
-                    pitch,
-                    debugBorder
-                );
-            }
+            //if (wallType != 0)
+            //{
+            //    ComputeWalls(
+            //        ClientSize,
+            //        distanceShade,
+            //        minimumScreenHeight,
+            //        minimumScreenWidth,
+            //        screenHorizontalOffset,
+            //        screenVerticalOffset,
+            //        tileSize,
+            //        i,
+            //        rayLength,
+            //        rayTilePosition,
+            //        wallHeight,
+            //        wallWidth,
+            //        wallSide,
+            //        wallType,
+            //        pitch,
+            //        debugBorder
+            //    );
+            //}
 
             //Incrementing rayAngle for next ray
             rayAngle = Utils.NormalizeAngle(rayAngle + radBetweenRays);
