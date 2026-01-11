@@ -38,8 +38,10 @@ uniform float uPitch;
 
 //OnLoad / OnFramebufferResize uniforms
 //=====================================
+    //Window's size
+uniform vec2 uClientSize;
     //Minimum window's size (uIn)
-uniform vec2 uMinimumScreen;
+uniform float uMinimumScreenSize;
     //TileSize (uIn)
 uniform float uTileSize;
     //Distance shade value (uIn)
@@ -67,9 +69,9 @@ void main()
     //World positions
     //=======================================================================================================================
         //Height of the player
-    float cameraZ = uMinimumScreen.y / 2;
+    float cameraZ = uMinimumScreenSize / 2;
         //Y of the miniQuad's middle
-    float rowY = (vWallHeight / 2) + pixelYInStrip;
+    float rowY = (uClientSize.y / 2 - (gl_FragCoord.y + uPitch));
         //Distance of the miniQuad from the player
     float ceilingPixelDistance = ((cameraZ / rowY) * uTileSize) / cos(uPlayerAngle - rayAngle);
         //World X position of the pixel
@@ -98,8 +100,7 @@ void main()
     vec4 tex = texture(uTextures[texIndex], uv);
         //Returning the correct color
 
-    vec4 baseClr = vec4(0.3, 0.5, 0.7, 1.0);
-    FragColor = baseClr - shade;
+    FragColor = tex - shade;
     //=====================================================================================================================
 }
 //==============================================================

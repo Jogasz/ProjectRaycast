@@ -217,7 +217,7 @@ internal class Shader
     //====================================================================================
 
     //OnLoad
-    public static void LoadAll(Vector2i ClientSize, Vector2 minimumScreen, Vector2 screenOffset)
+    public static void LoadAll(Vector2i ClientSize, float minimumScreenSize, Vector2 screenOffset)
     {
         //Viewport and projection (bottom-left origin)
         projection = Matrix4.CreateOrthographicOffCenter(0f, ClientSize.X, 0f, ClientSize.Y, -1f, 1f);
@@ -231,19 +231,20 @@ internal class Shader
             "source/engine/graphics/geometry/ceiling/ceiling.vert",
             "source/engine/graphics/geometry/ceiling/ceiling.frag",
             projection,
-            minimumScreen);
+            minimumScreenSize);
 
         LoadFloorShader(
             "source/engine/graphics/geometry/floor/floor.vert",
             "source/engine/graphics/geometry/floor/floor.frag",
             projection,
-            minimumScreen);
+            ClientSize,
+            minimumScreenSize);
 
         LoadWallShader(
             "source/engine/graphics/geometry/wall/wall.vert",
             "source/engine/graphics/geometry/wall/wall.frag",
             projection,
-            minimumScreen,
+            minimumScreenSize,
             screenOffset);
     }
 
@@ -282,7 +283,7 @@ internal class Shader
         string vertexPath,
         string fragmentPath,
         Matrix4 projection,
-        Vector2 minimumScreen)
+        float minimumScreenSize)
     {
         ceilingShader = new Shader(vertexPath, fragmentPath);
             //VAO, VBO
@@ -308,7 +309,7 @@ internal class Shader
             //Uniforms
         ceilingShader.Use();
         ceilingShader.SetMatrix4("uProjMat", projection);
-        ceilingShader.SetVector2("uMinimumScreen", new Vector2(minimumScreen.X, minimumScreen.Y));
+        ceilingShader.SetFloat("uMinimumScreenSize", minimumScreenSize);
         ceilingShader.SetFloat("uTileSize", Settings.Gameplay.tileSize);
         ceilingShader.SetFloat("uDistanceShade", Settings.Graphics.distanceShade);
     }
@@ -317,7 +318,8 @@ internal class Shader
         string vertexPath,
         string fragmentPath,
         Matrix4 projection,
-        Vector2 minimumScreen)
+        Vector2 ClientSize,
+        float minimumScreenSize)
     {
         floorShader = new Shader(vertexPath, fragmentPath);
         //VAO, VBO
@@ -347,7 +349,8 @@ internal class Shader
         //Uniforms
         floorShader.Use();
         floorShader.SetMatrix4("uProjMat", projection);
-        floorShader.SetVector2("uMinimumScreen", new Vector2(minimumScreen.X, minimumScreen.Y));
+        floorShader.SetVector2("uClientSize", ClientSize);
+        floorShader.SetFloat("uMinimumScreenSize", minimumScreenSize);
         floorShader.SetFloat("uTileSize", Settings.Gameplay.tileSize);
         floorShader.SetFloat("uDistanceShade", Settings.Graphics.distanceShade);
     }
@@ -356,7 +359,7 @@ internal class Shader
         string vertexPath,
         string fragmentPath,
         Matrix4 projection,
-        Vector2 minimumScreen,
+        float minimumScreenSize,
         Vector2 screenOffset)
     {
         wallShader = new Shader(vertexPath, fragmentPath);
@@ -400,7 +403,7 @@ internal class Shader
         wallShader.Use();
         wallShader.SetMatrix4("uProjMat", projection);
         wallShader.SetFloat("uTileSize", Settings.Gameplay.tileSize);
-        wallShader.SetVector2("uMinimumScreen", minimumScreen);
+        wallShader.SetFloat("uMinimumScreenSize", minimumScreenSize);
         wallShader.SetFloat("uDistanceShade", Settings.Graphics.distanceShade);
         wallShader.SetVector2("uScreenOffset", screenOffset);
     }
@@ -408,7 +411,7 @@ internal class Shader
     //OnFramebufferResize
     public static void UpdateUniforms(
         Vector2i ClientSize,
-        Vector2 minimumScreen,
+        float minimumScreenSize,
         Vector2 screenOffset)
     {
         projection = Matrix4.CreateOrthographicOffCenter(0f, ClientSize.X, 0f, ClientSize.Y, -1f, 1f);
@@ -420,15 +423,16 @@ internal class Shader
             //CeilingShader
         ceilingShader?.Use();
         ceilingShader?.SetMatrix4("uProjMat", projection);
-        ceilingShader?.SetVector2("uMinimumScreen", minimumScreen);
+        ceilingShader?.SetFloat("uMinimumScreenSize", minimumScreenSize);
             //FloorShader
         floorShader?.Use();
         floorShader?.SetMatrix4("uProjMat", projection);
-        floorShader?.SetVector2("uMinimumScreen", minimumScreen);
-            //WallShader
+        floorShader?.SetVector2("uClientSize", ClientSize);
+        floorShader?.SetFloat("uMinimumScreenSize", minimumScreenSize);
+        //WallShader
         wallShader?.Use();
         wallShader?.SetMatrix4("uProjMat", projection);
-        wallShader?.SetVector2("uMinimumScreen", minimumScreen);
+        wallShader?.SetFloat("uMinimumScreenSize", minimumScreenSize);
         wallShader?.SetVector2("uScreenOffset", screenOffset);
     }
 
@@ -579,7 +583,7 @@ internal class Shader
             //Binding and drawing
         GL.BindVertexArray(floorVAO);
         int floorLen = floorVertices?.Length ?? 0;
-        instanceCount = floorLen / 5;
+        instanceCount = floorLen / 6;
         if (instanceCount > 0)
         {
             GL.DrawArraysInstanced(PrimitiveType.TriangleStrip, 0, 4, instanceCount);

@@ -37,7 +37,7 @@ uniform float uPitch;
 //OnLoad / OnFramebufferResize uniforms
 //=====================================
     //Minimum window's size (uIn)
-uniform vec2 uMinimumScreen;
+uniform float uMinimumScreenSize;
     //TileSize (uIn)
 uniform float uTileSize;
     //Distance shade value (uIn)
@@ -65,7 +65,7 @@ void main()
     //World positions
     //=======================================================================================================================
         //Height of the player
-    float cameraZ = uMinimumScreen.y / 2;
+    float cameraZ = uMinimumScreenSize / 2;
         //Y of the miniQuad's middle
     float rowY = cameraZ - pixelYInStrip + uPitch;
         //Distance of the miniQuad from the player

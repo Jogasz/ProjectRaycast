@@ -31,7 +31,7 @@ uniform float uPitch;
 //OnLoad / OnFramebufferResize uniforms
 //=====================================
     //Minimum window's size (uIn)
-uniform vec2 uMinimumScreen;
+uniform float uMinimumScreenSize;
     //Offsets for ,inimum window (uIn)
 uniform vec2 uScreenOffset;
     //TileSize (uIn)
@@ -48,7 +48,7 @@ void main()
         //Strip quad's height
     float stripQuadHeight = max(0.0, vWallHeight);
         //Wall's true top value
-    float wallRelTop = uScreenOffset.y + (uMinimumScreen.y / 2) + (vWallHeight / 2) - uPitch;
+    float wallRelTop = uScreenOffset.y + (uMinimumScreenSize / 2) + (vWallHeight / 2) - uPitch;
         //Current pixel's Y from strip quad's top (Clamp to avoid weird values on borders)
     float pixelYInStrip = clamp(wallRelTop - gl_FragCoord.y, 0.0, stripQuadHeight);
         //Strength of shading by distance

@@ -15,10 +15,9 @@ internal partial class RayCasting
         int rayCount,
         int tileSize,
         float distanceShade,
-        int minimumScreenWidth,
-        int minimumScreenHeight,
-        int screenHorizontalOffset,
-        int screenVerticalOffset,
+        float minimumScreenSize,
+        float screenHorizontalOffset,
+        float screenVerticalOffset,
         float playerAngle,
         Vector2 playerPosition,
         float pitch,
@@ -28,12 +27,12 @@ internal partial class RayCasting
         int renderDistance
     )
     {
-        float debugBorder = 0.5f;
+        float debugBorder = 0f;
 
         //FOV calculation
         float FOVStart = -((float)(FOV * (Math.PI / 180f)) / 2);
         float radBetweenRays = ((float)(FOV * (Math.PI / 180f)) / (rayCount - 1));
-        float wallWidth = (float)minimumScreenWidth / rayCount;
+        float wallWidth = (float)minimumScreenSize / rayCount;
 
         float rayAngle = Utils.NormalizeAngle(playerAngle + FOVStart);
 
@@ -298,14 +297,13 @@ internal partial class RayCasting
                 wallType = 0;
             }
 
-            float wallHeight = (float)((tileSize * minimumScreenHeight) /
+            float wallHeight = (float)((tileSize * minimumScreenSize) /
                 (rayLength * (float)Math.Cos(playerAngle -
                 (playerAngle + FOVStart + i * radBetweenRays))));
 
             ComputeCeiling(
                 distanceShade,
-                minimumScreenHeight,
-                minimumScreenWidth,
+                minimumScreenSize,
                 screenHorizontalOffset,
                 screenVerticalOffset,
                 i,
@@ -318,8 +316,7 @@ internal partial class RayCasting
 
             ComputeFloor(
                 distanceShade,
-                minimumScreenHeight,
-                minimumScreenWidth,
+                minimumScreenSize,
                 screenHorizontalOffset,
                 screenVerticalOffset,
                 i,
@@ -330,27 +327,26 @@ internal partial class RayCasting
                 debugBorder
             );
 
-            //if (wallType != 0)
-            //{
-            //    ComputeWalls(
-            //        ClientSize,
-            //        distanceShade,
-            //        minimumScreenHeight,
-            //        minimumScreenWidth,
-            //        screenHorizontalOffset,
-            //        screenVerticalOffset,
-            //        tileSize,
-            //        i,
-            //        rayLength,
-            //        rayTilePosition,
-            //        wallHeight,
-            //        wallWidth,
-            //        wallSide,
-            //        wallType,
-            //        pitch,
-            //        debugBorder
-            //    );
-            //}
+            if (wallType != 0)
+            {
+                ComputeWalls(
+                    ClientSize,
+                    distanceShade,
+                    minimumScreenSize,
+                    screenHorizontalOffset,
+                    screenVerticalOffset,
+                    tileSize,
+                    i,
+                    rayLength,
+                    rayTilePosition,
+                    wallHeight,
+                    wallWidth,
+                    wallSide,
+                    wallType,
+                    pitch,
+                    debugBorder
+                );
+            }
 
             //Incrementing rayAngle for next ray
             rayAngle = Utils.NormalizeAngle(rayAngle + radBetweenRays);

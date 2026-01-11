@@ -10,10 +10,9 @@ internal partial class RayCasting
 {
     public static void ComputeFloor(
         float distanceShade,
-        int minimumScreenHeight,
-        int minimumScreenWidth,
-        int screenHorizontalOffset,
-        int screenVerticalOffset,
+        float minimumScreenSize,
+        float screenHorizontalOffset,
+        float screenVerticalOffset,
         int i,
         float rayAngle,
         float wallHeight,
@@ -26,7 +25,7 @@ internal partial class RayCasting
         float quadX1 = screenHorizontalOffset + (i * stepX);
         float quadX2 = screenHorizontalOffset + ((i + 1) * stepX);
 
-        float quadY1 = Math.Clamp(screenVerticalOffset + (minimumScreenHeight / 2f) - (wallHeight / 2f) - pitch, screenVerticalOffset, screenVerticalOffset + minimumScreenHeight);
+        float quadY1 = Math.Min(screenVerticalOffset + minimumScreenSize / 2 - wallHeight / 2 - pitch, screenVerticalOffset + minimumScreenSize);
         float quadY2 = screenVerticalOffset;
 
         //No ceiling can be rendered if the wall's top is on the top of the screen

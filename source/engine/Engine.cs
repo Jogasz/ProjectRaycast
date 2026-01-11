@@ -38,10 +38,9 @@ internal partial class Engine : GameWindow
     float FOVStart { get; set; }
     float radBetweenRays { get; set; }
     float wallWidth { get; set; }
-    int minimumScreenWidth { get; set; }
-    int minimumScreenHeight { get; set; }
-    int screenVerticalOffset { get; set; }
-    int screenHorizontalOffset { get; set; }
+    float minimumScreenSize { get; set; }
+    float screenVerticalOffset { get; set; }
+    float screenHorizontalOffset { get; set; }
     //=============================================================================================
     public Engine(int width, int height, string title) : base(GameWindowSettings.Default, new NativeWindowSettings()
     {
@@ -64,12 +63,11 @@ internal partial class Engine : GameWindow
         Utils.SetViewport(ClientSize.X, ClientSize.Y);
 
         //Allowed screen's size (square game aspect ratio)
-        minimumScreenHeight = ClientSize.Y > ClientSize.X ? ClientSize.X : ClientSize.Y;
-        minimumScreenWidth = ClientSize.X > ClientSize.Y ? ClientSize.Y : ClientSize.X;
+        minimumScreenSize = ClientSize.Y > ClientSize.X ? ClientSize.X : ClientSize.Y;
 
         //Offsets to center allowed screen
-        screenHorizontalOffset = ClientSize.X > ClientSize.Y ? ((ClientSize.X - minimumScreenWidth) / 2) : 0;
-        screenVerticalOffset = ClientSize.Y > ClientSize.X ? ((ClientSize.Y - minimumScreenHeight) / 2) : 0;
+        screenHorizontalOffset = ClientSize.X > ClientSize.Y ? ((ClientSize.X - minimumScreenSize) / 2) : 0;
+        screenVerticalOffset = ClientSize.Y > ClientSize.X ? ((ClientSize.Y - minimumScreenSize) / 2) : 0;
 
         //Render distance limiter
         renderDistance = Math.Min(renderDistance, Math.Max(mapWalls.GetLength(0), mapWalls.GetLength(1)));
@@ -82,7 +80,7 @@ internal partial class Engine : GameWindow
         {
             Shader.LoadAll(
                 ClientSize,
-                new Vector2(minimumScreenWidth, minimumScreenHeight),
+                minimumScreenSize,
                 new Vector2(screenHorizontalOffset, screenVerticalOffset));
             Console.WriteLine(" - Shaders have been loaded!");
         }
@@ -110,16 +108,15 @@ internal partial class Engine : GameWindow
         Utils.SetViewport(ClientSize.X, ClientSize.Y);
 
         //Allowed screen's size (square game aspect ratio)
-        minimumScreenHeight = ClientSize.Y > ClientSize.X ? ClientSize.X : ClientSize.Y;
-        minimumScreenWidth = ClientSize.X > ClientSize.Y ? ClientSize.Y : ClientSize.X;
+        minimumScreenSize = ClientSize.Y > ClientSize.X ? ClientSize.X : ClientSize.Y;
 
         //Offsets to center allowed screen
-        screenHorizontalOffset = ClientSize.X > ClientSize.Y ? ((ClientSize.X - minimumScreenWidth) / 2) : 0;
-        screenVerticalOffset = ClientSize.Y > ClientSize.X ? ((ClientSize.Y - minimumScreenHeight) / 2) : 0;
+        screenHorizontalOffset = ClientSize.X > ClientSize.Y ? ((ClientSize.X - minimumScreenSize) / 2) : 0;
+        screenVerticalOffset = ClientSize.Y > ClientSize.X ? ((ClientSize.Y - minimumScreenSize) / 2) : 0;
 
         Shader.UpdateUniforms(
             ClientSize,
-            new Vector2(minimumScreenWidth, minimumScreenHeight),
+            minimumScreenSize,
             new Vector2(screenHorizontalOffset, screenVerticalOffset));
     }
 
@@ -156,9 +153,9 @@ internal partial class Engine : GameWindow
         Shader.defVertexAttribList.AddRange(new float[]
         {
             screenHorizontalOffset,
-            screenHorizontalOffset + minimumScreenWidth,
+            screenHorizontalOffset + minimumScreenSize,
             screenVerticalOffset,
-            screenVerticalOffset + minimumScreenHeight,
+            screenVerticalOffset + minimumScreenSize,
             1f,
             0f,
             0f
@@ -166,9 +163,9 @@ internal partial class Engine : GameWindow
         //=========================================================================================
 
         //Raycount limiter
-        rayCount = Math.Min(Settings.Graphics.rayCount, minimumScreenWidth);
+        rayCount = Math.Min(Settings.Graphics.rayCount, (int)minimumScreenSize);
         // recompute wallWidth here so Engine and RayCasting use same value
-        wallWidth = (float)minimumScreenWidth / Math.Max(1, rayCount);
+        wallWidth = minimumScreenSize / Math.Max(1, rayCount);
         //=============================================================================================
         
         //Raycasting:
@@ -180,8 +177,7 @@ internal partial class Engine : GameWindow
             rayCount,
             tileSize,
             distanceShade,
-            minimumScreenWidth,
-            minimumScreenHeight,
+            minimumScreenSize,
             screenHorizontalOffset,
             screenVerticalOffset,
             playerAngle,

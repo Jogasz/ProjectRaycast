@@ -12,10 +12,9 @@ internal partial class RayCasting
     public static void ComputeWalls(
         Vector2i ClientSize,
         float distanceShade,
-        int minimumScreenHeight,
-        int minimumScreenWidth,
-        int screenHorizontalOffset,
-        int screenVerticalOffset,
+        float minimumScreenSize,
+        float screenHorizontalOffset,
+        float screenVerticalOffset,
         int tileSize,
         int nthRay,
         float rayLength,
@@ -32,7 +31,7 @@ internal partial class RayCasting
         float quadX2 = (nthRay + 1) * wallWidth + screenHorizontalOffset;
 
             //Limit to stay inside minimumScreen
-        float screenLimitTop = screenVerticalOffset + minimumScreenHeight;
+        float screenLimitTop = screenVerticalOffset + minimumScreenSize;
         float screenLimitBottom = screenVerticalOffset;
 
         float quadY1 = Math.Min((ClientSize.Y / 2f) + (wallHeight / 2f) - pitch, screenLimitTop);
