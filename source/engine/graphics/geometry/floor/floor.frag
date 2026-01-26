@@ -89,11 +89,7 @@ void main()
         //Selecting texture based on map array
     int texIndex = texelFetch(uMapFloor, ivec2(floor(ceilingPixelX / uTileSize), floor(ceilingPixelY / uTileSize)), 0).r;
         //If index is zero, empty tile
-    if (texIndex == 0)
-    {
-        FragColor = vec4(0.0, 1.0, 0.0, 1.0);
-        return;
-    }
+    if (texIndex == 0) discard;
         //Corresponding color's position in the selected texture
     vec2 uv = fract(vec2(ceilingPixelX, ceilingPixelY) / uTileSize);
         //Taking out the color from the selected texture

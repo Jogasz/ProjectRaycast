@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
-using OpenTK;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using OpenTK.Graphics.OpenGL;
+using OpenTK.Mathematics;
 
 public class Level
 {
@@ -10,63 +10,59 @@ public class Level
     public static int[,] mapCeiling;
     public static int[,] mapFloor;
 
+    public static List<SpriteData> Sprites { get; private set; } = new();
+
     public void Load()
     {
-        //Reading text in file
-        string path = File.ReadAllText("assets/maps/map01.json");
+        string path = "assets/maps/map01.json";
 
-        //Deserialize text to data
-        var fileText = JsonConvert.DeserializeObject<MapData>(path);
+        if (!File.Exists(path))
+            throw new FileNotFoundException($"Map file not found:\n - '{path}'");
+
+        string jsonText = File.ReadAllText(path);
+
+        var json = JsonConvert.DeserializeObject<MapData>(jsonText)
+            ?? throw new InvalidOperationException($"Failed to deserialize map file:\n - '{path}'");
 
         int rows, cols;
 
-        rows = fileText.MapCeiling.Count;
-        cols = fileText.MapCeiling[0].Count;
-
+        rows = json.MapCeiling.Count;
+        cols = json.MapCeiling[0].Count;
         mapCeiling = new int[rows, cols];
-
-        //Declaring mapCeiling[]
         for (int y = 0; y < rows; y++)
-        {
             for (int x = 0; x < cols; x++)
-            {
-                mapCeiling[y, x] = fileText.MapCeiling[y][x];
-            }
-        }
+                mapCeiling[y, x] = json.MapCeiling[y][x];
 
-        rows = fileText.MapWalls.Count;
-        cols = fileText.MapWalls[0].Count;
-
+        rows = json.MapWalls.Count;
+        cols = json.MapWalls[0].Count;
         mapWalls = new int[rows, cols];
-
-        //Declaring mapWalls[]
         for (int y = 0; y < rows; y++)
-        {
             for (int x = 0; x < cols; x++)
-            {
-                mapWalls[y, x] = fileText.MapWalls[y][x];
-            }
-        }
+                mapWalls[y, x] = json.MapWalls[y][x];
 
-        rows = fileText.MapFloor.Count;
-        cols = fileText.MapFloor[0].Count;
-
+        rows = json.MapFloor.Count;
+        cols = json.MapFloor[0].Count;
         mapFloor = new int[rows, cols];
-
-        //Declaring mapFloor[]
         for (int y = 0; y < rows; y++)
-        {
             for (int x = 0; x < cols; x++)
-            {
-                mapFloor[y, x] = fileText.MapFloor[y][x];
-            }
-        }
+                mapFloor[y, x] = json.MapFloor[y][x];
+
+        Sprites = json.Sprites ?? new List<SpriteData>();
     }
 
-    private class MapData
+    public sealed class SpriteData
     {
-        public List<List<int>> MapCeiling { get; set; }
-        public List<List<int>> MapWalls { get; set; }
-        public List<List<int>> MapFloor { get; set; }
+        public int Id { get; set; }
+        public int Type { get; set; }
+        public bool State { get; set; }
+        public Vector2 Position { get; set; }
+    }
+
+    private sealed class MapData
+    {
+        public List<List<int>> MapCeiling { get; set; } = new();
+        public List<List<int>> MapWalls { get; set; } = new();
+        public List<List<int>> MapFloor { get; set; } = new();
+        public List<SpriteData>? Sprites { get; set; }
     }
 }

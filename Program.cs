@@ -21,11 +21,19 @@ public class Program
             map.Load();
             Console.WriteLine(" - MAP has been loaded!");
         }
-        catch (Exception ex)
+        catch (FileNotFoundException noFileEx)
         {
-            Console.WriteLine($" - Something went wrong while loading MAP...\n{ex}");
+            Console.WriteLine(noFileEx);
         }
-        
+        catch (InvalidOperationException invOpEx)
+        {
+            Console.WriteLine(invOpEx);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Map: Something went wrong...\n - {e}");
+        }
+
         Engine.Engine engine = new Engine.Engine(800, 800, "ProjectRaycast");
         engine.Run();
     }

@@ -216,6 +216,18 @@ internal class Shader
     static float[]? wallVertices { get; set; }
     //====================================================================================
 
+    //SpriteShader
+    //====================================================================================
+    //Instance
+    public static Shader? spriteShader { get; set; }
+    //VBO, VAO
+    static int spriteVAO { get; set; }
+    static int spriteVBO { get; set; }
+    //Containers
+    public static List<float> spriteVertexAttribList { get; set; } = new List<float>();
+    static float[]? spriteVertices { get; set; }
+    //====================================================================================
+
     //OnLoad
     public static void LoadAll(Vector2i ClientSize, float minimumScreenSize, Vector2 screenOffset)
     {
@@ -246,6 +258,11 @@ internal class Shader
             projection,
             minimumScreenSize,
             screenOffset);
+
+        LoadSpriteShader(
+            "source/engine/graphics/geometry/sprites/sprites.vert",
+            "source/engine/graphics/geometry/sprites/sprites.frag",
+            projection);
     }
 
     static void LoadDefShader(
@@ -408,6 +425,37 @@ internal class Shader
         wallShader.SetVector2("uScreenOffset", screenOffset);
     }
 
+    static void LoadSpriteShader(
+        string vertexPath,
+        string fragmentPath,
+        Matrix4 projection)
+    {
+        spriteShader = new Shader(vertexPath, fragmentPath);
+        //VAO, VBO Creating
+        spriteVAO = GL.GenVertexArray();
+        spriteVBO = GL.GenBuffer();
+        //VAO, VBO Binding
+        GL.BindVertexArray(spriteVAO);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, spriteVBO);
+        //Attribute0
+        GL.EnableVertexAttribArray(0);
+        GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, 7 * sizeof(float), 0);
+        //Attribute1
+        GL.EnableVertexAttribArray(1);
+        GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 7 * sizeof(float), 4 * sizeof(float));
+        //Divisor
+        GL.VertexAttribDivisor(0, 1);
+        GL.VertexAttribDivisor(1, 1);
+        //Disable face culling to avoid accidentally removing one triangle
+        GL.Disable(EnableCap.CullFace);
+        //Unbind for safety
+        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+        GL.BindVertexArray(0);
+        //Uniforms
+        spriteShader.Use();
+        spriteShader.SetMatrix4("uProjection", projection);
+    }
+
     //OnFramebufferResize
     public static void UpdateUniforms(
         Vector2i ClientSize,
@@ -434,6 +482,9 @@ internal class Shader
         wallShader?.SetMatrix4("uProjMat", projection);
         wallShader?.SetFloat("uMinimumScreenSize", minimumScreenSize);
         wallShader?.SetVector2("uScreenOffset", screenOffset);
+        //SpriteShader
+        spriteShader?.Use();
+        spriteShader?.SetMatrix4("uProjection", projection);
     }
 
     //OnUpdateFrame
@@ -501,6 +552,22 @@ internal class Shader
         GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             //CLEARING LIST
         wallVertexAttribList.Clear();
+        //==============================================
+
+        //SpriteShader
+        //==============================================
+        //Making array
+        spriteVertices = spriteVertexAttribList.ToArray();
+        //Loading buffer
+        GL.BindBuffer(BufferTarget.ArrayBuffer, spriteVBO);
+        GL.BufferData(
+            BufferTarget.ArrayBuffer,
+            spriteVertices.Length * sizeof(float),
+            spriteVertices,
+            BufferUsageHint.DynamicDraw);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+        //CLEARING LIST
+        spriteVertexAttribList.Clear();
         //==============================================
     }
 
@@ -609,6 +676,19 @@ internal class Shader
             GL.DrawArraysInstanced(PrimitiveType.TriangleStrip, 0, 4, instanceCount);
         }
         //===========================================================================
+
+        //SpriteShader
+        //===========================================================================
+        spriteShader?.Use();
+        //Binding and drawing
+        GL.BindVertexArray(spriteVAO);
+        int spriteLen = spriteVertices?.Length ?? 0;
+        instanceCount = spriteLen / 7;
+        if (instanceCount > 0)
+        {
+            GL.DrawArraysInstanced(PrimitiveType.TriangleStrip, 0, 4, instanceCount);
+        }
+        //===========================================================================
     }
 
     //OnUnload
@@ -619,5 +699,6 @@ internal class Shader
         ceilingShader?.Dispose();
         floorShader?.Dispose();
         wallShader?.Dispose();
+        spriteShader?.Dispose();
     }
 }

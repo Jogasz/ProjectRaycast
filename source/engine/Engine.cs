@@ -28,7 +28,7 @@ internal partial class Engine : GameWindow
     float lastTime { get; set; }
 
     //Player variables
-    Vector2 playerPosition { get; set; } = new Vector2(75, 75);
+    Vector2 playerPosition { get; set; } = new Vector2(250, 250);
     float playerAngle { get; set; } = 0f;
     const float playerCollisionRadius = 10f;
     float pitch { get; set; } = 0f;
@@ -47,11 +47,11 @@ internal partial class Engine : GameWindow
         ClientSize = (width, height),
         Title = title,
 
-        WindowState = WindowState.Normal,
+        WindowState = WindowState.Fullscreen,
         WindowBorder = WindowBorder.Resizable,
     })
     {
-        CursorState = CursorState.Grabbed;
+        //CursorState = CursorState.Grabbed;
         VSync = VSyncMode.On;
     }
 
@@ -73,7 +73,22 @@ internal partial class Engine : GameWindow
         renderDistance = Math.Min(renderDistance, Math.Max(mapWalls.GetLength(0), mapWalls.GetLength(1)));
 
         //Loading textures
-        Texture.LoadAll(mapWalls, mapCeiling, mapFloor);
+        try
+        {
+            Texture.LoadAll(mapWalls, mapCeiling, mapFloor);
+        }
+        catch (FileNotFoundException noFileEx)
+        {
+            Console.WriteLine(noFileEx);
+        }
+        catch (InvalidOperationException invOpEx)
+        {
+            Console.WriteLine(invOpEx);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Textures: Something went wrong...\n - {e}");
+        }
 
         //Loading shaders
         try
@@ -82,7 +97,7 @@ internal partial class Engine : GameWindow
                 ClientSize,
                 minimumScreenSize,
                 new Vector2(screenHorizontalOffset, screenVerticalOffset));
-            Console.WriteLine(" - Shaders have been loaded!");
+            Console.WriteLine(" - SHADERS have been loaded!");
         }
         catch (FileNotFoundException noFileEx)
         {
@@ -156,9 +171,9 @@ internal partial class Engine : GameWindow
             screenHorizontalOffset + minimumScreenSize,
             screenVerticalOffset,
             screenVerticalOffset + minimumScreenSize,
-            1f,
-            0f,
-            0f
+            0.3f,
+            0.5f,
+            0.9f
         });
         //=========================================================================================
 
@@ -188,10 +203,21 @@ internal partial class Engine : GameWindow
             mapCeiling,
             renderDistance
         );
-        //Graphic's position adn color calculator's (Inside Logic):
+        //Graphic's position and color calculator's (Inside Logic):
         //2. Ceiling
         //3. Floor
         //4. Walls
+
+        //5. Sprites
+        RayCasting.ComputeSprites(
+            playerPosition,
+            tileSize,
+            playerAngle,
+            FOV,
+            minimumScreenSize,
+            screenHorizontalOffset,
+            screenVerticalOffset,
+            pitch);
         //=============================================================================================
 
         //Hud
