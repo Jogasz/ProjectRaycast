@@ -24,6 +24,8 @@
     <None Remove="assets\textures\door_stonebricks.png" />
     <None Remove="assets\textures\door_stonebricks.txt" />
     <None Remove="assets\textures\floorTest.txt" />
+    <None Remove="assets\textures\gui\mainmenu.png" />
+    <None Remove="assets\textures\gui\pausemenu.png" />
     <None Remove="assets\textures\missing.txt" />
     <None Remove="assets\textures\mossy_bricks.txt" />
     <None Remove="assets\textures\mossy_planks.png" />
@@ -64,6 +66,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="assets\textures\door_stonebricks.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\textures\gui\mainmenu.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\textures\gui\pausemenu.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="assets\textures\mossy_planks.png">

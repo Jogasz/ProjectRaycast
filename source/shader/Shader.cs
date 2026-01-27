@@ -228,6 +228,18 @@ internal class Shader
     static float[]? spriteVertices { get; set; }
     //====================================================================================
 
+    //PauseMenuShader
+    //====================================================================================
+    //Instance
+    public static Shader? pauseMenuShader { get; set; }
+    //VBO, VAO
+    static int pauseMenuVAO { get; set; }
+    static int pauseMenuVBO { get; set; }
+    //Containers
+    public static List<float> pauseMenuVertexAttribList { get; set; } = new List<float>();
+    static float[]? pauseMenuVertices { get; set; }
+    //====================================================================================
+
     //OnLoad
     public static void LoadAll(Vector2i ClientSize, float minimumScreenSize, Vector2 screenOffset)
     {
@@ -572,7 +584,7 @@ internal class Shader
     }
 
     //OnRenderFrame
-    public static void Draw(
+    public static void DrawGame(
         float wallWidth,
         Vector2 playerPosition,
         float playerAngle,
@@ -689,6 +701,24 @@ internal class Shader
             GL.DrawArraysInstanced(PrimitiveType.TriangleStrip, 0, 4, instanceCount);
         }
         //===========================================================================
+    }
+
+    public static void DrawMainMenu(
+        float wallWidth,
+        Vector2 playerPosition,
+        float playerAngle,
+        float pitch)
+    {
+
+    }
+
+    public static void DrawPauseMenu(
+        float wallWidth,
+        Vector2 playerPosition,
+        float playerAngle,
+        float pitch)
+    {
+
     }
 
     //OnUnload

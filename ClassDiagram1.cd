@@ -1,4 +1,94 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Engine.RayCasting">
+    <Position X="5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAEBAAAIAACAAAAAAAAAAAAAAAAAAAAAAAAAAI=</HashCode>
+      <FileName>source\engine\graphics\geometry\ceiling\ComputeCeiling.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Engine.Engine">
+    <Position X="9.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAABoAAAIYEQCQAAEEACEEACYACIAWABABEgACAQkAM=</HashCode>
+      <FileName>source\engine\Controls.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Engine.Utils">
+    <Position X="6.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAEAAAAAA=</HashCode>
+      <FileName>source\engine\Utils.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Engine.Shader">
+    <Position X="2" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABAAABAAACAAQkB4AAGEACIahhAUABYDIAAAgiQAMIM=</HashCode>
+      <FileName>source\shader\Shader.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Level">
+    <Position X="8" Y="0.5" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Class Name="Level.SpriteData" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>source\Level.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+      <Class Name="Level.MapData" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>source\Level.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAgAAAAAAAAAAAAAAAAAAAAAAIAAAAAIEAAAAAAAA=</HashCode>
+      <FileName>source\Level.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Settings">
+    <Position X="3.5" Y="0.5" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Class Name="Settings.SettingsData" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>source\Settings.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+      <Class Name="Settings.PlayerSettings" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>source\Settings.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+      <Class Name="Settings.GraphicsSettings" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>source\Settings.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+      <Class Name="Settings.GameplaySettings">
+        <TypeIdentifier>
+          <NewMemberFileName>source\Settings.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAgAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAwAAAAA=</HashCode>
+      <FileName>source\Settings.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Texture">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAAAWAAAAAAAAAAAAAAABAGAAYAAACAAAAAAAE=</HashCode>
+      <FileName>source\Texture.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
   <Font Name="Segoe UI" Size="9" />
 </ClassDiagram>

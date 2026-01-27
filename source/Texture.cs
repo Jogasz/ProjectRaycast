@@ -8,8 +8,8 @@ internal sealed class Texture : IDisposable
 {
     public int Handle { get; }
 
-    //Texture paths
-    static string[] paths =
+    //Textures (Walls, ceiling, floor)
+    static string[] texturePaths =
     {
         //Defaults
         "assets/textures/planks.png",
@@ -23,6 +23,18 @@ internal sealed class Texture : IDisposable
         "assets/textures/window_stonebricks.png",
         "assets/textures/window_mossy_stonebricks.png"
     };
+
+    //Sprites (Objects, items, enemy)
+    //static string[] spritePaths =
+    //{
+
+    //};
+
+    //Images (Menus, buttons, containers)
+    //static string[] imagePaths =
+    //{
+
+    //};
 
     //Textures
     public static List<Texture?> textures = new();
@@ -48,7 +60,7 @@ internal sealed class Texture : IDisposable
 
             mapSize = (mapWalls.GetLength(1), mapWalls.GetLength(0));
 
-            foreach (var path in paths)
+            foreach (var path in texturePaths)
             {
                 textures.Add(new Texture(path));
             }

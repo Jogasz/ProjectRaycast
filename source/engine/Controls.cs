@@ -42,12 +42,11 @@ internal partial class Engine
                 HandleMouse(mouse);
             }
 
-            //Closing program
-            // - Escape
+            //Pause
+            // - Escape (while in game)
             if (keyboard.IsKeyDown(Keys.Escape))
             {
-                Console.WriteLine("Exiting program...");
-                Close();
+                isInPauseMenu = true;
             }
 
             //Fullscreen

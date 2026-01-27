@@ -2,6 +2,7 @@
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 using System.Diagnostics;
 
 namespace Engine;
@@ -25,7 +26,7 @@ internal partial class Engine : GameWindow
 
     //DeltaTime
     float deltaTime { get; set; }
-    float lastTime { get; set; }
+    float deltaLastTime { get; set; }
 
     //Player variables
     Vector2 playerPosition { get; set; } = new Vector2(250, 250);
@@ -41,6 +42,11 @@ internal partial class Engine : GameWindow
     float minimumScreenSize { get; set; }
     float screenVerticalOffset { get; set; }
     float screenHorizontalOffset { get; set; }
+
+    // Allowed-screen color animation
+    readonly Vector3 allowedScreenBaseColor = new(0.3f, 0.5f, 0.9f);
+    readonly Vector3 allowedScreenAltColor = new(1.0f, 0.0f, 0.0f); // red
+    const float allowedScreenBlinkPeriodSeconds = 1.0f;
     //=============================================================================================
     public Engine(int width, int height, string title) : base(GameWindowSettings.Default, new NativeWindowSettings()
     {
@@ -135,6 +141,9 @@ internal partial class Engine : GameWindow
             new Vector2(screenHorizontalOffset, screenVerticalOffset));
     }
 
+    bool isInMainMenu = true;
+    bool isInPauseMenu = false;
+
     protected override void OnUpdateFrame(FrameEventArgs e)
     {
         base.OnUpdateFrame(e);
@@ -142,14 +151,45 @@ internal partial class Engine : GameWindow
         //DeltaTime
         //=========================================================================================
         float currentTime = (float)stopwatch.Elapsed.TotalSeconds;
-        deltaTime = currentTime - lastTime;
-        lastTime = currentTime;
+        deltaTime = currentTime - deltaLastTime;
+        deltaLastTime = currentTime;
         //=========================================================================================
 
         //FPS Counter
         FPSList.Add((int)Math.Floor(1 / deltaTime));
         //Console.WriteLine((int)Math.Floor(1 / deltaTime));
         //=========================================================================================
+
+        //No game logic until user is in menu
+        if (isInMainMenu)
+        {
+            if (KeyboardState.IsKeyPressed(Keys.Escape))
+                Close();
+
+            else if (KeyboardState.IsKeyPressed(Keys.Enter))
+            {
+                CursorState = CursorState.Grabbed;
+                isInMainMenu = false;
+            }
+
+            return;
+        }
+
+        if (isInPauseMenu)
+        {
+            CursorState = CursorState.Normal;
+
+            if (KeyboardState.IsKeyPressed(Keys.Enter))
+            {
+                CursorState = CursorState.Grabbed;
+                isInPauseMenu = false;
+            }
+
+            else if (KeyboardState.IsKeyPressed(Keys.Escape))
+                Close();
+
+            return;
+        }
 
         //Keybinds, controls and collision
         //1. Distributor
@@ -165,15 +205,21 @@ internal partial class Engine : GameWindow
         //=========================================================================================
 
         //Allowed screen's color
+
+        bool useAlt =
+            ((int)MathF.Floor((float)stopwatch.Elapsed.TotalSeconds / allowedScreenBlinkPeriodSeconds) % 2) == 1;
+
+        Vector3 color = useAlt ? allowedScreenAltColor : allowedScreenBaseColor;
+
         Shader.defVertexAttribList.AddRange(new float[]
         {
             screenHorizontalOffset,
             screenHorizontalOffset + minimumScreenSize,
             screenVerticalOffset,
             screenVerticalOffset + minimumScreenSize,
-            0.3f,
-            0.5f,
-            0.9f
+            color.X,
+            color.Y,
+            color.Z
         });
         //=========================================================================================
 
@@ -239,7 +285,15 @@ internal partial class Engine : GameWindow
         GL.ClearColor(0.2f,0.2f,0.2f,1.0f);
         GL.Clear(ClearBufferMask.ColorBufferBit);
 
-        Shader.Draw(
+        if (isInMainMenu)
+        {
+            // Placeholder: draw nothing (gray), or draw your menu background here.
+            // Important: NO Shader.Draw(...) to avoid drawing the game.
+            SwapBuffers();
+            return;
+        }
+
+        Shader.DrawGame(
             wallWidth,
             playerPosition,
             playerAngle,
