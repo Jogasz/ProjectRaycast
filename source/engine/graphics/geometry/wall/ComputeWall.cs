@@ -40,7 +40,7 @@ internal partial class RayCasting
             //If wall is outside of the minimumScreen, dont render
         if (quadY2 < screenLimitTop && quadY1 > screenLimitBottom)
         {
-            Shader.wallVertexAttribList.AddRange(new float[]
+            ShaderHandler.WallVertexAttribList.AddRange(new float[]
             {
                 quadX1 + debugBorder,
                 quadX2 - debugBorder,

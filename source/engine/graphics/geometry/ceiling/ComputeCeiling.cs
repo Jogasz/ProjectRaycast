@@ -32,7 +32,7 @@ internal partial class RayCasting
         //No ceiling can be rendered if the wall's top is on the top of the screen
         if (quadY1 > quadY2)
         {
-            Shader.ceilingVertexAttribList.AddRange(new float[]
+            ShaderHandler.CeilingVertexAttribList.AddRange(new float[]
             {
                 quadX1 + debugBorder,
                 quadX2 - debugBorder,

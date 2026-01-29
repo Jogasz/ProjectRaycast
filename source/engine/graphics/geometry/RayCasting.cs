@@ -24,8 +24,7 @@ internal partial class RayCasting
         int[,] mapWalls,
         int[,] mapFloor,
         int[,] mapCeiling,
-        int renderDistance
-    )
+        int renderDistance)
     {
         float debugBorder = 0f;
 

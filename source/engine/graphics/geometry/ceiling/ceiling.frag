@@ -20,7 +20,7 @@ out vec4 FragColor;
 //OnRenderFrame uniforms
 //======================
     //Textures array (uIn)
-uniform sampler2D uTextures[9];
+uniform sampler2D uTextures[8];
     //Map Ceiling array (uIn)
 uniform isampler2D uMapCeiling;
     //Map's size (uIn)
@@ -89,7 +89,7 @@ void main()
         //Corresponding color's position in the selected texture
     vec2 uv = fract(vec2(ceilingPixelX, ceilingPixelY) / uTileSize);
         //Taking out the color from the selected texture
-    vec4 tex = texture(uTextures[texIndex], uv);
+    vec4 tex = texture(uTextures[int(texIndex - 1)], uv);
         //Returning the correct color
     FragColor = vec4(tex - shade);
     //=====================================================================================================================

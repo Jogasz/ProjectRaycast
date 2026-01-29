@@ -57,8 +57,10 @@
     <None Remove="source\engine\graphics\geometry\sprites\sprites.vert" />
     <None Remove="source\engine\graphics\geometry\wall\wall.frag" />
     <None Remove="source\engine\graphics\geometry\wall\wall.vert" />
-    <None Remove="source\shader\shader.frag" />
-    <None Remove="source\shader\shader.vert" />
+    <None Remove="source\engine\graphics\hud\mainmenu\mainmenu.frag" />
+    <None Remove="source\engine\graphics\hud\mainmenu\mainmenu.vert" />
+    <None Remove="source\engine\graphics\window\window.frag" />
+    <None Remove="source\engine\graphics\window\window.vert" />
   </ItemGroup>
 
   <ItemGroup>
@@ -84,9 +86,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="assets\textures\stonebricks.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\textures\testTexture.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="assets\textures\window_mossy_stonebricks.png">
@@ -122,10 +121,16 @@
     <Content Include="source\engine\graphics\geometry\wall\wall.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="source\shader\shader.frag">
+    <Content Include="source\engine\graphics\hud\mainmenu\mainmenu.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="source\shader\shader.vert">
+    <Content Include="source\engine\graphics\hud\mainmenu\mainmenu.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="source\engine\graphics\window\window.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="source\engine\graphics\window\window.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -140,6 +145,11 @@
     <Content Include="assets\maps\map01.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="source\engine\graphics\hud\minimap\" />
+    <Folder Include="source\engine\graphics\hud\pause menu\" />
   </ItemGroup>
 
 </Project>

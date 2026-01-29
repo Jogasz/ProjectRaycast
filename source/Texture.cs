@@ -8,49 +8,40 @@ internal sealed class Texture : IDisposable
 {
     public int Handle { get; }
 
-    //Textures (Walls, ceiling, floor)
-    static string[] texturePaths =
+    static readonly string[] texturePaths =
     {
-        //Defaults
         "assets/textures/planks.png",
         "assets/textures/mossy_planks.png",
         "assets/textures/stonebricks.png",
         "assets/textures/mossy_stonebricks.png",
-        //Doors
         "assets/textures/door_stonebricks.png",
         "assets/textures/door_mossy_stonebricks.png",
-        //Windows
         "assets/textures/window_stonebricks.png",
         "assets/textures/window_mossy_stonebricks.png"
     };
 
-    //Sprites (Objects, items, enemy)
-    //static string[] spritePaths =
-    //{
+    static readonly string mainMenuPath = "assets/textures/gui/mainmenu.png";
 
-    //};
-
-    //Images (Menus, buttons, containers)
-    //static string[] imagePaths =
-    //{
-
-    //};
-
-    //Textures
+    // Unified list:
+    // 0: null (dummy)
+    // 1: mainmenu.png
+    // 2..4: reserved (maps are separate int handles, but indices stay reserved)
+    // 5.. : tile textures
     public static List<Texture?> textures = new();
 
-    //Map datas
-    public static int mapCeilingTex { get; set; }
-    public static int mapFloorTex { get; set; }
-    public static int mapWallsTex { get; set; }
-    public static Vector2i mapSize { get; set; }
+    // (Keep these if other code references them; they won't be used for binding anymore)
+    public static List<Texture?> sprites = new();
+    public static List<Texture?> images = new();
+
+    // Map textures (R32i)
+    public static int mapCeilingTex { get; private set; }
+    public static int mapFloorTex { get; private set; }
+    public static int mapWallsTex { get; private set; }
+    public static Vector2i mapSize { get; private set; }
 
     public static void LoadAll(int[,] mapWalls, int[,] mapCeiling, int[,] mapFloor)
     {
         textures.Clear();
-
-        //Dummy texture
-        textures.Add(null);
 
         try
         {
@@ -60,10 +51,8 @@ internal sealed class Texture : IDisposable
 
             mapSize = (mapWalls.GetLength(1), mapWalls.GetLength(0));
 
-            foreach (var path in texturePaths)
-            {
-                textures.Add(new Texture(path));
-            }
+            foreach (var texturePath in texturePaths)
+                textures.Add(new Texture(texturePath));
 
             Console.WriteLine(" - TEXTURES have been loaded!");
         }
@@ -79,12 +68,8 @@ internal sealed class Texture : IDisposable
         int[] data = new int[size.X * size.Y];
 
         for (int y = 0; y < size.Y; y++)
-        {
             for (int x = 0; x < size.X; x++)
-            {
                 data[y * size.X + x] = map[y, x];
-            }
-        }
 
         int handle = GL.GenTexture();
         GL.BindTexture(TextureTarget.Texture2D, handle);
@@ -106,13 +91,11 @@ internal sealed class Texture : IDisposable
             pixels: data);
 
         GL.BindTexture(TextureTarget.Texture2D, 0);
-
         return handle;
     }
 
     public static void Bind(int textureIndex, TextureUnit unit = TextureUnit.Texture0)
     {
-        //If index is-or smaller than 0, or bigger than num of textures, UNBIND
         if (textureIndex < 0 || textureIndex >= textures.Count)
         {
             GL.ActiveTexture(unit);
@@ -120,7 +103,6 @@ internal sealed class Texture : IDisposable
             return;
         }
 
-        //If index is null, UNBIND
         Texture? texture = textures[textureIndex];
         if (texture is null)
         {
@@ -129,31 +111,25 @@ internal sealed class Texture : IDisposable
             return;
         }
 
-        //If texture exists, BIND
         texture.Use(unit);
     }
 
     public Texture(string path)
     {
-        // Generate a blank texture and bind it.
         Handle = GL.GenTexture();
         Use();
 
-        // Basic sampling/wrapping defaults (safe, common choice).
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
 
-        // Pixel-art filtering (no smoothing)
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
 
-        // stb_image loads from the top-left, OpenGL expects bottom-left.
         StbImage.stbi_set_flip_vertically_on_load(1);
 
         using var stream = File.OpenRead(path);
         ImageResult image = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
 
-        // Upload pixel data to the GPU.
         GL.TexImage2D(
             TextureTarget.Texture2D,
             level: 0,
@@ -165,7 +141,6 @@ internal sealed class Texture : IDisposable
             type: PixelType.UnsignedByte,
             pixels: image.Data);
 
-        // Generate mipmaps (optional, but recommended with the min filter above).
         GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
     }
 
@@ -177,11 +152,8 @@ internal sealed class Texture : IDisposable
 
     public void Dispose()
     {
-        // Safely delete the GL resource if it was created.
         if (Handle != 0)
-        {
             GL.DeleteTexture(Handle);
-        }
 
         GC.SuppressFinalize(this);
     }

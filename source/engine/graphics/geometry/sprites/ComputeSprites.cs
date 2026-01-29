@@ -88,7 +88,7 @@ internal partial class RayCasting
                 quadY2 > screenVerticalOffset + minimumScreenSize)
                 continue;
 
-            Shader.spriteVertexAttribList.AddRange(new float[]
+            ShaderHandler.spriteVertexAttribList.AddRange(new float[]
             {
                 quadX1,
                 quadX2,

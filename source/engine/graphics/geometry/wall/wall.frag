@@ -24,7 +24,7 @@ out vec4 FragColor;
 //OnRenderFrame uniforms
 //======================
     //Textures array (uIn)
-uniform sampler2D uTextures[9];
+uniform sampler2D uTextures[8];
     //Player's pitch (uIn)
 uniform float uPitch;
 
@@ -65,7 +65,7 @@ void main()
         //Vertical texture pixel position
     float v = clamp(1 - (pixelYInStrip / stripQuadHeight), 0.0, 1.0);
         //Taking out the color from the selected texture
-    vec4 tex = texture(uTextures[int(vTexIndex)], vec2(u, v));
+    vec4 tex = texture(uTextures[int(vTexIndex - 1)], vec2(u, v));
         //Returning the correct color
     FragColor = tex - shade;
 }

@@ -99,7 +99,7 @@ internal partial class Engine : GameWindow
         //Loading shaders
         try
         {
-            Shader.LoadAll(
+            ShaderHandler.LoadAll(
                 ClientSize,
                 minimumScreenSize,
                 new Vector2(screenHorizontalOffset, screenVerticalOffset));
@@ -135,7 +135,7 @@ internal partial class Engine : GameWindow
         screenHorizontalOffset = ClientSize.X > ClientSize.Y ? ((ClientSize.X - minimumScreenSize) / 2) : 0;
         screenVerticalOffset = ClientSize.Y > ClientSize.X ? ((ClientSize.Y - minimumScreenSize) / 2) : 0;
 
-        Shader.UpdateUniforms(
+        ShaderHandler.UpdateUniforms(
             ClientSize,
             minimumScreenSize,
             new Vector2(screenHorizontalOffset, screenVerticalOffset));
@@ -171,6 +171,14 @@ internal partial class Engine : GameWindow
                 CursorState = CursorState.Grabbed;
                 isInMainMenu = false;
             }
+
+            //Hud
+            DrawGui.MainMenu(
+                minimumScreenSize,
+                screenVerticalOffset,
+                screenHorizontalOffset);
+
+            ShaderHandler.LoadBufferAndClear();
 
             return;
         }
@@ -211,7 +219,7 @@ internal partial class Engine : GameWindow
 
         Vector3 color = useAlt ? allowedScreenAltColor : allowedScreenBaseColor;
 
-        Shader.defVertexAttribList.AddRange(new float[]
+        ShaderHandler.WindowVertexAttribList.AddRange(new float[]
         {
             screenHorizontalOffset,
             screenHorizontalOffset + minimumScreenSize,
@@ -266,13 +274,12 @@ internal partial class Engine : GameWindow
             pitch);
         //=============================================================================================
 
-        //Hud
         //DrawHUD();
         //=============================================================================================
         //
         //Console.WriteLine(pitch);
         //Loading shader buffer, clreaing attribute list
-        Shader.LoadBufferAndClear();
+        ShaderHandler.LoadBufferAndClear();
     }
     //=============================================================================================
 
@@ -287,13 +294,12 @@ internal partial class Engine : GameWindow
 
         if (isInMainMenu)
         {
-            // Placeholder: draw nothing (gray), or draw your menu background here.
-            // Important: NO Shader.Draw(...) to avoid drawing the game.
+            ShaderHandler.DrawMainMenu();
             SwapBuffers();
             return;
         }
 
-        Shader.DrawGame(
+        ShaderHandler.DrawGame(
             wallWidth,
             playerPosition,
             playerAngle,
@@ -317,6 +323,6 @@ internal partial class Engine : GameWindow
         avarageFPS /= FPSList.Count;
         Console.WriteLine($"The avarage FPS was: {avarageFPS}");
 
-        Shader.DisposeAll();
+        ShaderHandler.DisposeAll();
     }
 }
