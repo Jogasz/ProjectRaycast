@@ -34,6 +34,11 @@ internal partial class Engine : GameWindow
     const float playerCollisionRadius = 10f;
     float pitch { get; set; } = 0f;
 
+    internal bool escConsumed;
+
+    internal bool isInMainMenu = true;
+    internal bool isInPauseMenu = false;
+
     //Engine
     Stopwatch stopwatch { get; set; } = new Stopwatch();
     float FOVStart { get; set; }
@@ -43,17 +48,13 @@ internal partial class Engine : GameWindow
     float screenVerticalOffset { get; set; }
     float screenHorizontalOffset { get; set; }
 
-    // Allowed-screen color animation
-    readonly Vector3 allowedScreenBaseColor = new(0.3f, 0.5f, 0.9f);
-    readonly Vector3 allowedScreenAltColor = new(1.0f, 0.0f, 0.0f); // red
-    const float allowedScreenBlinkPeriodSeconds = 1.0f;
     //=============================================================================================
     public Engine(int width, int height, string title) : base(GameWindowSettings.Default, new NativeWindowSettings()
     {
         ClientSize = (width, height),
         Title = title,
 
-        WindowState = WindowState.Fullscreen,
+        //WindowState = WindowState.Fullscreen,
         WindowBorder = WindowBorder.Resizable,
     })
     {
@@ -135,18 +136,25 @@ internal partial class Engine : GameWindow
         screenHorizontalOffset = ClientSize.X > ClientSize.Y ? ((ClientSize.X - minimumScreenSize) / 2) : 0;
         screenVerticalOffset = ClientSize.Y > ClientSize.X ? ((ClientSize.Y - minimumScreenSize) / 2) : 0;
 
+        if (isInMainMenu || isInPauseMenu)
+        {
+            ShaderHandler.UpdateMenusUniforms();
+            return;
+        }
+
         ShaderHandler.UpdateUniforms(
             ClientSize,
             minimumScreenSize,
             new Vector2(screenHorizontalOffset, screenVerticalOffset));
     }
 
-    bool isInMainMenu = true;
-    bool isInPauseMenu = false;
-
     protected override void OnUpdateFrame(FrameEventArgs e)
     {
         base.OnUpdateFrame(e);
+
+        //Release -> allow next press
+        if (!KeyboardState.IsKeyDown(Keys.Escape))
+            escConsumed = false;
 
         //DeltaTime
         //=========================================================================================
@@ -160,49 +168,39 @@ internal partial class Engine : GameWindow
         //Console.WriteLine((int)Math.Floor(1 / deltaTime));
         //=========================================================================================
 
-        //No game logic until user is in menu
+        if (!isInMainMenu && !isInPauseMenu && KeyboardState.IsKeyPressed(Keys.Escape))
+        {
+            isInPauseMenu = true;
+        }
+
         if (isInMainMenu)
         {
-            if (KeyboardState.IsKeyPressed(Keys.Escape))
-                Close();
-
-            else if (KeyboardState.IsKeyPressed(Keys.Enter))
-            {
-                CursorState = CursorState.Grabbed;
-                isInMainMenu = false;
-            }
-
-            //Hud
-            DrawGui.MainMenu(
-                minimumScreenSize,
-                screenVerticalOffset,
-                screenHorizontalOffset);
-
-            ShaderHandler.LoadBufferAndClear();
-
+            MainMenu();
+            ShaderHandler.LoadBufferAndClearMenus();
             return;
         }
 
         if (isInPauseMenu)
         {
-            CursorState = CursorState.Normal;
-
-            if (KeyboardState.IsKeyPressed(Keys.Enter))
-            {
-                CursorState = CursorState.Grabbed;
-                isInPauseMenu = false;
-            }
-
-            else if (KeyboardState.IsKeyPressed(Keys.Escape))
-                Close();
-
+            PauseMenu();
+            ShaderHandler.LoadBufferAndClearMenus();
             return;
         }
 
-        //Keybinds, controls and collision
-        //1. Distributor
-        Controls(KeyboardState, MouseState);
+        // in-game -> pause (consume the press)
+        if (!escConsumed && KeyboardState.IsKeyPressed(Keys.Escape))
+        {
+            escConsumed = true;
+            isInPauseMenu = true;
 
+            // build pause menu immediately this frame to avoid the "green flash"
+            PauseMenu();
+            ShaderHandler.LoadBufferAndClearMenus();
+            return;
+        }
+
+        Controls(KeyboardState, MouseState);
+        Console.WriteLine("Semmi");
         //(Inside Distributor):
         //2. Movement and collison
         //3. Jump
@@ -214,20 +212,15 @@ internal partial class Engine : GameWindow
 
         //Allowed screen's color
 
-        bool useAlt =
-            ((int)MathF.Floor((float)stopwatch.Elapsed.TotalSeconds / allowedScreenBlinkPeriodSeconds) % 2) == 1;
-
-        Vector3 color = useAlt ? allowedScreenAltColor : allowedScreenBaseColor;
-
         ShaderHandler.WindowVertexAttribList.AddRange(new float[]
         {
             screenHorizontalOffset,
             screenHorizontalOffset + minimumScreenSize,
             screenVerticalOffset,
             screenVerticalOffset + minimumScreenSize,
-            color.X,
-            color.Y,
-            color.Z
+            0.3f,
+            0.5f,
+            0.9f
         });
         //=========================================================================================
 
@@ -274,11 +267,6 @@ internal partial class Engine : GameWindow
             pitch);
         //=============================================================================================
 
-        //DrawHUD();
-        //=============================================================================================
-        //
-        //Console.WriteLine(pitch);
-        //Loading shader buffer, clreaing attribute list
         ShaderHandler.LoadBufferAndClear();
     }
     //=============================================================================================
@@ -294,7 +282,7 @@ internal partial class Engine : GameWindow
 
         if (isInMainMenu)
         {
-            ShaderHandler.DrawMainMenu();
+            ShaderHandler.DrawMenus();
             SwapBuffers();
             return;
         }
@@ -305,6 +293,11 @@ internal partial class Engine : GameWindow
             playerAngle,
             pitch);
 
+        if (isInPauseMenu)
+        {
+            ShaderHandler.DrawMenus();
+        }
+
         SwapBuffers();
     }
     
@@ -313,7 +306,7 @@ internal partial class Engine : GameWindow
         base.OnUnload();
 
         //Avarage fps
-        int avarageFPS =0;
+        int avarageFPS = 0;
 
         foreach (int FPS in FPSList)
         {

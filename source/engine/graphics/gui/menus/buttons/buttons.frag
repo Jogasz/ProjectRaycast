@@ -4,15 +4,17 @@
 //==============================================================
 //In-and outgoing variables
     //The input variable from Vertex Shader (same name and type)
-in vec3 quadColor;
+in float texIndex;
 
     //Vec4 that defines the final color output that we should calculate ourselves
 out vec4 FragColor;
 //==============================================================
-//main() method entry point
 void main()
 {
-        //ourColor is a vec3 (R,G,B) + including default 1.0 Alpha
-    FragColor = vec4(quadColor, 0.2);
+    vec3 menuColor;
+    if (texIndex == 0) menuColor = vec3(0.0, 1.0, 0.0); 
+    else if (texIndex == 1) menuColor = vec3(0.0, 0.0, 1.0); 
+
+    FragColor = vec4(menuColor, 1.0);
 }
 //==============================================================

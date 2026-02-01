@@ -57,8 +57,10 @@
     <None Remove="source\engine\graphics\geometry\sprites\sprites.vert" />
     <None Remove="source\engine\graphics\geometry\wall\wall.frag" />
     <None Remove="source\engine\graphics\geometry\wall\wall.vert" />
-    <None Remove="source\engine\graphics\hud\mainmenu\mainmenu.frag" />
-    <None Remove="source\engine\graphics\hud\mainmenu\mainmenu.vert" />
+    <None Remove="source\engine\graphics\gui\menus\buttons\buttons.frag" />
+    <None Remove="source\engine\graphics\gui\menus\buttons\buttons.vert" />
+    <None Remove="source\engine\graphics\gui\menus\containers\menus.frag" />
+    <None Remove="source\engine\graphics\gui\menus\containers\menus.vert" />
     <None Remove="source\engine\graphics\window\window.frag" />
     <None Remove="source\engine\graphics\window\window.vert" />
   </ItemGroup>
@@ -121,10 +123,16 @@
     <Content Include="source\engine\graphics\geometry\wall\wall.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="source\engine\graphics\hud\mainmenu\mainmenu.frag">
+    <Content Include="source\engine\graphics\gui\menus\buttons\buttons.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="source\engine\graphics\hud\mainmenu\mainmenu.vert">
+    <Content Include="source\engine\graphics\gui\menus\buttons\buttons.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="source\engine\graphics\gui\menus\containers\menus.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="source\engine\graphics\gui\menus\containers\menus.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="source\engine\graphics\window\window.frag">
@@ -145,11 +153,6 @@
     <Content Include="assets\maps\map01.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="source\engine\graphics\hud\minimap\" />
-    <Folder Include="source\engine\graphics\hud\pause menu\" />
   </ItemGroup>
 
 </Project>

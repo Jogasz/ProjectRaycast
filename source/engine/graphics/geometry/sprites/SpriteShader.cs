@@ -1,0 +1,91 @@
+﻿using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
+
+namespace Engine;
+
+internal partial class ShaderHandler
+{
+    //Instance
+    public static ShaderHandler? SpriteShader { get; set; }
+    //VBO, VAO
+    static int SpriteVAO { get; set; }
+    static int SpriteVBO { get; set; }
+    //Containers
+    public static List<float> SpriteVertexAttribList { get; set; } = new List<float>();
+    static float[]? SpriteVertices { get; set; }
+
+    static void LoadSpriteShader(
+        string vertexPath,
+        string fragmentPath,
+        Matrix4 projection)
+    {
+        SpriteShader = new ShaderHandler(vertexPath, fragmentPath);
+        //VAO, VBO Creating
+        SpriteVAO = GL.GenVertexArray();
+        SpriteVBO = GL.GenBuffer();
+        //VAO, VBO Binding
+        GL.BindVertexArray(SpriteVAO);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, SpriteVBO);
+        //Attribute0
+        GL.EnableVertexAttribArray(0);
+        GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, 7 * sizeof(float), 0);
+        //Attribute1
+        GL.EnableVertexAttribArray(1);
+        GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 7 * sizeof(float), 4 * sizeof(float));
+        //Divisor
+        GL.VertexAttribDivisor(0, 1);
+        GL.VertexAttribDivisor(1, 1);
+        //Disable face culling to avoid accidentally removing one triangle
+        GL.Disable(EnableCap.CullFace);
+        //Unbind for safety
+        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+        GL.BindVertexArray(0);
+        //Uniforms
+        SpriteShader.Use();
+        SpriteShader.SetMatrix4("uProjection", projection);
+    }
+
+    static void UpdateSpriteUniforms()
+    {
+        //SpriteShader
+        SpriteShader?.Use();
+        SpriteShader?.SetMatrix4("uProjection", projection);
+    }
+
+    static void LoadBufferAndClearSprite()
+    {
+        //Making array
+        SpriteVertices = SpriteVertexAttribList.ToArray();
+        //Loading buffer
+        GL.BindBuffer(BufferTarget.ArrayBuffer, SpriteVBO);
+        GL.BufferData(
+            BufferTarget.ArrayBuffer,
+            SpriteVertices.Length * sizeof(float),
+            SpriteVertices,
+            BufferUsageHint.DynamicDraw);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+        //CLEARING LIST
+        SpriteVertexAttribList.Clear();
+    }
+
+    static void DrawSprite()
+    {
+        SpriteShader?.Use();
+
+        //Sprites use explicit alpha in the fragment shader, so enable blending here.
+        GL.Enable(EnableCap.Blend);
+        GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+
+        //Binding and drawing
+        GL.BindVertexArray(SpriteVAO);
+        int spriteLen = SpriteVertices?.Length ?? 0;
+        int instanceCount = spriteLen / 7;
+        if (instanceCount > 0)
+        {
+            GL.DrawArraysInstanced(PrimitiveType.TriangleStrip, 0, 4, instanceCount);
+        }
+
+        //Restore state so other passes aren't affected.
+        GL.Disable(EnableCap.Blend);
+    }
+}

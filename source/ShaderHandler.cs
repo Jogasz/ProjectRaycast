@@ -168,31 +168,6 @@ internal partial class ShaderHandler
 
     static Matrix4 projection { get; set; }
 
-    
-    //SpriteShader
-    //====================================================================================
-    //Instance
-    public static ShaderHandler? spriteShader { get; set; }
-    //VBO, VAO
-    static int spriteVAO { get; set; }
-    static int spriteVBO { get; set; }
-    //Containers
-    public static List<float> spriteVertexAttribList { get; set; } = new List<float>();
-    static float[]? spriteVertices { get; set; }
-    //====================================================================================
-
-    //MainMenuShader
-    //====================================================================================
-    //Instance
-    public static ShaderHandler? mainMenuShader { get; set; }
-    //VBO, VAO
-    static int mainMenuVAO { get; set; }
-    static int mainMenuVBO { get; set; }
-    //Containers
-    public static List<float> mainMenuVertexAttribList { get; set; } = new List<float>();
-    static float[]? mainMenuVertices { get; set; }
-    //====================================================================================
-
     //OnLoad
     public static void LoadAll(Vector2i ClientSize, float minimumScreenSize, Vector2 screenOffset)
     {
@@ -229,72 +204,15 @@ internal partial class ShaderHandler
             "source/engine/graphics/geometry/sprites/sprites.frag",
             projection);
 
-        LoadMainMenuShader(
-            "source/engine/graphics/hud/mainmenu/mainmenu.vert",
-            "source/engine/graphics/hud/mainmenu/mainmenu.frag",
+        LoadMenusShader(
+            "source/engine/graphics/gui/menus/containers/menus.vert",
+            "source/engine/graphics/gui/menus/containers/menus.frag",
             projection);
-    }
 
-    static void LoadSpriteShader(
-        string vertexPath,
-        string fragmentPath,
-        Matrix4 projection)
-    {
-        spriteShader = new ShaderHandler(vertexPath, fragmentPath);
-        //VAO, VBO Creating
-        spriteVAO = GL.GenVertexArray();
-        spriteVBO = GL.GenBuffer();
-        //VAO, VBO Binding
-        GL.BindVertexArray(spriteVAO);
-        GL.BindBuffer(BufferTarget.ArrayBuffer, spriteVBO);
-        //Attribute0
-        GL.EnableVertexAttribArray(0);
-        GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, 7 * sizeof(float), 0);
-        //Attribute1
-        GL.EnableVertexAttribArray(1);
-        GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 7 * sizeof(float), 4 * sizeof(float));
-        //Divisor
-        GL.VertexAttribDivisor(0, 1);
-        GL.VertexAttribDivisor(1, 1);
-        //Disable face culling to avoid accidentally removing one triangle
-        GL.Disable(EnableCap.CullFace);
-        //Unbind for safety
-        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-        GL.BindVertexArray(0);
-        //Uniforms
-        spriteShader.Use();
-        spriteShader.SetMatrix4("uProjection", projection);
-    }
-
-    static void LoadMainMenuShader(
-        string vertexPath,
-        string fragmentPath,
-        Matrix4 projection)
-    {
-        mainMenuShader = new ShaderHandler(vertexPath, fragmentPath);
-        //VAO, VBO Creating
-        mainMenuVAO = GL.GenVertexArray();
-        mainMenuVBO = GL.GenBuffer();
-        //VAO, VBO Binding
-        GL.BindVertexArray(mainMenuVAO);
-        GL.BindBuffer(BufferTarget.ArrayBuffer, mainMenuVBO);
-        //Attribute0
-        GL.EnableVertexAttribArray(0);
-        GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, 7 * sizeof(float), 0);
-        //Attribute1
-        GL.EnableVertexAttribArray(1);
-        GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 7 * sizeof(float), 4 * sizeof(float));
-        //Divisor
-        GL.VertexAttribDivisor(0, 1);
-        GL.VertexAttribDivisor(1, 1);
-        //Disable face culling to avoid accidentally removing one triangle
-        GL.Disable(EnableCap.CullFace);
-        //Unbind for safety
-        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-        GL.BindVertexArray(0);
-        //Uniforms
-        mainMenuShader.Use();
-        mainMenuShader.SetMatrix4("uProjMat", projection);
+        LoadButtonsShader(
+            "source/engine/graphics/gui/menus/buttons/buttons.vert",
+            "source/engine/graphics/gui/menus/buttons/buttons.frag",
+            projection);
     }
 
     //OnFramebufferResize
@@ -310,12 +228,7 @@ internal partial class ShaderHandler
         UpdateCeilingUniforms(minimumScreenSize);
         UpdateWallUniforms(minimumScreenSize, screenOffset);
         UpdateFloorUniforms(ClientSize, minimumScreenSize);
-            //SpriteShader
-        spriteShader?.Use();
-        spriteShader?.SetMatrix4("uProjection", projection);
-            //MainMenuShader
-        mainMenuShader?.Use();
-        mainMenuShader?.SetMatrix4("uProjMat", projection);
+        UpdateSpriteUniforms();
     }
 
     //OnUpdateFrame
@@ -325,38 +238,7 @@ internal partial class ShaderHandler
         LoadBufferAndClearCeiling();
         LoadBufferAndClearWall();
         LoadBufferAndClearFloor();
-
-        //SpriteShader
-        //==============================================
-        //Making array
-        spriteVertices = spriteVertexAttribList.ToArray();
-        //Loading buffer
-        GL.BindBuffer(BufferTarget.ArrayBuffer, spriteVBO);
-        GL.BufferData(
-            BufferTarget.ArrayBuffer,
-            spriteVertices.Length * sizeof(float),
-            spriteVertices,
-            BufferUsageHint.DynamicDraw);
-        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-        //CLEARING LIST
-        spriteVertexAttribList.Clear();
-        //==============================================
-
-        //MainMenuShader
-        //==============================================
-        //Making array
-        mainMenuVertices = mainMenuVertexAttribList.ToArray();
-        //Loading buffer
-        GL.BindBuffer(BufferTarget.ArrayBuffer, mainMenuVBO);
-        GL.BufferData(
-            BufferTarget.ArrayBuffer,
-            mainMenuVertices.Length * sizeof(float),
-            mainMenuVertices,
-            BufferUsageHint.DynamicDraw);
-        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-        //CLEARING LIST
-        mainMenuVertexAttribList.Clear();
-        //==============================================
+        LoadBufferAndClearSprite();
     }
 
     //OnRenderFrame
@@ -409,35 +291,7 @@ internal partial class ShaderHandler
         DrawCeiling(tileCount, wallWidth, playerPosition, playerAngle, pitch);
         DrawWalls(tileCount, pitch);
         DrawFloor(tileCount, wallWidth, playerPosition, playerAngle, pitch);
-
-        //SpriteShader
-        //===========================================================================
-        spriteShader?.Use();
-        //Binding and drawing
-        GL.BindVertexArray(spriteVAO);
-        int spriteLen = spriteVertices?.Length ?? 0;
-        int instanceCount = spriteLen / 7;
-        if (instanceCount > 0)
-        {
-            GL.DrawArraysInstanced(PrimitiveType.TriangleStrip, 0, 4, instanceCount);
-        }
-        //===========================================================================
-    }
-    public static void DrawMainMenu()
-    {
-        // textures[1] == mainmenu.png
-        Texture.Bind(1, TextureUnit.Texture1);
-
-        mainMenuShader?.Use();
-        mainMenuShader?.SetInt("uImages[1]", 1);
-
-        GL.BindVertexArray(mainMenuVAO);
-        int mainMenuLen = mainMenuVertices?.Length ?? 0;
-        int instanceCount = mainMenuLen / 7;
-        if (instanceCount > 0)
-        {
-            GL.DrawArraysInstanced(PrimitiveType.TriangleStrip, 0, 4, instanceCount);
-        }
+        DrawSprite();
     }
 
     //OnUnload
@@ -448,7 +302,8 @@ internal partial class ShaderHandler
         CeilingShader?.Dispose();
         FloorShader?.Dispose();
         WallShader?.Dispose();
-        spriteShader?.Dispose();
-        mainMenuShader?.Dispose();
+        SpriteShader?.Dispose();
+        MenusShader?.Dispose();
+        ButtonsShader?.Dispose();
     }
 }

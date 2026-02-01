@@ -42,13 +42,6 @@ internal partial class Engine
                 HandleMouse(mouse);
             }
 
-            //Pause
-            // - Escape (while in game)
-            if (keyboard.IsKeyDown(Keys.Escape))
-            {
-                isInPauseMenu = true;
-            }
-
             //Fullscreen
             // - F11
             if (keyboard.IsKeyPressed(Keys.F11))
@@ -57,7 +50,7 @@ internal partial class Engine
             }
 
             //Cursor grab
-            //F1
+            // - F1
             if (keyboard.IsKeyPressed(Keys.F1))
             {
                 HandleCursorGrab();
