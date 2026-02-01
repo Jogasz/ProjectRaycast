@@ -24,6 +24,9 @@
     <None Remove="assets\textures\door_stonebricks.png" />
     <None Remove="assets\textures\door_stonebricks.txt" />
     <None Remove="assets\textures\floorTest.txt" />
+    <None Remove="assets\textures\gui\buttons_sheet.png" />
+    <None Remove="assets\textures\gui\containers\mainmenu.png" />
+    <None Remove="assets\textures\gui\containers\pausemenu.png" />
     <None Remove="assets\textures\gui\mainmenu.png" />
     <None Remove="assets\textures\gui\pausemenu.png" />
     <None Remove="assets\textures\missing.txt" />
@@ -72,10 +75,13 @@
     <Content Include="assets\textures\door_stonebricks.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="assets\textures\gui\mainmenu.png">
+    <Content Include="assets\textures\gui\buttons_sheet.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="assets\textures\gui\pausemenu.png">
+    <Content Include="assets\textures\gui\containers\mainmenu.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\textures\gui\containers\pausemenu.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="assets\textures\mossy_planks.png">

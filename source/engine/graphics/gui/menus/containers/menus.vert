@@ -10,6 +10,7 @@ layout (location = 1) in float aTexIndex;
 //==============================================================
 //In-and outgoing variables
 out float texIndex;
+out vec2 vUv;
 
 uniform mat4 uProjection;
 
@@ -29,6 +30,12 @@ void main()
     else if (corner == 1) pos = vec2(aPos.y, aPos.z); // x2,y1
     else if (corner == 2) pos = vec2(aPos.x, aPos.w); // x1,y2
     else                  pos = vec2(aPos.y, aPos.w); // x2,y2
+
+    // TriangleStrip order matches these UVs
+    if (corner == 0)      vUv = vec2(0.0, 1.0);
+    else if (corner == 1) vUv = vec2(1.0, 1.0);
+    else if (corner == 2) vUv = vec2(0.0, 0.0);
+    else                  vUv = vec2(1.0, 0.0);
 
     gl_Position = uProjection * vec4(pos.xy, 0.0, 1.0);
     texIndex = aTexIndex;

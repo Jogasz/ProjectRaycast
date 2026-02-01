@@ -229,6 +229,8 @@ internal partial class ShaderHandler
         UpdateWallUniforms(minimumScreenSize, screenOffset);
         UpdateFloorUniforms(ClientSize, minimumScreenSize);
         UpdateSpriteUniforms();
+        UpdateMenusUniforms();
+        UpdateButtonsUniforms();
     }
 
     //OnUpdateFrame

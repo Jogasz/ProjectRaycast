@@ -18,8 +18,7 @@ internal partial class RayCasting
         float wallHeight,
         float wallWidth,
         float pitch,
-        float debugBorder
-    )
+        float debugBorder)
     {
         float stepX = wallWidth;
         float quadX1 = screenHorizontalOffset + (i * stepX);

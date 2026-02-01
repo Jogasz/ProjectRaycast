@@ -9,6 +9,8 @@ namespace Engine;
 
 internal partial class Engine : GameWindow
 {
+    internal bool isSaveState = false;
+
     //Avarage FPS tester
     List<int> FPSList = new List<int>();
 
@@ -58,7 +60,6 @@ internal partial class Engine : GameWindow
         WindowBorder = WindowBorder.Resizable,
     })
     {
-        //CursorState = CursorState.Grabbed;
         VSync = VSyncMode.On;
     }
 
@@ -135,12 +136,14 @@ internal partial class Engine : GameWindow
         //Offsets to center allowed screen
         screenHorizontalOffset = ClientSize.X > ClientSize.Y ? ((ClientSize.X - minimumScreenSize) / 2) : 0;
         screenVerticalOffset = ClientSize.Y > ClientSize.X ? ((ClientSize.Y - minimumScreenSize) / 2) : 0;
-
-        if (isInMainMenu || isInPauseMenu)
-        {
-            ShaderHandler.UpdateMenusUniforms();
-            return;
-        }
+        
+        Console.WriteLine("============================");
+        Console.WriteLine($"minimumScreenSize: {minimumScreenSize}");
+        Console.WriteLine($"screenHorizontalOffset: {screenHorizontalOffset}");
+        Console.WriteLine($"screenVerticalOffset: {screenVerticalOffset}");
+        Console.WriteLine($"ClientSize.X: {ClientSize.X}");
+        Console.WriteLine($"ClientSize.Y: {ClientSize.Y}");
+        Console.WriteLine("============================");
 
         ShaderHandler.UpdateUniforms(
             ClientSize,
@@ -171,6 +174,7 @@ internal partial class Engine : GameWindow
         if (!isInMainMenu && !isInPauseMenu && KeyboardState.IsKeyPressed(Keys.Escape))
         {
             isInPauseMenu = true;
+            escConsumed = true;
         }
 
         if (isInMainMenu)
@@ -187,20 +191,9 @@ internal partial class Engine : GameWindow
             return;
         }
 
-        // in-game -> pause (consume the press)
-        if (!escConsumed && KeyboardState.IsKeyPressed(Keys.Escape))
-        {
-            escConsumed = true;
-            isInPauseMenu = true;
-
-            // build pause menu immediately this frame to avoid the "green flash"
-            PauseMenu();
-            ShaderHandler.LoadBufferAndClearMenus();
-            return;
-        }
-
+        //Handling controls
         Controls(KeyboardState, MouseState);
-        Console.WriteLine("Semmi");
+
         //(Inside Distributor):
         //2. Movement and collison
         //3. Jump

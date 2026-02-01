@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Collections.Generic;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using StbImageSharp;
@@ -10,6 +11,7 @@ internal sealed class Texture : IDisposable
 
     static readonly string[] texturePaths =
     {
+        //Tile textures
         "assets/textures/planks.png",
         "assets/textures/mossy_planks.png",
         "assets/textures/stonebricks.png",
@@ -17,20 +19,18 @@ internal sealed class Texture : IDisposable
         "assets/textures/door_stonebricks.png",
         "assets/textures/door_mossy_stonebricks.png",
         "assets/textures/window_stonebricks.png",
-        "assets/textures/window_mossy_stonebricks.png"
+        "assets/textures/window_mossy_stonebricks.png",
     };
 
-    static readonly string mainMenuPath = "assets/textures/gui/mainmenu.png";
+    static readonly string[] imagePaths =
+    {
+        //Container textures
+        "assets/textures/gui/containers/mainmenu.png",
+        "assets/textures/gui/containers/pausemenu.png",
+        "assets/textures/gui/buttons_sheet.png"
+    };
 
-    // Unified list:
-    // 0: null (dummy)
-    // 1: mainmenu.png
-    // 2..4: reserved (maps are separate int handles, but indices stay reserved)
-    // 5.. : tile textures
     public static List<Texture?> textures = new();
-
-    // (Keep these if other code references them; they won't be used for binding anymore)
-    public static List<Texture?> sprites = new();
     public static List<Texture?> images = new();
 
     // Map textures (R32i)
@@ -42,6 +42,7 @@ internal sealed class Texture : IDisposable
     public static void LoadAll(int[,] mapWalls, int[,] mapCeiling, int[,] mapFloor)
     {
         textures.Clear();
+        images.Clear();
 
         try
         {
@@ -51,8 +52,8 @@ internal sealed class Texture : IDisposable
 
             mapSize = (mapWalls.GetLength(1), mapWalls.GetLength(0));
 
-            foreach (var texturePath in texturePaths)
-                textures.Add(new Texture(texturePath));
+            LoadInto(textures, texturePaths);
+            LoadInto(images, imagePaths);
 
             Console.WriteLine(" - TEXTURES have been loaded!");
         }
@@ -60,6 +61,12 @@ internal sealed class Texture : IDisposable
         {
             Console.WriteLine($" - Something went wrong while loading TEXTURES...\n{ex}");
         }
+    }
+
+    static void LoadInto(List<Texture?> target, IReadOnlyList<string> paths)
+    {
+        for (int i = 0; i < paths.Count; i++)
+            target.Add(new Texture(paths[i]));
     }
 
     static int CreateMapTexture(int[,] map)
@@ -94,16 +101,16 @@ internal sealed class Texture : IDisposable
         return handle;
     }
 
-    public static void Bind(int textureIndex, TextureUnit unit = TextureUnit.Texture0)
+    static void BindFrom(List<Texture?> list, int index, TextureUnit unit)
     {
-        if (textureIndex < 0 || textureIndex >= textures.Count)
+        if (index < 0 || index >= list.Count)
         {
             GL.ActiveTexture(unit);
             GL.BindTexture(TextureTarget.Texture2D, 0);
             return;
         }
 
-        Texture? texture = textures[textureIndex];
+        Texture? texture = list[index];
         if (texture is null)
         {
             GL.ActiveTexture(unit);
@@ -113,6 +120,12 @@ internal sealed class Texture : IDisposable
 
         texture.Use(unit);
     }
+
+    public static void BindTexture(int textureIndex, TextureUnit unit = TextureUnit.Texture0) => BindFrom(textures, textureIndex, unit);
+
+    public static void BindImage(int imageIndex, TextureUnit unit = TextureUnit.Texture0) => BindFrom(images, imageIndex, unit);
+
+    public static void Bind(int textureIndex, TextureUnit unit = TextureUnit.Texture0) => BindTexture(textureIndex, unit);
 
     public Texture(string path)
     {

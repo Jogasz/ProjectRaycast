@@ -5,16 +5,16 @@
 //In-and outgoing variables
     //The input variable from Vertex Shader (same name and type)
 in float texIndex;
+in vec2 vUv;
+
+    //Textures array (uIn)
+uniform sampler2D uTextures[3];
 
     //Vec4 that defines the final color output that we should calculate ourselves
 out vec4 FragColor;
 //==============================================================
 void main()
 {
-    vec4 menuColor;
-    if (texIndex == 0) menuColor = vec4(0.0, 1.0, 0.0, 1.0); 
-    else if (texIndex == 1) menuColor = vec4(0.0, 0.0, 1.0, 0.3); 
-
-    FragColor = menuColor;
+    FragColor = texture(uTextures[int(texIndex)], vUv);
 }
 //==============================================================

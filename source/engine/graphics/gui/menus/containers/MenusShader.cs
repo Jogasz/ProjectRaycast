@@ -70,11 +70,23 @@ internal partial class ShaderHandler
 
     internal static void DrawMenus()
     {
+        // 0. - 1.
+        for (int i = 0; i < Texture.images.Count; i++)
+        {
+            Texture.BindImage(i, TextureUnit.Texture0 + i);
+        }
+
         MenusShader?.Use();
 
         //Sprites use explicit alpha in the fragment shader, so enable blending here.
         GL.Enable(EnableCap.Blend);
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+
+        //Uniforms
+        for (int i = 0; i < Texture.images.Count; i++)
+        {
+            MenusShader?.SetInt($"uTextures[{i}]", i);
+        }
 
         //Binding and drawing
         GL.BindVertexArray(MenusVAO);

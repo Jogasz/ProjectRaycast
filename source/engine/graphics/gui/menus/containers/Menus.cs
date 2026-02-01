@@ -1,9 +1,5 @@
 ﻿using OpenTK.Windowing.GraphicsLibraryFramework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using OpenTK.Windowing.Common;
 
 namespace Engine;
 
@@ -19,27 +15,33 @@ internal partial class Engine
     /* Buttons ID Translator
      * 0. Contiune
      * 1. New Game
-     * 3. Play
-     * 4. Settings
-     * 5. Statistics
-     * 6. Exit
-     * 7. Back to Game
+     * 2. Play
+     * 3. Settings
+     * 4. Statistics
+     * 5. Exit
+     * 6. Back to Game
      */
 
     //Handling main menu
+
+    internal static int[] buttonIds;
     void MainMenu()
     {
-        if (!escConsumed && IsKeyPressed(Keys.Escape))
+        if (IsKeyPressed(Keys.Escape))
         {
-            escConsumed = true;
             Close();
         }
         else if (IsKeyPressed(Keys.Enter))
         {
             isInMainMenu = false;
+            CursorState = CursorState.Grabbed;
         }
 
+        if (isSaveState) buttonIds = [0, 1, 3, 4, 5];
+        else buttonIds = [2, 3, 4, 5];
+
         UploadMenus(0);
+        UploadButtons(buttonIds);
     }
 
     void PauseMenu()
@@ -47,12 +49,13 @@ internal partial class Engine
         if (IsKeyPressed(Keys.Enter))
         {
             isInPauseMenu = false;
+            CursorState = CursorState.Grabbed;
             return;
         }
 
         if (!escConsumed && IsKeyPressed(Keys.Escape))
         {
-            escConsumed = true;
+            CursorState = CursorState.Normal;
 
             isInPauseMenu = false;
             playerPosition = (250, 250);
@@ -68,10 +71,10 @@ internal partial class Engine
     {
         ShaderHandler.MenusVertexAttribList.AddRange(new float[]
         {
-            screenVerticalOffset,
-            screenVerticalOffset + minimumScreenSize,
-            screenHorizontalOffset+ minimumScreenSize,
             screenHorizontalOffset,
+            screenHorizontalOffset + minimumScreenSize,
+            screenVerticalOffset + minimumScreenSize,
+            screenVerticalOffset,
             backgroundIndex
         });
     }
