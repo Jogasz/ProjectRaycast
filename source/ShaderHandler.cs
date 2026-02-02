@@ -231,6 +231,7 @@ internal partial class ShaderHandler
         UpdateSpriteUniforms();
         UpdateMenusUniforms();
         UpdateButtonsUniforms();
+        UpdateButtonsUniforms();
     }
 
     //OnUpdateFrame

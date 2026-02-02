@@ -1,20 +1,28 @@
 //Declaration of shader version and core profile functionality
-    //Fragment shader is calculating the color output for the pixels
+ //Fragment shader is calculating the color output for the pixels
 #version 330 core
 //==============================================================
 //In-and outgoing variables
-    //The input variable from Vertex Shader (same name and type)
+ //The input variable from Vertex Shader (same name and type)
 in float texIndex;
 
-    //Vec4 that defines the final color output that we should calculate ourselves
+//Interpolated UV
+in vec2 vUv;
+
+ //Vec4 that defines the final color output that we should calculate ourselves
 out vec4 FragColor;
+
+//Buttons sheet
+uniform sampler2D uButtonsAtlas;
 //==============================================================
 void main()
 {
-    vec3 menuColor;
-    if (texIndex == 0) menuColor = vec3(0.0, 1.0, 0.0); 
-    else if (texIndex == 1) menuColor = vec3(0.0, 0.0, 1.0); 
+ //CHANGED: sample from atlas
+ vec4 tex = texture(uButtonsAtlas, vUv);
 
-    FragColor = vec4(menuColor, 1.0);
+ //Optional: discard fully transparent pixels
+ if (tex.a <=0.0 || distance(tex.rgb, vec3(255, 0, 220) / 255) < 0.1) discard;
+
+ FragColor = tex;
 }
 //==============================================================

@@ -137,14 +137,6 @@ internal partial class Engine : GameWindow
         screenHorizontalOffset = ClientSize.X > ClientSize.Y ? ((ClientSize.X - minimumScreenSize) / 2) : 0;
         screenVerticalOffset = ClientSize.Y > ClientSize.X ? ((ClientSize.Y - minimumScreenSize) / 2) : 0;
         
-        Console.WriteLine("============================");
-        Console.WriteLine($"minimumScreenSize: {minimumScreenSize}");
-        Console.WriteLine($"screenHorizontalOffset: {screenHorizontalOffset}");
-        Console.WriteLine($"screenVerticalOffset: {screenVerticalOffset}");
-        Console.WriteLine($"ClientSize.X: {ClientSize.X}");
-        Console.WriteLine($"ClientSize.Y: {ClientSize.Y}");
-        Console.WriteLine("============================");
-
         ShaderHandler.UpdateUniforms(
             ClientSize,
             minimumScreenSize,
@@ -173,6 +165,7 @@ internal partial class Engine : GameWindow
 
         if (!isInMainMenu && !isInPauseMenu && KeyboardState.IsKeyPressed(Keys.Escape))
         {
+            CursorState = CursorState.Normal;
             isInPauseMenu = true;
             escConsumed = true;
         }

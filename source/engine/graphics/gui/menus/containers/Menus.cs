@@ -64,7 +64,10 @@ internal partial class Engine
             return;
         }
 
+        buttonIds = [6, 3, 5];
+
         UploadMenus(1);
+        UploadButtons(buttonIds);
     }
 
     void UploadMenus(int backgroundIndex)

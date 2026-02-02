@@ -66,6 +66,8 @@ internal partial class ShaderHandler
         GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
         //CLEARING LIST
         MenusVertexAttribList.Clear();
+
+        LoadBufferAndClearButtons();
     }
 
     internal static void DrawMenus()
@@ -99,5 +101,7 @@ internal partial class ShaderHandler
 
         //Restore state so other passes aren't affected.
         GL.Disable(EnableCap.Blend);
+
+        DrawButtons();
     }
 }

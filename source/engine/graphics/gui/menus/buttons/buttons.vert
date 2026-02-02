@@ -7,9 +7,15 @@
 layout (location = 0) in vec4 aPos;
     //Colors per instance (same color for 4 vertex)
 layout (location = 1) in float aTexIndex;
+
+//Texture UV
+layout (location = 2) in vec4 aUvRect;
 //==============================================================
 //In-and outgoing variables
 out float texIndex;
+
+//Interpolated UV
+out vec2 vUv;
 
 uniform mat4 uProjection;
 
@@ -29,6 +35,17 @@ void main()
     else if (corner == 1) pos = vec2(aPos.y, aPos.z); // x2,y1
     else if (corner == 2) pos = vec2(aPos.x, aPos.w); // x1,y2
     else                  pos = vec2(aPos.y, aPos.w); // x2,y2
+
+        //UV's for textures
+    float u0 = aUvRect.x;
+    float v0 = aUvRect.y;
+    float u1 = aUvRect.z;
+    float v1 = aUvRect.w;
+
+    if (corner == 0) vUv = vec2(u0, v1);
+    else if (corner == 1) vUv = vec2(u1, v1);
+    else if (corner == 2) vUv = vec2(u0, v0);
+    else vUv = vec2(u1, v0);
 
     gl_Position = uProjection * vec4(pos.xy, 0.0, 1.0);
     texIndex = aTexIndex;
