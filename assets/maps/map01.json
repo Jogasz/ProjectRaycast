@@ -38,14 +38,14 @@
   "Sprites": [
     {
       "Id": 0,
-      "Type": 0,
+      "Type": 1,
       "Position": {
         "X": 1,
         "Y": 2
       }
     },
     {
-      "Id": 3,
+      "Id": 1,
       "Type": 2,
       "Position": {
         "X": 2,
@@ -53,11 +53,19 @@
       }
     },
     {
-      "Id": 3,
+      "Id": 2,
       "Type": 2,
       "Position": {
         "X": 5,
         "Y": 5
+      }
+    },
+    {
+      "Id": 3,
+      "Type": 2,
+      "Position": {
+        "X": 6,
+        "Y": 6
       }
     }
   ]

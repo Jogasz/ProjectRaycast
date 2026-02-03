@@ -26,12 +26,12 @@ internal partial class ShaderHandler
         //VAO, VBO Binding
         GL.BindVertexArray(SpriteVAO);
         GL.BindBuffer(BufferTarget.ArrayBuffer, SpriteVBO);
-        //Attribute0
+        //Attribute0 (Vertices)
         GL.EnableVertexAttribArray(0);
-        GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, 7 * sizeof(float), 0);
-        //Attribute1
+        GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
+        //Attribute1 (ID)
         GL.EnableVertexAttribArray(1);
-        GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 7 * sizeof(float), 4 * sizeof(float));
+        GL.VertexAttribPointer(1, 1, VertexAttribPointerType.Float, false, 5 * sizeof(float), 4 * sizeof(float));
         //Divisor
         GL.VertexAttribDivisor(0, 1);
         GL.VertexAttribDivisor(1, 1);
@@ -79,7 +79,7 @@ internal partial class ShaderHandler
         //Binding and drawing
         GL.BindVertexArray(SpriteVAO);
         int spriteLen = SpriteVertices?.Length ?? 0;
-        int instanceCount = spriteLen / 7;
+        int instanceCount = spriteLen / 5;
         if (instanceCount > 0)
         {
             GL.DrawArraysInstanced(PrimitiveType.TriangleStrip, 0, 4, instanceCount);

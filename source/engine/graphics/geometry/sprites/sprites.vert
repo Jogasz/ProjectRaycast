@@ -6,10 +6,10 @@
     //Verticies X1 X2 Y1 Y2 per instance
 layout (location = 0) in vec4 aPos;
     //Colors per instance (same color for 4 vertex)
-layout (location = 1) in vec3 aColor;
+layout (location = 1) in float aTexId;
 //==============================================================
 //In-and outgoing variables
-out vec3 quadColor;
+out float vTexId;
 
 uniform mat4 uProjection;
 
@@ -31,5 +31,5 @@ void main()
     else                  pos = vec2(aPos.y, aPos.w); // x2,y2
 
     gl_Position = uProjection * vec4(pos.xy, 0.0, 1.0);
-    quadColor = aColor;
+    vTexId = aTexId;
 }

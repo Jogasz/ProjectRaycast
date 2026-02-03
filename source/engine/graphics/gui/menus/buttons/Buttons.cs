@@ -130,6 +130,9 @@ internal partial class Engine
 
             anyHover |= isHover;
 
+            if (anyHover) Cursor = MouseCursor.PointingHand;
+            else Cursor = MouseCursor.Default;
+
             //Action registers on release on the button
             if (isHover && mouseReleased && !_menuClickConsumed)
                 HandleClickActions(id);

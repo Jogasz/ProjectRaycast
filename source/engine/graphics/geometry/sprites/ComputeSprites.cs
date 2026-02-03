@@ -28,7 +28,7 @@ internal partial class RayCasting
         //Scaling the plane with FOV
         float planeScale = MathF.Tan(FOVrad / 2f);
 
-        //Perpendicualr distance of the plane
+        //Perpendicular distance of the plane
         float planeX = -dirY * planeScale;
         float planeY = dirX * planeScale;
 
@@ -71,7 +71,7 @@ internal partial class RayCasting
             //Camera space to screen coordinates
             float screenXCenter = centerX + (transformX / transformY) * halfScreen;
 
-            //Sprites size on the screen
+            //Sprite's size on the screen
             float size = (tileSize / transformY) * halfScreen;
             
             //Screen coordinates
@@ -88,15 +88,15 @@ internal partial class RayCasting
                 quadY2 > screenVerticalOffset + minimumScreenSize)
                 continue;
 
+            Vector3 baseClr = (1.0f, 0.0f, 1.0f);
+
             ShaderHandler.SpriteVertexAttribList.AddRange(new float[]
             {
                 quadX1,
                 quadX2,
                 quadY1,
                 quadY2,
-                1.0f,
-                1.0f,
-                0.0f
+                Level.Sprites[i].Id
             });
         }
     }

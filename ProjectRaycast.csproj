@@ -29,6 +29,18 @@
     <None Remove="assets\textures\gui\containers\pausemenu.png" />
     <None Remove="assets\textures\gui\mainmenu.png" />
     <None Remove="assets\textures\gui\pausemenu.png" />
+    <None Remove="assets\textures\map\sprites\enemies\Jiggler\jiggler.png" />
+    <None Remove="assets\textures\map\sprites\enemies\temp boss\boss.png" />
+    <None Remove="assets\textures\map\sprites\enemies\temp lvl1\enemy_corr1.png" />
+    <None Remove="assets\textures\map\sprites\enemies\temp lvl1\enemy_lvl1_walk.png" />
+    <None Remove="assets\textures\map\sprites\enemies\temp lvl2\enemy_corr2.png" />
+    <None Remove="assets\textures\map\sprites\enemies\temp lvl3\enemy_corr3.png" />
+    <None Remove="assets\textures\map\sprites\items\ammo.png" />
+    <None Remove="assets\textures\map\sprites\items\heal.png" />
+    <None Remove="assets\textures\map\sprites\objects\torch.png" />
+    <None Remove="assets\textures\map\sprites\objects\torch_def.png" />
+    <None Remove="assets\textures\map\sprites\objects\torch_purple.png" />
+    <None Remove="assets\textures\map\sprites\projectiles\projectile.png" />
     <None Remove="assets\textures\missing.txt" />
     <None Remove="assets\textures\mossy_bricks.txt" />
     <None Remove="assets\textures\mossy_planks.png" />
@@ -82,6 +94,42 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="assets\textures\gui\containers\pausemenu.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\textures\map\sprites\enemies\Jiggler\jiggler.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\textures\map\sprites\enemies\temp boss\boss.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\textures\map\sprites\enemies\temp lvl1\enemy_corr1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\textures\map\sprites\enemies\temp lvl1\enemy_lvl1_walk.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\textures\map\sprites\enemies\temp lvl2\enemy_corr2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\textures\map\sprites\enemies\temp lvl3\enemy_corr3.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\textures\map\sprites\items\ammo.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\textures\map\sprites\items\heal.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\textures\map\sprites\objects\torch.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\textures\map\sprites\objects\torch_def.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\textures\map\sprites\objects\torch_purple.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\textures\map\sprites\projectiles\projectile.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="assets\textures\mossy_planks.png">
