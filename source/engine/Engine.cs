@@ -57,7 +57,7 @@ internal partial class Engine : GameWindow
         ClientSize = (width, height),
         Title = title,
 
-        //WindowState = WindowState.Fullscreen,
+        WindowState = WindowState.Fullscreen,
         WindowBorder = WindowBorder.Resizable,
     })
     {
@@ -85,6 +85,7 @@ internal partial class Engine : GameWindow
         try
         {
             Texture.LoadAll(mapWalls, mapCeiling, mapFloor);
+            HUDTextureManager.Load();
         }
         catch (FileNotFoundException noFileEx)
         {
@@ -218,8 +219,11 @@ internal partial class Engine : GameWindow
         //=============================================================================================
         
         //Raycasting:
-        //1. RayCast
-        //RayCast();
+        // 1. RayCasting logic engine
+        // 2. Computing ceiling
+        // 3. Computing floor
+        // 4. Computing walls
+        // +. At the end of every part, the vertex attributes also get uploaded
         RayCasting.Run(
             ClientSize,
             FOV,
@@ -237,23 +241,15 @@ internal partial class Engine : GameWindow
             mapCeiling,
             renderDistance
         );
-        //Graphic's position and color calculator's (Inside Logic):
-        //2. Ceiling
-        //3. Floor
-        //4. Walls
 
-        //5. Sprites
-        RayCasting.ComputeSprites(
-            playerPosition,
-            tileSize,
-            playerAngle,
-            FOV,
-            minimumScreenSize,
-            screenHorizontalOffset,
-            screenVerticalOffset,
-            pitch);
+        //Sprites
+        //Sprites are not in the RayCasting because they use3D matrix
+        ComputeSprites();
         //=============================================================================================
 
+        //HUD
+        UploadHUD();
+        
         ShaderHandler.LoadBufferAndClear();
     }
     //=============================================================================================
@@ -304,5 +300,6 @@ internal partial class Engine : GameWindow
         Console.WriteLine($"The avarage FPS was: {avarageFPS}");
 
         ShaderHandler.DisposeAll();
+        HUDTextureManager.Dispose();
     }
 }

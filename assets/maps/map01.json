@@ -37,35 +37,75 @@
   ],
   "Sprites": [
     {
+      "Type": 0,
       "Id": 0,
-      "Type": 1,
       "Position": {
         "X": 1,
-        "Y": 2
+        "Y": 1
       }
     },
     {
+      "Type": 0,
       "Id": 1,
-      "Type": 2,
       "Position": {
         "X": 2,
-        "Y": 2
+        "Y": 1
       }
     },
     {
+      "Type": 0,
       "Id": 2,
-      "Type": 2,
+      "Position": {
+        "X": 3,
+        "Y": 1
+      }
+    },
+    {
+      "Type": 0,
+      "Id": 3,
+      "Position": {
+        "X": 4,
+        "Y": 1
+      }
+    },
+    {
+      "Type": 0,
+      "Id": 4,
       "Position": {
         "X": 5,
-        "Y": 5
+        "Y": 1
       }
     },
     {
-      "Id": 3,
-      "Type": 2,
+      "Type": 0,
+      "Id": 5,
       "Position": {
         "X": 6,
-        "Y": 6
+        "Y": 1
+      }
+    },
+    {
+      "Type": 0,
+      "Id": 6,
+      "Position": {
+        "X": 7,
+        "Y": 1
+      }
+    },
+    {
+      "Type": 1,
+      "Id": 0,
+      "Position": {
+        "X": 8,
+        "Y": 1
+      }
+    },
+    {
+      "Type": 1,
+      "Id": 1,
+      "Position": {
+        "X": 8,
+        "Y": 2
       }
     }
   ]

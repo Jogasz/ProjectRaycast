@@ -7,8 +7,7 @@
 layout (location = 0) in vec4 aPos;
     //Colors per instance (same color for 4 vertex)
 layout (location = 1) in float aTexIndex;
-
-//Texture UV
+    //Texture UV
 layout (location = 2) in vec4 aUvRect;
 //==============================================================
 //In-and outgoing variables

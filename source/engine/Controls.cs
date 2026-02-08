@@ -22,6 +22,7 @@ internal partial class Engine
             //Movement + collison
             // - W, A, S, D + Left Shift
             if (keyboard.IsKeyDown(Keys.W) ||
+                keyboard.IsKeyDown(Keys.LeftShift) ||
                 keyboard.IsKeyDown(Keys.A) ||
                 keyboard.IsKeyDown(Keys.S) ||
                 keyboard.IsKeyDown(Keys.D))

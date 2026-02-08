@@ -202,7 +202,9 @@ internal partial class ShaderHandler
         LoadSpriteShader(
             "source/engine/graphics/geometry/sprites/sprites.vert",
             "source/engine/graphics/geometry/sprites/sprites.frag",
-            projection);
+            projection,
+            minimumScreenSize,
+            screenOffset);
 
         LoadMenusShader(
             "source/engine/graphics/gui/menus/containers/menus.vert",
@@ -212,6 +214,11 @@ internal partial class ShaderHandler
         LoadButtonsShader(
             "source/engine/graphics/gui/menus/buttons/buttons.vert",
             "source/engine/graphics/gui/menus/buttons/buttons.frag",
+            projection);
+
+        LoadHUDShader(
+            "source/engine/graphics/gui/hud/hud.vert",
+            "source/engine/graphics/gui/hud/hud.frag",
             projection);
     }
 
@@ -228,10 +235,11 @@ internal partial class ShaderHandler
         UpdateCeilingUniforms(minimumScreenSize);
         UpdateWallUniforms(minimumScreenSize, screenOffset);
         UpdateFloorUniforms(ClientSize, minimumScreenSize);
-        UpdateSpriteUniforms();
+        UpdateSpriteUniforms(minimumScreenSize, screenOffset);
         UpdateMenusUniforms();
         UpdateButtonsUniforms();
         UpdateButtonsUniforms();
+        UpdateHUDUniforms();
     }
 
     //OnUpdateFrame
@@ -242,6 +250,7 @@ internal partial class ShaderHandler
         LoadBufferAndClearWall();
         LoadBufferAndClearFloor();
         LoadBufferAndClearSprite();
+        LoadBufferAndClearHUD();
     }
 
     //OnRenderFrame
@@ -254,35 +263,36 @@ internal partial class ShaderHandler
         /*
          * Texture binding
          * ===============
-         * 0. Map Ceiling Array Text
-         * 1. Map Walls Array Text
-         * 2. Map Floor Array Text
-         * ------------------------- 3
-         * 3. Planks
-         * 4. Mossy Planks
-         * 5. Stonebricks
-         * 6. Mossy Stonebricks
-         * 7. Door Stonebricks
-         * 8. Door Mossy Stonebricks
-         * 9. Window Stonebricks
-         * 10. Window Mossy Stonebricks
-         * ---------------------------- 8
+         *0. Map Ceiling Array Text
+         *1. Map Walls Array Text
+         *2. Map Floor Array Text
+         * -------------------------3
+         *3. Planks
+         *4. Mossy Planks
+         *5. Stonebricks
+         *6. Mossy Stonebricks
+         *7. Door Stonebricks
+         *8. Door Mossy Stonebricks
+         *9. Window Stonebricks
+         *10. Window Mossy Stonebricks
+         * ----------------------------8
+         * Sprite textures (separate binding)
          */
 
         //Bindig textures
         //===========================================================================
-            // 0.
+ //0.
         GL.ActiveTexture(TextureUnit.Texture0);
         GL.BindTexture(TextureTarget.Texture2D, Texture.mapCeilingTex);
-            // 1.
+ //1.
         GL.ActiveTexture(TextureUnit.Texture1);
         GL.BindTexture(TextureTarget.Texture2D, Texture.mapWallsTex);
-            // 2.
+ //2.
         GL.ActiveTexture(TextureUnit.Texture2);
         GL.BindTexture(TextureTarget.Texture2D, Texture.mapFloorTex);
 
-            // 3. - 10.
-        for (int i = 0; i < Texture.textures.Count; i++)
+ //3. -10.
+        for (int i =0; i < Texture.textures.Count; i++)
         {
             Texture.Bind(i, TextureUnit.Texture3 + i);
         }
@@ -294,7 +304,19 @@ internal partial class ShaderHandler
         DrawCeiling(tileCount, wallWidth, playerPosition, playerAngle, pitch);
         DrawWalls(tileCount, pitch);
         DrawFloor(tileCount, wallWidth, playerPosition, playerAngle, pitch);
+
+        //Objects atlas
+        Texture.BindSprite(0, TextureUnit.Texture0);
+        //Items atlas
+        Texture.BindSprite(1, TextureUnit.Texture1);
+        //Enemies atlas
+        //Texture.BindSprite(2, TextureUnit.Texture2);
+        //Projectiles atlas
+        //Texture.BindSprite(3, TextureUnit.Texture3);
+
         DrawSprite();
+
+        DrawHUD();
     }
 
     //OnUnload
@@ -308,5 +330,6 @@ internal partial class ShaderHandler
         SpriteShader?.Dispose();
         MenusShader?.Dispose();
         ButtonsShader?.Dispose();
+        HUDShader?.Dispose();
     }
 }

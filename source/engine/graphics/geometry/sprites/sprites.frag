@@ -1,24 +1,47 @@
 //Declaration of shader version and core profile functionality
-    //Fragment shader is calculating the color output for the pixels
+ //Fragment shader is calculating the color output for the pixels
 #version 330 core
 //==============================================================
 //In-and outgoing variables
-    //The input variable from Vertex Shader (same name and type)
-in float vTexId;;
+in vec2 vUv;
 
-    //Vec4 that defines the final color output that we should calculate ourselves
+in float vSpriteType;
+
+in float vSpriteId;
+
+ //Vec4 that defines the final color output that we should calculate ourselves
 out vec4 FragColor;
+
+ // AI CHANGE: use a sprite texture array so each sprite ID can sample its own texture
+uniform sampler2D uSprites[2];
+
+uniform float uMinimumScreenSize;
+
+uniform vec2 uScreenOffset;
 //==============================================================
 //main() method entry point
 void main()
 {
-    vec3 baseClr;
-    
-    if (vTexId == 0) baseClr = vec3(1.0, 0.0, 0.0);
-    else if (vTexId == 1) baseClr = vec3(0.0, 1.0, 0.0);
-    else if (vTexId == 2) baseClr = vec3(0.0, 0.0, 1.0);
-    else if (vTexId == 3) baseClr = vec3(0.0, 1.0, 1.0);
+	vec4 tex = texture(uSprites[int(vSpriteType)], vUv);
 
-    FragColor = vec4(baseClr, 1.0);
+	//Minimum screen limit to ensure that pixels arent drawn outside the game screen
+	//x: left limit
+	//y: right limit
+	//z: bottom limit
+	//w: top limit
+	vec4 minimumScreenLimit = vec4(
+		uScreenOffset.x,
+		uScreenOffset.x + uMinimumScreenSize,
+		uScreenOffset.y,
+		uScreenOffset.y + uMinimumScreenSize);
+
+	if (tex.a <= 0.0 ||
+		distance(tex.rgb, vec3(255,0,220) /255) <0.1 ||
+		gl_FragCoord.x < minimumScreenLimit.x ||
+		gl_FragCoord.x > minimumScreenLimit.y ||
+		gl_FragCoord.y < minimumScreenLimit.z ||
+		gl_FragCoord.y > minimumScreenLimit.w) discard;
+
+	FragColor = tex;
 }
 //==============================================================

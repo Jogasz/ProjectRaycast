@@ -17,7 +17,9 @@ internal partial class ShaderHandler
     static void LoadSpriteShader(
         string vertexPath,
         string fragmentPath,
-        Matrix4 projection)
+        Matrix4 projection,
+        float minimumScreenSize,
+        Vector2 screenOffset)
     {
         SpriteShader = new ShaderHandler(vertexPath, fragmentPath);
         //VAO, VBO Creating
@@ -26,15 +28,23 @@ internal partial class ShaderHandler
         //VAO, VBO Binding
         GL.BindVertexArray(SpriteVAO);
         GL.BindBuffer(BufferTarget.ArrayBuffer, SpriteVBO);
-        //Attribute0 (Vertices)
+        //Attribute 0 (Vertices)
         GL.EnableVertexAttribArray(0);
-        GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
-        //Attribute1 (ID)
+        GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, 10 * sizeof(float), 0);
+        //Attribute 1 (Texture UV)
         GL.EnableVertexAttribArray(1);
-        GL.VertexAttribPointer(1, 1, VertexAttribPointerType.Float, false, 5 * sizeof(float), 4 * sizeof(float));
+        GL.VertexAttribPointer(1, 4, VertexAttribPointerType.Float, false, 10 * sizeof(float), 4 * sizeof(float));
+        //Attribute2 (Spite type)
+        GL.EnableVertexAttribArray(2);
+        GL.VertexAttribPointer(2, 1, VertexAttribPointerType.Float, false, 10 * sizeof(float), 8 * sizeof(float));
+        //Attribute3 (Sprite id)
+        GL.EnableVertexAttribArray(3);
+        GL.VertexAttribPointer(3, 1, VertexAttribPointerType.Float, false, 10 * sizeof(float), 9 * sizeof(float));
         //Divisor
         GL.VertexAttribDivisor(0, 1);
         GL.VertexAttribDivisor(1, 1);
+        GL.VertexAttribDivisor(2, 1);
+        GL.VertexAttribDivisor(3, 1);
         //Disable face culling to avoid accidentally removing one triangle
         GL.Disable(EnableCap.CullFace);
         //Unbind for safety
@@ -43,13 +53,23 @@ internal partial class ShaderHandler
         //Uniforms
         SpriteShader.Use();
         SpriteShader.SetMatrix4("uProjection", projection);
+        SpriteShader.SetFloat("uMinimumScreenSize", minimumScreenSize);
+        SpriteShader.SetVector2("uScreenOffset", screenOffset);
+        
+        SpriteShader.SetInt("uSprites[0]",0);
+        SpriteShader.SetInt("uSprites[1]",1);
+        SpriteShader.SetInt("uSprites[2]",2);
     }
 
-    static void UpdateSpriteUniforms()
+    static void UpdateSpriteUniforms(
+        float minimumScreenSize,
+        Vector2 screenOffset)
     {
         //SpriteShader
         SpriteShader?.Use();
         SpriteShader?.SetMatrix4("uProjection", projection);
+        SpriteShader?.SetFloat("uMinimumScreenSize", minimumScreenSize);
+        SpriteShader?.SetVector2("uScreenOffset", screenOffset);
     }
 
     static void LoadBufferAndClearSprite()
@@ -79,7 +99,7 @@ internal partial class ShaderHandler
         //Binding and drawing
         GL.BindVertexArray(SpriteVAO);
         int spriteLen = SpriteVertices?.Length ?? 0;
-        int instanceCount = spriteLen / 5;
+        int instanceCount = spriteLen / 10;
         if (instanceCount > 0)
         {
             GL.DrawArraysInstanced(PrimitiveType.TriangleStrip, 0, 4, instanceCount);

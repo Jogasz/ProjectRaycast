@@ -20,7 +20,6 @@ void main()
  //CHANGED: sample from atlas
  vec4 tex = texture(uButtonsAtlas, vUv);
 
- //Optional: discard fully transparent pixels
  if (tex.a <=0.0 || distance(tex.rgb, vec3(255, 0, 220) / 255) < 0.1) discard;
 
  FragColor = tex;

@@ -52,9 +52,11 @@ public class Level
 
     public sealed class SpriteData
     {
-        public int Id { get; set; }
         public int Type { get; set; }
-        public bool State { get; set; }
+        public int Id { get; set; }
+        public bool isInteracted { get; set; } = false;
+        public bool State { get; set; } = true;
+        public int Health { get; set; }
         public Vector2 Position { get; set; }
     }
 

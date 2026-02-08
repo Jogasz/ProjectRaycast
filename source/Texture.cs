@@ -30,8 +30,26 @@ internal sealed class Texture : IDisposable
         "assets/textures/gui/buttons_sheet.png"
     };
 
+    static readonly string[] spritePaths =
+    {
+        //Sprite textures
+        "assets/textures/map/sprites/objects_atlas.png",
+        "assets/textures/map/sprites/items_atlas.png"
+        //"assets/textures/map/sprites/enemies_atlas.png"
+    };
+
+    // HUD textures are handled by the HUD renderer, not the global Texture manager.
+    //static readonly string[] hudPaths =
+    //{
+    //    "assets/textures/gui/hud/container.png",
+    //    "assets/textures/gui/hud/sword.png",
+    //    "assets/textures/gui/hud/vignette.png"
+    //};
+
     public static List<Texture?> textures = new();
     public static List<Texture?> images = new();
+    public static List<Texture?> sprites = new();
+    // public static List<Texture?> hud = new();
 
     // Map textures (R32i)
     public static int mapCeilingTex { get; private set; }
@@ -41,8 +59,15 @@ internal sealed class Texture : IDisposable
 
     public static void LoadAll(int[,] mapWalls, int[,] mapCeiling, int[,] mapFloor)
     {
+        // If LoadAll can be called more than once, make sure we release the old GPU resources.
+        if (mapCeilingTex !=0) GL.DeleteTexture(mapCeilingTex);
+        if (mapFloorTex !=0) GL.DeleteTexture(mapFloorTex);
+        if (mapWallsTex !=0) GL.DeleteTexture(mapWallsTex);
+
         textures.Clear();
         images.Clear();
+        sprites.Clear();
+        // hud.Clear();
 
         try
         {
@@ -54,6 +79,8 @@ internal sealed class Texture : IDisposable
 
             LoadInto(textures, texturePaths);
             LoadInto(images, imagePaths);
+            LoadInto(sprites, spritePaths);
+            // LoadInto(hud, hudPaths); // HUD textures handled separately
 
             Console.WriteLine(" - TEXTURES have been loaded!");
         }
@@ -65,7 +92,7 @@ internal sealed class Texture : IDisposable
 
     static void LoadInto(List<Texture?> target, IReadOnlyList<string> paths)
     {
-        for (int i = 0; i < paths.Count; i++)
+        for (int i =0; i < paths.Count; i++)
             target.Add(new Texture(paths[i]));
     }
 
@@ -74,8 +101,8 @@ internal sealed class Texture : IDisposable
         Vector2i size = (map.GetLength(1), map.GetLength(0));
         int[] data = new int[size.X * size.Y];
 
-        for (int y = 0; y < size.Y; y++)
-            for (int x = 0; x < size.X; x++)
+        for (int y =0; y < size.Y; y++)
+            for (int x =0; x < size.X; x++)
                 data[y * size.X + x] = map[y, x];
 
         int handle = GL.GenTexture();
@@ -88,25 +115,25 @@ internal sealed class Texture : IDisposable
 
         GL.TexImage2D(
             TextureTarget.Texture2D,
-            level: 0,
+            level:0,
             internalformat: PixelInternalFormat.R32i,
             width: size.X,
             height: size.Y,
-            border: 0,
+            border:0,
             format: PixelFormat.RedInteger,
             type: PixelType.Int,
             pixels: data);
 
-        GL.BindTexture(TextureTarget.Texture2D, 0);
+        GL.BindTexture(TextureTarget.Texture2D,0);
         return handle;
     }
 
     static void BindFrom(List<Texture?> list, int index, TextureUnit unit)
     {
-        if (index < 0 || index >= list.Count)
+        if (index <0 || index >= list.Count)
         {
             GL.ActiveTexture(unit);
-            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GL.BindTexture(TextureTarget.Texture2D,0);
             return;
         }
 
@@ -114,7 +141,7 @@ internal sealed class Texture : IDisposable
         if (texture is null)
         {
             GL.ActiveTexture(unit);
-            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GL.BindTexture(TextureTarget.Texture2D,0);
             return;
         }
 
@@ -124,6 +151,8 @@ internal sealed class Texture : IDisposable
     public static void BindTexture(int textureIndex, TextureUnit unit = TextureUnit.Texture0) => BindFrom(textures, textureIndex, unit);
 
     public static void BindImage(int imageIndex, TextureUnit unit = TextureUnit.Texture0) => BindFrom(images, imageIndex, unit);
+
+    public static void BindSprite(int spriteIndex, TextureUnit unit = TextureUnit.Texture0) => BindFrom(sprites, spriteIndex, unit);
 
     public static void Bind(int textureIndex, TextureUnit unit = TextureUnit.Texture0) => BindTexture(textureIndex, unit);
 
@@ -145,11 +174,11 @@ internal sealed class Texture : IDisposable
 
         GL.TexImage2D(
             TextureTarget.Texture2D,
-            level: 0,
+            level:0,
             internalformat: PixelInternalFormat.Rgba,
             width: image.Width,
             height: image.Height,
-            border: 0,
+            border:0,
             format: PixelFormat.Rgba,
             type: PixelType.UnsignedByte,
             pixels: image.Data);
@@ -165,7 +194,7 @@ internal sealed class Texture : IDisposable
 
     public void Dispose()
     {
-        if (Handle != 0)
+        if (Handle !=0)
             GL.DeleteTexture(Handle);
 
         GC.SuppressFinalize(this);
