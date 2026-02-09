@@ -13,7 +13,7 @@ in float vSpriteId;
 out vec4 FragColor;
 
  // AI CHANGE: use a sprite texture array so each sprite ID can sample its own texture
-uniform sampler2D uSprites[2];
+uniform sampler2D uSprites[3];
 
 uniform float uMinimumScreenSize;
 

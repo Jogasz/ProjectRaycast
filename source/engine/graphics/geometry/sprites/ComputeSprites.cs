@@ -10,9 +10,11 @@ internal partial class Engine
     //Texture atlas size's
     Vector2 objectAtlasSize = (360, 252);
     Vector2 itemAtlasSize = (288, 72);
+    Vector2 enemyAtlasSize = (288, 432);
 
     float objectSpriteCellSize = 36;
     float itemSpriteCellSize = 36;
+    float enemySpriteCellSize = 72;
 
     /* Sprite translator
      * Types: Objects, Pick-up items, enemies
@@ -56,10 +58,23 @@ internal partial class Engine
     //Sprite animation config (Number of Frames, Frames per Second)
     static readonly SpriteAnimConfig[] SpriteAnimTable =
     [
-        //Type 0
-        new SpriteAnimConfig(frameCount:10, fps:8f),
-        //Type 1
-        new SpriteAnimConfig(frameCount:8, fps:10f),
+        //Type 0 (Objects)
+        new SpriteAnimConfig(
+            frameCount: 10,
+            fps: 8f),
+        //Type 1 (Items)
+        new SpriteAnimConfig(
+            frameCount: 8,
+            fps: 10f),
+        //Type 2 (Enemies)
+        // - Idle
+        new SpriteAnimConfig(
+            frameCount: 2,
+            fps: 2f),
+        // - Walk & Attack
+        new SpriteAnimConfig(
+            frameCount: 4,
+            fps: 4)
     ];
 
     void ComputeSprites()
@@ -196,50 +211,25 @@ internal partial class Engine
                     quadY1,
                     quadY2);
             }
+
+            //=======================
+            //If sprite is an enemy
+            //=======================
+            else if (sType == 2)
+            {
+                HandleEnemies(
+                    sType,
+                    sId,
+                    i,
+                    spriteWorldPos,
+                    quadX1,
+                    quadX2,
+                    quadY1,
+                    quadY2);
+            }
         }
     }
 
-    //Items could be animated sprites
-    void HandleItems(
-    int sType,
-    int sId,
-    int i,
-    Vector2 spriteWorldPos,
-    float quadX1,
-    float quadX2,
-    float quadY1,
-    float quadY2)
-    {
-        // Horizontal animation based on sprite type config (one row per type)
-        float u0 =0f;
-        float u1 = itemSpriteCellSize / itemAtlasSize.X;
-
-        var cfg = SpriteAnimTable[sType];
-        if (cfg.FrameCount >1 && cfg.Fps >0f)
-        {
-            int frame = (int)(_spriteAnimTime * cfg.Fps) % cfg.FrameCount;
-            u0 = (frame * itemSpriteCellSize) / itemAtlasSize.X;
-            u1 = ((frame +1) * itemSpriteCellSize) / itemAtlasSize.X;
-        }
-
-        // Vertical stride based on sprite ID (top-down in atlas)
-        float v0 =1 - ((sId +1) * itemSpriteCellSize / itemAtlasSize.Y);
-        float v1 =1 - (sId * itemSpriteCellSize / itemAtlasSize.Y);
-
-        UploadSprite(
-        quadX1,
-        quadX2,
-        quadY1,
-        quadY2,
-        u0,
-        v0,
-        u1,
-        v1,
-        sType,
-        sId);
-    }
-
-    //Objects are non-moving, rarely interactable, could be animated sprites
     void HandleObjects(
         int sType,
         int sId,
@@ -299,6 +289,182 @@ internal partial class Engine
         //Texture UV rect's height (Vertical texture stride is based on ID)
         float v0 =1 - ((sId +1) * objectSpriteCellSize / objectAtlasSize.Y);
         float v1 =1 - (sId * objectSpriteCellSize / objectAtlasSize.Y);
+
+        UploadSprite(
+        quadX1,
+        quadX2,
+        quadY1,
+        quadY2,
+        u0,
+        v0,
+        u1,
+        v1,
+        sType,
+        sId);
+    }
+
+    void HandleItems(
+        int sType,
+        int sId,
+        int i,
+        Vector2 spriteWorldPos,
+        float quadX1,
+        float quadX2,
+        float quadY1,
+        float quadY2)
+    {
+        // Horizontal animation based on sprite type config (one row per type)
+        float u0 = 0f;
+        float u1 = itemSpriteCellSize / itemAtlasSize.X;
+
+        var cfg = SpriteAnimTable[sType];
+        if (cfg.FrameCount > 1 && cfg.Fps > 0f)
+        {
+            int frame = (int)(_spriteAnimTime * cfg.Fps) % cfg.FrameCount;
+            u0 = (frame * itemSpriteCellSize) / itemAtlasSize.X;
+            u1 = ((frame + 1) * itemSpriteCellSize) / itemAtlasSize.X;
+        }
+
+        // Vertical stride based on sprite ID (top-down in atlas)
+        float v0 = 1 - ((sId + 1) * itemSpriteCellSize / itemAtlasSize.Y);
+        float v1 = 1 - (sId * itemSpriteCellSize / itemAtlasSize.Y);
+
+        UploadSprite(
+        quadX1,
+        quadX2,
+        quadY1,
+        quadY2,
+        u0,
+        v0,
+        u1,
+        v1,
+        sType,
+        sId);
+    }
+
+    //Enemy settings
+    //=========================================================================================
+    //Follow distance (in tiles)
+    float enemyNoticeDistance = 2f;
+    //Stop distance (in tiles)
+    float enemyStopDistance = 0.75f;
+    //Attack start distance (in tiles)
+    float enemyAttackStartDistance = 0.75f;
+    //Attack stop distance (in tiles)
+    float enemyAttackStopDistance = 1f;
+    //Enemy speed (pixels / sec)
+    float enemyMovementSpeed = 30f;
+    //=========================================================================================
+
+    //Enemy runtime state
+    //0: idle,1: walk,2: attack
+    static readonly Dictionary<int, int> enemyAnimState = new();
+
+    void HandleEnemies(
+        int sType,
+        int sId,
+        int i,
+        Vector2 spriteWorldPos,
+        float quadX1,
+        float quadX2,
+        float quadY1,
+        float quadY2)
+    {
+        //Enemy -> player distance (pixel)
+        float dx = playerPosition.X - spriteWorldPos.X;
+        float dy = playerPosition.Y - spriteWorldPos.Y;
+        float dist = MathF.Sqrt(dx * dx + dy * dy);
+
+        //Distance thresholds (pixel)
+        float followDist = enemyNoticeDistance * tileSize;
+        float stopDist = enemyStopDistance * tileSize;
+        float attackStartDist = enemyAttackStartDistance * tileSize;
+        float attackStopDist = enemyAttackStopDistance * tileSize;
+
+        //Getting enemy state (default: idle)
+        if (!enemyAnimState.TryGetValue(i, out int state))
+            state =0;
+
+        //Attack hysteresis
+        // - Start attack when close enough
+        // - Keep attacking until player is far enough
+        if (state !=2)
+        {
+            if (dist <= attackStartDist)
+                state =2;
+        }
+        else
+        {
+            if (dist > attackStopDist)
+                state =1;
+        }
+
+        //Follow logic
+        // - Only try to follow inside the follow distance
+        // - Stop if too close
+        bool canFollow = dist <= followDist;
+        bool isTooClose = dist <= stopDist;
+
+        if (state !=2)
+        {
+            if (!canFollow)
+                state =0;
+            else if (isTooClose)
+                state =0;
+            else
+                state =1;
+        }
+
+        //Movement
+        if (state ==1)
+        {
+            Vector2 dir = (dx, dy);
+            if (dir.LengthSquared >1e-6f)
+                dir.Normalize();
+
+            float step = enemyMovementSpeed * deltaTime;
+
+            //Move in tile-space units (Level sprites store tile coords)
+            Vector2 enemyPosPx = spriteWorldPos;
+            enemyPosPx += dir * step;
+
+            Level.Sprites[i].Position = (enemyPosPx.X / tileSize -0.5f, enemyPosPx.Y / tileSize -0.5f);
+        }
+
+        enemyAnimState[i] = state;
+
+        //Animation
+        //=====================================================================================
+        int idleRow = sId *3;
+        int row = idleRow;
+
+        //0: idle (2 frame)
+        if (state ==0)
+            row = idleRow;
+
+        //1: walk (4 frame)
+        else if (state ==1)
+            row = idleRow +1;
+
+        //2: attack (4 frame)
+        else if (state ==2)
+            row = idleRow +2;
+
+        int frameCount = state ==0 ? SpriteAnimTable[2].FrameCount : SpriteAnimTable[3].FrameCount;
+        float fps = state ==0 ? SpriteAnimTable[2].Fps : SpriteAnimTable[3].Fps;
+
+        frameCount = Math.Clamp(frameCount,1,4);
+
+        int frame =0;
+        if (frameCount >1 && fps >0f)
+            frame = (int)(_spriteAnimTime * fps) % frameCount;
+
+        float u0 = (frame * enemySpriteCellSize) / enemyAtlasSize.X;
+        float u1 = ((frame +1) * enemySpriteCellSize) / enemyAtlasSize.X;
+
+        float v0 =1 - ((row +1) * enemySpriteCellSize / enemyAtlasSize.Y);
+        float v1 =1 - (row * enemySpriteCellSize / enemyAtlasSize.Y);
+        //=====================================================================================
 
         UploadSprite(
         quadX1,

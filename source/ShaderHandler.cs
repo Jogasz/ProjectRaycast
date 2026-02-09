@@ -303,6 +303,7 @@ internal partial class ShaderHandler
         //Items atlas
         Texture.BindSprite(1, TextureUnit.Texture1);
         //Enemies atlas
+        Texture.BindSprite(2, TextureUnit.Texture2);
         //Texture.BindSprite(2, TextureUnit.Texture2);
         //Projectiles atlas
         //Texture.BindSprite(3, TextureUnit.Texture3);

@@ -34,7 +34,8 @@ internal sealed class Texture : IDisposable
     {
         //Sprite textures
         "assets/textures/map/sprites/objects_atlas.png",
-        "assets/textures/map/sprites/items_atlas.png"
+        "assets/textures/map/sprites/items_atlas.png",
+        "assets/textures/map/sprites/enemies_atlas.png"
     };
 
     public static List<Texture?> textures = new();

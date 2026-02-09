@@ -45,6 +45,7 @@
     <None Remove="assets\textures\gui\hudTex\vignette.png" />
     <None Remove="assets\textures\gui\mainmenu.png" />
     <None Remove="assets\textures\gui\pausemenu.png" />
+    <None Remove="assets\textures\map\sprites\enemies_atlas.png" />
     <None Remove="assets\textures\map\sprites\items_atlas.png" />
     <None Remove="assets\textures\map\sprites\objects_atlas.png" />
     <None Remove="assets\textures\map\sprites\projectile.png" />
@@ -113,6 +114,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="assets\textures\gui\hudTex\vignette.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\textures\map\sprites\enemies_atlas.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="assets\textures\map\sprites\items_atlas.png">
