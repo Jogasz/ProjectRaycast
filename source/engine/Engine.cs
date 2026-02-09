@@ -37,8 +37,7 @@ internal partial class Engine : GameWindow
     const float playerCollisionRadius = 10f;
     float pitch { get; set; } = 0f;
 
-    internal bool escConsumed;
-
+    //Bools for menus
     internal bool isInMainMenu = true;
     internal bool isInPauseMenu = false;
 
@@ -85,7 +84,6 @@ internal partial class Engine : GameWindow
         try
         {
             Texture.LoadAll(mapWalls, mapCeiling, mapFloor);
-            HUDTextureManager.Load();
         }
         catch (FileNotFoundException noFileEx)
         {
@@ -149,10 +147,6 @@ internal partial class Engine : GameWindow
     {
         base.OnUpdateFrame(e);
 
-        //Release -> allow next press
-        if (!KeyboardState.IsKeyDown(Keys.Escape))
-            escConsumed = false;
-
         //DeltaTime
         //=========================================================================================
         float currentTime = (float)stopwatch.Elapsed.TotalSeconds;
@@ -162,25 +156,23 @@ internal partial class Engine : GameWindow
 
         //FPS Counter
         FPSList.Add((int)Math.Floor(1 / deltaTime));
-        //Console.WriteLine((int)Math.Floor(1 / deltaTime));
         //=========================================================================================
 
-        if (!isInMainMenu && !isInPauseMenu && KeyboardState.IsKeyPressed(Keys.Escape))
-        {
-            CursorState = CursorState.Normal;
-            isInPauseMenu = true;
-            escConsumed = true;
-        }
-
+        //Handling main menu
         if (isInMainMenu)
         {
+            CursorState = CursorState.Normal;
             MainMenu();
             ShaderHandler.LoadBufferAndClearMenus();
             return;
         }
 
+        if (KeyboardState.IsKeyPressed(Keys.Escape)) isInPauseMenu = true;
+
+        //Handling pause menu
         if (isInPauseMenu)
         {
+            CursorState = CursorState.Normal;
             PauseMenu();
             ShaderHandler.LoadBufferAndClearMenus();
             return;
@@ -188,18 +180,9 @@ internal partial class Engine : GameWindow
 
         //Handling controls
         Controls(KeyboardState, MouseState);
-
-        //(Inside Distributor):
-        //2. Movement and collison
-        //3. Jump
-        //4. Mouse
-        //5. Closing program
-        //6. Fullscreen
-        //7. Mouse grab
         //=========================================================================================
 
         //Allowed screen's color
-
         ShaderHandler.WindowVertexAttribList.AddRange(new float[]
         {
             screenHorizontalOffset,
@@ -243,13 +226,10 @@ internal partial class Engine : GameWindow
         );
 
         //Sprites
-        //Sprites are not in the RayCasting because they use3D matrix
+        //Sprites are not in the RayCasting because they use 3D matrix
         ComputeSprites();
         //=============================================================================================
 
-        //HUD
-        UploadHUD();
-        
         ShaderHandler.LoadBufferAndClear();
     }
     //=============================================================================================
@@ -260,7 +240,7 @@ internal partial class Engine : GameWindow
         base.OnRenderFrame(e);
 
         //Clearing window
-        GL.ClearColor(0.2f,0.2f,0.2f,1.0f);
+        GL.ClearColor(0.0f,0.0f,0.0f,1.0f);
         GL.Clear(ClearBufferMask.ColorBufferBit);
 
         if (isInMainMenu)
@@ -289,7 +269,7 @@ internal partial class Engine : GameWindow
         base.OnUnload();
 
         //Avarage fps
-        int avarageFPS = 0;
+        int avarageFPS =0;
 
         foreach (int FPS in FPSList)
         {
@@ -300,6 +280,5 @@ internal partial class Engine : GameWindow
         Console.WriteLine($"The avarage FPS was: {avarageFPS}");
 
         ShaderHandler.DisposeAll();
-        HUDTextureManager.Dispose();
     }
 }

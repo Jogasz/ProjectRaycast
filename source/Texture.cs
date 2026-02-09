@@ -35,21 +35,11 @@ internal sealed class Texture : IDisposable
         //Sprite textures
         "assets/textures/map/sprites/objects_atlas.png",
         "assets/textures/map/sprites/items_atlas.png"
-        //"assets/textures/map/sprites/enemies_atlas.png"
     };
-
-    // HUD textures are handled by the HUD renderer, not the global Texture manager.
-    //static readonly string[] hudPaths =
-    //{
-    //    "assets/textures/gui/hud/container.png",
-    //    "assets/textures/gui/hud/sword.png",
-    //    "assets/textures/gui/hud/vignette.png"
-    //};
 
     public static List<Texture?> textures = new();
     public static List<Texture?> images = new();
     public static List<Texture?> sprites = new();
-    // public static List<Texture?> hud = new();
 
     // Map textures (R32i)
     public static int mapCeilingTex { get; private set; }
@@ -67,7 +57,6 @@ internal sealed class Texture : IDisposable
         textures.Clear();
         images.Clear();
         sprites.Clear();
-        // hud.Clear();
 
         try
         {
@@ -80,7 +69,6 @@ internal sealed class Texture : IDisposable
             LoadInto(textures, texturePaths);
             LoadInto(images, imagePaths);
             LoadInto(sprites, spritePaths);
-            // LoadInto(hud, hudPaths); // HUD textures handled separately
 
             Console.WriteLine(" - TEXTURES have been loaded!");
         }

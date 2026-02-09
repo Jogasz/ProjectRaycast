@@ -215,11 +215,6 @@ internal partial class ShaderHandler
             "source/engine/graphics/gui/menus/buttons/buttons.vert",
             "source/engine/graphics/gui/menus/buttons/buttons.frag",
             projection);
-
-        LoadHUDShader(
-            "source/engine/graphics/gui/hud/hud.vert",
-            "source/engine/graphics/gui/hud/hud.frag",
-            projection);
     }
 
     //OnFramebufferResize
@@ -239,7 +234,6 @@ internal partial class ShaderHandler
         UpdateMenusUniforms();
         UpdateButtonsUniforms();
         UpdateButtonsUniforms();
-        UpdateHUDUniforms();
     }
 
     //OnUpdateFrame
@@ -250,7 +244,6 @@ internal partial class ShaderHandler
         LoadBufferAndClearWall();
         LoadBufferAndClearFloor();
         LoadBufferAndClearSprite();
-        LoadBufferAndClearHUD();
     }
 
     //OnRenderFrame
@@ -315,8 +308,6 @@ internal partial class ShaderHandler
         //Texture.BindSprite(3, TextureUnit.Texture3);
 
         DrawSprite();
-
-        DrawHUD();
     }
 
     //OnUnload
@@ -330,6 +321,5 @@ internal partial class ShaderHandler
         SpriteShader?.Dispose();
         MenusShader?.Dispose();
         ButtonsShader?.Dispose();
-        HUDShader?.Dispose();
     }
 }

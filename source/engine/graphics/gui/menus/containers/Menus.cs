@@ -5,7 +5,7 @@ namespace Engine;
 
 internal partial class Engine
 {
-    /* Menu background IS translator
+    /* Menu background ID translator
      * 0. Main Menu
      * 1. Pause Menu
      * 2. Statistics Menu
@@ -27,16 +27,6 @@ internal partial class Engine
     internal static int[] buttonIds;
     void MainMenu()
     {
-        if (IsKeyPressed(Keys.Escape))
-        {
-            Close();
-        }
-        else if (IsKeyPressed(Keys.Enter))
-        {
-            isInMainMenu = false;
-            CursorState = CursorState.Grabbed;
-        }
-
         if (isSaveState) buttonIds = [0, 1, 3, 4, 5];
         else buttonIds = [2, 3, 4, 5];
 
@@ -46,24 +36,6 @@ internal partial class Engine
 
     void PauseMenu()
     {
-        if (IsKeyPressed(Keys.Enter))
-        {
-            isInPauseMenu = false;
-            CursorState = CursorState.Grabbed;
-            return;
-        }
-
-        if (!escConsumed && IsKeyPressed(Keys.Escape))
-        {
-            CursorState = CursorState.Normal;
-
-            isInPauseMenu = false;
-            playerPosition = (250, 250);
-            playerAngle = 0f;
-            isInMainMenu = true;
-            return;
-        }
-
         buttonIds = [6, 3, 5];
 
         UploadMenus(1);
